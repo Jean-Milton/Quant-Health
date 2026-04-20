@@ -1578,7 +1578,7 @@ async function addFoodEntry(){
     // Try proxy first, fall back to direct API
     let resp, usedProxy = true;
     try {
-      resp = await fetch('/api/claude-proxy',{
+      resp = await fetch('/.netlify/functions/claude-proxy',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({
@@ -1670,7 +1670,7 @@ async function retryFoodEntry(id, name) {
   try {
     let resp;
     try {
-      resp = await fetch('/api/claude-proxy',{method:'POST',headers:{'Content-Type':'application/json'},
+      resp = await fetch('/.netlify/functions/claude-proxy',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,
           messages:[{role:'user',content:`Estimate nutritional values for: "${name}". Return ONLY JSON: {"cal":number,"protein":number,"carbs":number,"fat":number,"note":""}`}]})});
       if(resp.status===404||resp.status===502) throw new Error('proxy_missing');
@@ -1927,7 +1927,7 @@ buyDay: "now" (buy day 1-2, fresh), "midweek" (day 3-5), "any" (pantry)
 Include 7 full days. Make meals varied, delicious, family-friendly. No repeating the same meal twice.`;
 
   try{
-    const resp=await fetch('/api/claude-proxy',{
+    const resp=await fetch('/.netlify/functions/claude-proxy',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
@@ -2870,7 +2870,7 @@ async function stravaGetValidToken() {
   // Refresh expired token
   if (!stravaRefresh) return null;
   try {
-    const resp = await fetch('/api/strava-auth', {
+    const resp = await fetch('/.netlify/functions/strava-auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'refresh', refresh_token: stravaRefresh })
@@ -2909,7 +2909,7 @@ async function stravaHandleCallback() {
   toast('Connecting to Strava…');
 
   try {
-    const resp = await fetch('/api/strava-auth', {
+    const resp = await fetch('/.netlify/functions/strava-auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'exchange', code })
@@ -3157,7 +3157,7 @@ async function runSystemCheck() {
 
   // ── 3. Netlify proxy — Claude ──
   try {
-    const resp = await fetch('/api/claude-proxy', {
+    const resp = await fetch('/.netlify/functions/claude-proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -3167,35 +3167,35 @@ async function runSystemCheck() {
       })
     });
     if (resp.status === 404) {
-      results.push(row('Claude Proxy (/api/claude-proxy)', 'fail',
+      results.push(row('Claude Proxy (/.netlify/functions/claude-proxy)', 'fail',
         'Function not found (404). Check that claude-proxy.js is in netlify/functions/ in your GitHub repo and the site has redeployed.'));
     } else if (resp.status === 500) {
       const data = await resp.json().catch(() => ({}));
       const msg = data.error || 'Internal server error';
-      results.push(row('Claude Proxy (/api/claude-proxy)', 'fail',
+      results.push(row('Claude Proxy (/.netlify/functions/claude-proxy)', 'fail',
         `Function running but errored: ${msg}. Check ANTHROPIC_API_KEY is set in Netlify environment variables.`));
     } else if (resp.ok) {
       const data = await resp.json();
       const txt = data.content?.[0]?.text || '';
-      results.push(row('Claude Proxy (/api/claude-proxy)', 'pass',
+      results.push(row('Claude Proxy (/.netlify/functions/claude-proxy)', 'pass',
         `Connected · Response: "${txt.slice(0,40)}" · Food log and meal plan will work`));
     } else {
-      results.push(row('Claude Proxy (/api/claude-proxy)', 'fail', `HTTP ${resp.status}`));
+      results.push(row('Claude Proxy (/.netlify/functions/claude-proxy)', 'fail', `HTTP ${resp.status}`));
     }
   } catch(e) {
-    results.push(row('Claude Proxy (/api/claude-proxy)', 'fail',
+    results.push(row('Claude Proxy (/.netlify/functions/claude-proxy)', 'fail',
       `Network error: ${e.message}. Are you on the live Netlify URL (quant-health.netlify.app)?`));
   }
 
   // ── 4. Netlify proxy — Strava auth function ──
   try {
-    const resp = await fetch('/api/strava-auth', {
+    const resp = await fetch('/.netlify/functions/strava-auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'test' })
     });
     if (resp.status === 404) {
-      results.push(row('Strava Auth Function (/api/strava-auth)', 'fail',
+      results.push(row('Strava Auth Function (/.netlify/functions/strava-auth)', 'fail',
         'Function not found (404). Check strava-auth.js is in netlify/functions/ in GitHub.'));
     } else {
       // Any response (even 400 for bad action) means the function exists
