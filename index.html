@@ -954,7 +954,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
       <div style="font-size:0.62rem;font-weight:700;color:var(--muted2);margin-bottom:0.5rem;letter-spacing:0.08em;text-transform:uppercase">One-time Setup</div>
       <div style="font-size:0.62rem;color:var(--muted);line-height:1.8">
         1. Go to <strong style="color:var(--text)">strava.com/settings/api</strong><br>
-        2. Create an app — set callback URL to <strong style="color:var(--text)">https://quant-health.netlify.app</strong><br>
+        2. Create an app — set callback URL to <strong style="color:var(--text)">https://quant-health.pages.dev</strong><br>
         3. Copy your <strong style="color:var(--text)">Client ID</strong> and <strong style="color:var(--text)">Client Secret</strong><br>
         4. In Netlify dashboard → Site config → Environment variables:<br>
         &nbsp;&nbsp;&nbsp;<strong style="color:var(--accent)">STRAVA_CLIENT_ID</strong> = your client ID<br>
@@ -1565,19 +1565,36 @@ document.addEventListener('input', function(e) {
 // CLAUDE API — direct browser call
 // ═══════════════════════════════
 async function callClaudeAPI(body) {
-  // Use user-supplied key from settings, fallback to built-in context (Claude.ai)
+  // 1. Try Cloudflare Worker (key stored server-side securely)
+  // 2. Fall back to direct API with user-supplied key from Sync settings
+  const workerUrl = 'https://claude-proxy.jcmjtamblyn.workers.dev';
   const userKey = D.settings && D.settings.anthropicKey;
-  const headers = { 'Content-Type': 'application/json' };
-  if (userKey) {
-    headers['x-api-key'] = userKey;
-    headers['anthropic-version'] = '2023-06-01';
+
+  // Try worker first if it's configured (not placeholder)
+  if (!workerUrl.includes('jcmjtamblyn')) {
+    try {
+      const resp = await fetch(workerUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (resp.ok || resp.status === 400) return resp; // worker is responding
+    } catch(e) { /* fall through to direct */ }
   }
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+
+  // Direct API with user key
+  if (!userKey) {
+    throw new Error('No API key configured. Add your Anthropic API key in Sync → Profile.');
+  }
+  return fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: headers,
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': userKey,
+      'anthropic-version': '2023-06-01'
+    },
     body: JSON.stringify(body)
   });
-  return resp;
 }
 
 // ═══════════════════════════════
@@ -1675,9 +1692,8 @@ async function retryFoodEntry(id, name) {
       resp = await callClaudeAPI({model:'claude-sonnet-4-20250514',max_tokens:300,
           messages:[{role:'user',content:`Estimate nutritional values for: "${name}". Return ONLY JSON: {"cal":number,"protein":number,"carbs":number,"fat":number,"note":""}`}]});
     } catch(pe) {
-      resp = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,
-          messages:[{role:'user',content:`Estimate nutritional values for: "${name}". Return ONLY JSON: {"cal":number,"protein":number,"carbs":number,"fat":number,"note":""}`}]})});
+      resp = await callClaudeAPI({model:'claude-sonnet-4-20250514',max_tokens:300,
+          messages:[{role:'user',content:`Estimate nutritional values for: "${name}". Return ONLY JSON: {"cal":number,"protein":number,"carbs":number,"fat":number,"note":""}`}]});
     }
     const data = await resp.json();
     let txt = data.content?.[0]?.text?.trim()||'';
@@ -2880,7 +2896,7 @@ async function stravaGetValidToken() {
   // Refresh expired token
   if (!stravaRefresh) return null;
   try {
-    const resp = await fetch('/.netlify/functions/strava-auth', {
+    const resp = await fetch('https://strava-auth.jcmjtamblyn.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'refresh', refresh_token: stravaRefresh })
@@ -2919,7 +2935,7 @@ async function stravaHandleCallback() {
   toast('Connecting to Strava…');
 
   try {
-    const resp = await fetch('/.netlify/functions/strava-auth', {
+    const resp = await fetch('https://strava-auth.jcmjtamblyn.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'exchange', code })
@@ -3190,13 +3206,13 @@ async function runSystemCheck() {
 
   // ── 4. Netlify proxy — Strava auth function ──
   try {
-    const resp = await fetch('/.netlify/functions/strava-auth', {
+    const resp = await fetch('https://strava-auth.jcmjtamblyn.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'test' })
     });
     if (resp.status === 404) {
-      results.push(row('Strava Auth Function (/.netlify/functions/strava-auth)', 'fail',
+      results.push(row('Strava Auth Function (https://strava-auth.jcmjtamblyn.workers.dev)', 'fail',
         'Function not found (404). Check strava-auth.js is in netlify/functions/ in GitHub.'));
     } else {
       // Any response (even 400 for bad action) means the function exists
