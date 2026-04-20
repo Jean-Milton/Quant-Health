@@ -909,8 +909,13 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
     </div>
     <div class="form-group" style="margin-top:0.65rem">
       <label class="form-label">Anthropic API Key <span style="color:var(--muted);font-size:0.55rem">(for food log + meal plan)</span></label>
-      <input type="password" class="form-input" id="inputAnthropicKey" placeholder="sk-ant-..." oninput="saveAnthropicKey(this.value)" autocomplete="off">
-      <div style="font-size:0.58rem;color:var(--muted);margin-top:0.25rem">Get free key at <strong style="color:var(--muted2)">console.anthropic.com</strong> → API Keys → Create key. Stored on device only, never transmitted except to Anthropic.</div>
+      <input type="password" class="form-input" id="inputAnthropicKey" placeholder="sk-ant-api03-..." oninput="saveAnthropicKey(this.value)" autocomplete="off">
+      <div style="font-size:0.58rem;color:var(--muted);margin-top:0.25rem">From <strong style="color:var(--muted2)">console.anthropic.com</strong> → API Keys. Stored on device only.</div>
+    </div>
+    <div class="form-group" style="margin-top:0.4rem">
+      <label class="form-label">Cloudflare Account ID <span style="color:var(--muted);font-size:0.55rem">(for AI Gateway — faster + more secure)</span></label>
+      <input type="text" class="form-input" id="inputCfAccountId" placeholder="2bb4d2fd95a948d1709e..." oninput="saveCfAccountId(this.value)" autocomplete="off">
+      <div style="font-size:0.58rem;color:var(--muted);margin-top:0.25rem">Cloudflare dashboard → bottom of Workers &amp; Pages page → Account ID. Routes API calls through Cloudflare AI Gateway.</div>
     </div>
     <div class="form-group" style="margin-top:0.65rem">
       <label class="form-label">ExerciseDB API Key <span style="color:var(--muted);font-size:0.55rem">(RapidAPI — free tier)</span></label>
@@ -1439,7 +1444,14 @@ function saveCheckin(){
   const arm=parseFloat(document.getElementById('inArm').value)||null;
 
   const hasFoodLog = foodLogItems.length > 0;
-  const hasAnyValue = hr||weight||calIn||hasFoodLog||S.sleep||S.flex||S.workout;
+  const hasMonthly = !isNaN(parseFloat(document.getElementById('inBodyFat').value))
+    || !isNaN(parseFloat(document.getElementById('inWaist').value))
+    || !isNaN(parseFloat(document.getElementById('inChest').value))
+    || !isNaN(parseFloat(document.getElementById('inArm').value));
+  const hasVitals = hr||weight||bpSys||sleepHrs||
+    !isNaN(parseFloat(document.getElementById('inHydration').value))||
+    !isNaN(parseFloat(document.getElementById('inAlcohol').value));
+  const hasAnyValue = hasVitals||calIn||hasFoodLog||S.sleep||S.energy||S.stress||S.flex||S.workout||hasMonthly;
   if(!hasAnyValue){toast('⚠ Enter at least one value');return;}
 
   const today=new Date().toISOString().split('T')[0];
@@ -1565,35 +1577,30 @@ document.addEventListener('input', function(e) {
 // CLAUDE API — direct browser call
 // ═══════════════════════════════
 async function callClaudeAPI(body) {
-  // 1. Try Cloudflare Worker (key stored server-side securely)
-  // 2. Fall back to direct API with user-supplied key from Sync settings
-  const workerUrl = 'https://claude-proxy.jcmjtamblyn.workers.dev';
+  // Cloudflare AI Gateway — no outbound restrictions, free, built for this
+  // Falls back to direct Anthropic API if gateway not configured
   const userKey = D.settings && D.settings.anthropicKey;
+  const cfAccountId = D.settings && D.settings.cfAccountId;
+  const gatewayName = 'quant-health';
 
-  // Always try the Worker first
-  try {
-    const resp = await fetch(workerUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    // If worker responds (even with error), return it — don't fall through
-    return resp;
-  } catch(e) {
-    // Worker unreachable — fall back to direct API with user key
-    if (!userKey) {
-      throw new Error('Worker unreachable and no API key configured. Add your Anthropic API key in Sync → Profile.');
-    }
-    return fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': userKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify(body)
-    });
+  if (!userKey) {
+    throw new Error('No API key. Add your Anthropic API key in Sync → Profile.');
   }
+
+  // Use Cloudflare AI Gateway if account ID is set, otherwise direct API
+  const url = cfAccountId
+    ? `https://gateway.ai.cloudflare.com/v1/${cfAccountId}/${gatewayName}/anthropic/v1/messages`
+    : 'https://api.anthropic.com/v1/messages';
+
+  return fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': userKey,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify(body)
+  });
 }
 
 // ═══════════════════════════════
@@ -2200,6 +2207,8 @@ function renderSync() {
   document.getElementById('inputProfileName').value = name;
   const anthropicEl = document.getElementById('inputAnthropicKey');
   if(anthropicEl) anthropicEl.value = D.settings?.anthropicKey || '';
+  const cfEl = document.getElementById('inputCfAccountId');
+  if(cfEl) cfEl.value = D.settings?.cfAccountId || '';
   const keyEl = document.getElementById('inputExerciseKey');
   if(keyEl) keyEl.value = D.settings?.exerciseDbKey || '';
   document.getElementById('profileName').textContent = name || 'My Profile';
@@ -2552,6 +2561,12 @@ function saveAnthropicKey(val) {
   save();
 }
 
+function saveCfAccountId(val) {
+  if (!D.settings) D.settings = {};
+  D.settings.cfAccountId = val.trim();
+  save();
+}
+
 function saveExerciseKey(val) {
   if (!D.settings) D.settings = {};
   D.settings.exerciseDbKey = val;
@@ -2573,6 +2588,8 @@ function renderProgram() {
   renderGuidelinesPanel();
   var anthropicEl2 = document.getElementById('inputAnthropicKey');
   if (anthropicEl2 && D.settings && D.settings.anthropicKey) anthropicEl2.value = D.settings.anthropicKey;
+  var cfEl2 = document.getElementById('inputCfAccountId');
+  if (cfEl2 && D.settings && D.settings.cfAccountId) cfEl2.value = D.settings.cfAccountId;
   var keyEl = document.getElementById('inputExerciseKey');
   if (keyEl && D.settings && D.settings.exerciseDbKey) keyEl.value = D.settings.exerciseDbKey;
 }
@@ -3192,8 +3209,9 @@ async function runSystemCheck() {
       if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
       const txt = data.content?.[0]?.text || '';
       const apiKey = D.settings && D.settings.anthropicKey;
+      const cfId = D.settings && D.settings.cfAccountId;
       results.push(row('Claude API', 'pass',
-        `Connected · Response: "${txt.slice(0,30)}" · Food log and meal plan working · ${apiKey ? 'Using your API key' : 'Using built-in key'}`));
+        `Connected · "${txt.slice(0,30)}" · ${cfId ? '✓ Cloudflare AI Gateway active' : 'Direct API (add CF Account ID for Gateway)'}`));
     } catch(claudeErr) {
       results.push(row('Claude API', 'fail',
         `Failed: ${claudeErr.message}. Add your Anthropic API key in the field below, or check your internet connection.`));
