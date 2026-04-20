@@ -908,6 +908,11 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
       <input type="text" class="form-input" id="inputProfileName" placeholder="e.g. JT" oninput="updateProfileName(this.value)">
     </div>
     <div class="form-group" style="margin-top:0.65rem">
+      <label class="form-label">Anthropic API Key <span style="color:var(--muted);font-size:0.55rem">(for food log + meal plan)</span></label>
+      <input type="password" class="form-input" id="inputAnthropicKey" placeholder="sk-ant-..." oninput="saveAnthropicKey(this.value)" autocomplete="off">
+      <div style="font-size:0.58rem;color:var(--muted);margin-top:0.25rem">Get free key at <strong style="color:var(--muted2)">console.anthropic.com</strong> → API Keys → Create key. Stored on device only, never transmitted except to Anthropic.</div>
+    </div>
+    <div class="form-group" style="margin-top:0.65rem">
       <label class="form-label">ExerciseDB API Key <span style="color:var(--muted);font-size:0.55rem">(RapidAPI — free tier)</span></label>
       <input type="password" class="form-input" id="inputExerciseKey" placeholder="Paste your RapidAPI key here" oninput="saveExerciseKey(this.value)" autocomplete="off">
       <div style="font-size:0.58rem;color:var(--muted);margin-top:0.25rem">Get free key at rapidapi.com → search ExerciseDB → Subscribe (free). Stored locally on device only.</div>
@@ -1557,6 +1562,25 @@ document.addEventListener('input', function(e) {
 });
 
 // ═══════════════════════════════
+// CLAUDE API — direct browser call
+// ═══════════════════════════════
+async function callClaudeAPI(body) {
+  // Use user-supplied key from settings, fallback to built-in context (Claude.ai)
+  const userKey = D.settings && D.settings.anthropicKey;
+  const headers = { 'Content-Type': 'application/json' };
+  if (userKey) {
+    headers['x-api-key'] = userKey;
+    headers['anthropic-version'] = '2023-06-01';
+  }
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify(body)
+  });
+  return resp;
+}
+
+// ═══════════════════════════════
 // FOOD LOG ENGINE
 // ═══════════════════════════════
 if(!S.foodLog) S.foodLog=[];
@@ -1575,33 +1599,11 @@ async function addFoodEntry(){
   renderFoodLog();
 
   try{
-    // Try proxy first, fall back to direct API
-    let resp, usedProxy = true;
-    try {
-      resp = await fetch('/.netlify/functions/claude-proxy',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          model:'claude-sonnet-4-20250514',
-          max_tokens:300,
-          messages:[{role:'user',content:`Estimate the nutritional values for: "${text}". Return ONLY valid JSON with no markdown, no explanation: {"cal":number,"protein":number,"carbs":number,"fat":number,"note":"brief clarification if needed"}. Round to nearest integer.`}]
-        })
-      });
-      // If proxy returns 404, it's not deployed — try direct
-      if(resp.status === 404 || resp.status === 502) { usedProxy = false; throw new Error('proxy_missing'); }
-    } catch(proxyErr) {
-      if(proxyErr.message !== 'proxy_missing' && !proxyErr.message.includes('fetch')) throw proxyErr;
-      // Proxy not available — try direct Anthropic API (works in Claude.ai artifact context)
-      resp = await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          model:'claude-sonnet-4-20250514',
-          max_tokens:300,
-          messages:[{role:'user',content:`Estimate the nutritional values for: "${text}". Return ONLY valid JSON with no markdown, no explanation: {"cal":number,"protein":number,"carbs":number,"fat":number,"note":"brief clarification if needed"}. Round to nearest integer.`}]
-        })
-      });
-    }
+    let resp = await callClaudeAPI({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:300,
+      messages:[{role:'user',content:`Estimate the nutritional values for: "${text}". Return ONLY valid JSON with no markdown, no explanation: {"cal":number,"protein":number,"carbs":number,"fat":number,"note":"brief clarification if needed"}. Round to nearest integer.`}]
+    });
 
     if(!resp.ok){
       const errData = await resp.json().catch(()=>({}));
@@ -1670,10 +1672,8 @@ async function retryFoodEntry(id, name) {
   try {
     let resp;
     try {
-      resp = await fetch('/.netlify/functions/claude-proxy',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,
-          messages:[{role:'user',content:`Estimate nutritional values for: "${name}". Return ONLY JSON: {"cal":number,"protein":number,"carbs":number,"fat":number,"note":""}`}]})});
-      if(resp.status===404||resp.status===502) throw new Error('proxy_missing');
+      resp = await callClaudeAPI({model:'claude-sonnet-4-20250514',max_tokens:300,
+          messages:[{role:'user',content:`Estimate nutritional values for: "${name}". Return ONLY JSON: {"cal":number,"protein":number,"carbs":number,"fat":number,"note":""}`}]});
     } catch(pe) {
       resp = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,
@@ -1927,7 +1927,7 @@ buyDay: "now" (buy day 1-2, fresh), "midweek" (day 3-5), "any" (pantry)
 Include 7 full days. Make meals varied, delicious, family-friendly. No repeating the same meal twice.`;
 
   try{
-    const resp=await fetch('/.netlify/functions/claude-proxy',{
+    const resp=await callClaudeAPI({
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
@@ -2183,6 +2183,8 @@ function renderSync() {
   // Profile name
   const name = D.profile?.name || '';
   document.getElementById('inputProfileName').value = name;
+  const anthropicEl = document.getElementById('inputAnthropicKey');
+  if(anthropicEl) anthropicEl.value = D.settings?.anthropicKey || '';
   const keyEl = document.getElementById('inputExerciseKey');
   if(keyEl) keyEl.value = D.settings?.exerciseDbKey || '';
   document.getElementById('profileName').textContent = name || 'My Profile';
@@ -2529,6 +2531,12 @@ const PROGRAM = {
 // ═══════════════════════════════
 let programTabIndex = 0;
 
+function saveAnthropicKey(val) {
+  if (!D.settings) D.settings = {};
+  D.settings.anthropicKey = val.trim();
+  save();
+}
+
 function saveExerciseKey(val) {
   if (!D.settings) D.settings = {};
   D.settings.exerciseDbKey = val;
@@ -2548,6 +2556,8 @@ function renderProgram() {
   renderPhasePanel(1);
   renderPhasePanel(2);
   renderGuidelinesPanel();
+  var anthropicEl2 = document.getElementById('inputAnthropicKey');
+  if (anthropicEl2 && D.settings && D.settings.anthropicKey) anthropicEl2.value = D.settings.anthropicKey;
   var keyEl = document.getElementById('inputExerciseKey');
   if (keyEl && D.settings && D.settings.exerciseDbKey) keyEl.value = D.settings.exerciseDbKey;
 }
@@ -3157,33 +3167,24 @@ async function runSystemCheck() {
 
   // ── 3. Netlify proxy — Claude ──
   try {
-    const resp = await fetch('/.netlify/functions/claude-proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    try {
+      const resp = await callClaudeAPI({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 20,
         messages: [{ role: 'user', content: 'Reply with just the word PONG' }]
-      })
-    });
-    if (resp.status === 404) {
-      results.push(row('Claude Proxy (/.netlify/functions/claude-proxy)', 'fail',
-        'Function not found (404). Check that claude-proxy.js is in netlify/functions/ in your GitHub repo and the site has redeployed.'));
-    } else if (resp.status === 500) {
-      const data = await resp.json().catch(() => ({}));
-      const msg = data.error || 'Internal server error';
-      results.push(row('Claude Proxy (/.netlify/functions/claude-proxy)', 'fail',
-        `Function running but errored: ${msg}. Check ANTHROPIC_API_KEY is set in Netlify environment variables.`));
-    } else if (resp.ok) {
+      });
       const data = await resp.json();
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
       const txt = data.content?.[0]?.text || '';
-      results.push(row('Claude Proxy (/.netlify/functions/claude-proxy)', 'pass',
-        `Connected · Response: "${txt.slice(0,40)}" · Food log and meal plan will work`));
-    } else {
-      results.push(row('Claude Proxy (/.netlify/functions/claude-proxy)', 'fail', `HTTP ${resp.status}`));
+      const apiKey = D.settings && D.settings.anthropicKey;
+      results.push(row('Claude API', 'pass',
+        `Connected · Response: "${txt.slice(0,30)}" · Food log and meal plan working · ${apiKey ? 'Using your API key' : 'Using built-in key'}`));
+    } catch(claudeErr) {
+      results.push(row('Claude API', 'fail',
+        `Failed: ${claudeErr.message}. Add your Anthropic API key in the field below, or check your internet connection.`));
     }
   } catch(e) {
-    results.push(row('Claude Proxy (/.netlify/functions/claude-proxy)', 'fail',
+    results.push(row('Claude API', 'fail',
       `Network error: ${e.message}. Are you on the live Netlify URL (quant-health.netlify.app)?`));
   }
 
