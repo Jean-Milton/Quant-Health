@@ -1570,31 +1570,30 @@ async function callClaudeAPI(body) {
   const workerUrl = 'https://claude-proxy.jcmjtamblyn.workers.dev';
   const userKey = D.settings && D.settings.anthropicKey;
 
-  // Try worker first if it's configured (not placeholder)
-  if (!workerUrl.includes('jcmjtamblyn')) {
-    try {
-      const resp = await fetch(workerUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      if (resp.ok || resp.status === 400) return resp; // worker is responding
-    } catch(e) { /* fall through to direct */ }
+  // Always try the Worker first
+  try {
+    const resp = await fetch(workerUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    // If worker responds (even with error), return it — don't fall through
+    return resp;
+  } catch(e) {
+    // Worker unreachable — fall back to direct API with user key
+    if (!userKey) {
+      throw new Error('Worker unreachable and no API key configured. Add your Anthropic API key in Sync → Profile.');
+    }
+    return fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': userKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify(body)
+    });
   }
-
-  // Direct API with user key
-  if (!userKey) {
-    throw new Error('No API key configured. Add your Anthropic API key in Sync → Profile.');
-  }
-  return fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': userKey,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify(body)
-  });
 }
 
 // ═══════════════════════════════
