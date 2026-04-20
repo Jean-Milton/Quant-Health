@@ -1037,6 +1037,14 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
     </div>
   </div>
 
+  <!-- System Check -->
+  <div class="card">
+    <div class="card-title">System Check</div>
+    <div style="font-size:0.7rem;color:var(--muted2);margin-bottom:0.75rem;line-height:1.6">Tests all connections live — proxy, Claude API, Strava, and local storage.</div>
+    <div id="sysCheckResults"></div>
+    <button onclick="runSystemCheck()" class="btn-primary" style="margin-top:0.5rem;background:var(--surface2);color:var(--accent);border:1px solid rgba(0,200,255,0.3)">⟳ Run System Check</button>
+  </div>
+
   <!-- Data stats -->
   <div class="card">
     <div class="card-title">Data Summary</div>
@@ -1450,12 +1458,63 @@ function saveCheckin(){
     shoulderReach:isNaN(shoulderReach)?null:shoulderReach
   };
 
-  const idx=D.entries.findIndex(e=>e.date===today);
-  if(idx>=0) D.entries[idx]=entry; else D.entries.push(entry);
+  const idx = D.entries.findIndex(e=>e.date===today);
+
+  if (idx >= 0) {
+    // ── MERGE into existing entry ──
+    // For each field: new non-null value wins; if new is null, keep existing
+    const prev = D.entries[idx];
+    const merged = {};
+
+    // Scalar fields — new value wins if provided, else keep previous
+    const scalarFields = ['hr','weight','vo2','strava','bpSys','bpDia',
+      'calIn','calOut','protein','carbs','sleep','sleepHrs','energy','stress',
+      'flex','hydration','alcohol','bodyFat','waist','chest','arm',
+      'elbowPain','shoulderPain','kneePain','elbowLoc','kneeLoc',
+      'duration','workoutHR','trail','touchToes','shoulderReach','workout'];
+    scalarFields.forEach(f => {
+      merged[f] = entry[f] != null ? entry[f] : prev[f] != null ? prev[f] : null;
+    });
+
+    // Food log — append new items, deduplicate by name
+    const prevFood = prev.foodLog || [];
+    const newFood  = entry.foodLog || [];
+    // Merge: keep all prev items, add new items that aren't duplicates
+    const allFood  = [...prevFood];
+    newFood.forEach(item => {
+      const exists = allFood.some(p => p.name.toLowerCase() === item.name.toLowerCase());
+      if (!exists) allFood.push(item);
+    });
+    merged.foodLog = allFood.length ? allFood : undefined;
+
+    // Recalculate calorie totals from merged food log
+    if (merged.foodLog && !parseFloat(document.getElementById('inCalIn').value)) {
+      const logTotal = merged.foodLog.filter(f=>f.cal!=null).reduce((s,f)=>s+f.cal,0);
+      if (logTotal > 0) merged.calIn = logTotal;
+    }
+
+    // Notes — append if different
+    if (entry.notes && prev.notes && entry.notes !== prev.notes) {
+      merged.notes = prev.notes + ' · ' + entry.notes;
+    } else {
+      merged.notes = entry.notes || prev.notes || '';
+    }
+
+    // Calorie balance — recalculate from merged values
+    merged.calBal = (merged.calIn && merged.calOut) ? merged.calIn - merged.calOut : null;
+
+    merged.date = today;
+    D.entries[idx] = merged;
+    toast('✓ Entry updated — merged with todays data');
+  } else {
+    // ── NEW entry ──
+    D.entries.push(entry);
+    toast('✓ Entry saved');
+  }
+
   D.entries.sort((a,b)=>a.date.localeCompare(b.date));
   save();
   clearCheckin();
-  toast('✓ Entry saved');
   setTimeout(()=>showPage('today',document.querySelector('.nav-item')),700);
 }
 
@@ -1516,28 +1575,59 @@ async function addFoodEntry(){
   renderFoodLog();
 
   try{
-    const resp=await fetch('/api/claude-proxy',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:300,
-        messages:[{role:'user',content:`Estimate the nutritional values for: "${text}". Return ONLY valid JSON with no markdown, no explanation: {"cal":number,"protein":number,"carbs":number,"fat":number,"note":"brief clarification if needed"}. Round to nearest integer. Be accurate for common foods and reasonable for ambiguous quantities.`}]
-      })
-    });
+    // Try proxy first, fall back to direct API
+    let resp, usedProxy = true;
+    try {
+      resp = await fetch('/api/claude-proxy',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          model:'claude-sonnet-4-20250514',
+          max_tokens:300,
+          messages:[{role:'user',content:`Estimate the nutritional values for: "${text}". Return ONLY valid JSON with no markdown, no explanation: {"cal":number,"protein":number,"carbs":number,"fat":number,"note":"brief clarification if needed"}. Round to nearest integer.`}]
+        })
+      });
+      // If proxy returns 404, it's not deployed — try direct
+      if(resp.status === 404 || resp.status === 502) { usedProxy = false; throw new Error('proxy_missing'); }
+    } catch(proxyErr) {
+      if(proxyErr.message !== 'proxy_missing' && !proxyErr.message.includes('fetch')) throw proxyErr;
+      // Proxy not available — try direct Anthropic API (works in Claude.ai artifact context)
+      resp = await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          model:'claude-sonnet-4-20250514',
+          max_tokens:300,
+          messages:[{role:'user',content:`Estimate the nutritional values for: "${text}". Return ONLY valid JSON with no markdown, no explanation: {"cal":number,"protein":number,"carbs":number,"fat":number,"note":"brief clarification if needed"}. Round to nearest integer.`}]
+        })
+      });
+    }
+
+    if(!resp.ok){
+      const errData = await resp.json().catch(()=>({}));
+      const errMsg = errData.error?.message || errData.error || `HTTP ${resp.status}`;
+      throw new Error(errMsg);
+    }
+
     const data=await resp.json();
+    if(data.error){ throw new Error(data.error.message || JSON.stringify(data.error)); }
+
     let txt=data.content?.[0]?.text?.trim()||'';
-    txt=txt.replace('```json','').replace('```','').trim();
+    txt=txt.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
     const macros=JSON.parse(txt);
-    // Update the entry
     const idx=S.foodLog.findIndex(f=>f.id===placeholderId);
     if(idx>=0){
       S.foodLog[idx]={id:placeholderId,name:text,cal:macros.cal,protein:macros.protein,carbs:macros.carbs,fat:macros.fat,note:macros.note,loading:false};
     }
   }catch(e){
     const idx=S.foodLog.findIndex(f=>f.id===placeholderId);
-    if(idx>=0) S.foodLog[idx].loading=false;
-    toast('⚠ Could not estimate macros');
+    if(idx>=0){
+      S.foodLog[idx].loading=false;
+      S.foodLog[idx].error=e.message;
+    }
+    const shortErr = e.message.length > 60 ? e.message.slice(0,60)+'…' : e.message;
+    toast('⚠ Macro estimate failed: '+shortErr);
+    console.error('Food log error:', e);
   }
   input.disabled=false;
   renderFoodLog();
@@ -1551,9 +1641,13 @@ function renderFoodLog(){
     <div style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.55rem;margin-bottom:0.3rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px">
       <div style="flex:1">
         <div style="font-size:0.75rem;color:var(--text)">${f.name}</div>
-        ${f.loading?'<div style="font-size:0.6rem;color:var(--muted)">Calculating…</div>'
-          :f.cal!=null?`<div style="font-size:0.6rem;color:var(--muted);display:flex;gap:0.5rem"><span style="color:var(--accent)">${f.cal} kcal</span><span style="color:var(--green)">${f.protein}g P</span><span style="color:var(--amber)">${f.carbs}g C</span>${f.note?`<span>${f.note}</span>`:''}</div>`
-          :'<div style="font-size:0.6rem;color:var(--red)">—</div>'}
+        ${f.loading
+          ?'<div style="font-size:0.65rem;color:var(--muted)">Calculating…</div>'
+          :f.cal!=null
+            ?`<div style="font-size:0.65rem;color:var(--muted2);display:flex;gap:0.5rem;flex-wrap:wrap"><span style="color:var(--accent)">${f.cal} kcal</span><span style="color:var(--green)">${f.protein}g protein</span><span style="color:var(--amber)">${f.carbs}g carbs</span>${f.note?`<span style="color:var(--muted2)">${f.note}</span>`:''}</div>`
+            :f.error
+              ?`<div style="font-size:0.62rem;color:var(--red)">⚠ ${f.error} — <span style="cursor:pointer;text-decoration:underline" onclick="retryFoodEntry('${f.id}','${f.name.replace(/'/g,'')}')">retry</span></div>`
+              :'<div style="font-size:0.62rem;color:var(--red)">Failed — tap retry</div>'}
       </div>
       <button onclick="removeFoodEntry('${f.id}')" style="background:none;border:none;color:var(--muted);font-size:0.9rem;cursor:pointer;padding:0.2rem;line-height:1">✕</button>
     </div>`).join('');
@@ -1562,6 +1656,39 @@ function renderFoodLog(){
 
 function removeFoodEntry(id){
   S.foodLog=(S.foodLog||[]).filter(f=>f.id!==id);
+  renderFoodLog();
+  updateFoodTotals();
+}
+
+async function retryFoodEntry(id, name) {
+  const idx = (S.foodLog||[]).findIndex(f=>f.id===id);
+  if(idx<0) return;
+  S.foodLog[idx].loading = true;
+  S.foodLog[idx].error = null;
+  renderFoodLog();
+  // Re-run the same logic as addFoodEntry but for existing item
+  try {
+    let resp;
+    try {
+      resp = await fetch('/api/claude-proxy',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,
+          messages:[{role:'user',content:`Estimate nutritional values for: "${name}". Return ONLY JSON: {"cal":number,"protein":number,"carbs":number,"fat":number,"note":""}`}]})});
+      if(resp.status===404||resp.status===502) throw new Error('proxy_missing');
+    } catch(pe) {
+      resp = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,
+          messages:[{role:'user',content:`Estimate nutritional values for: "${name}". Return ONLY JSON: {"cal":number,"protein":number,"carbs":number,"fat":number,"note":""}`}]})});
+    }
+    const data = await resp.json();
+    let txt = data.content?.[0]?.text?.trim()||'';
+    txt = txt.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+    const macros = JSON.parse(txt);
+    const i2 = (S.foodLog||[]).findIndex(f=>f.id===id);
+    if(i2>=0) S.foodLog[i2]={...S.foodLog[i2],cal:macros.cal,protein:macros.protein,carbs:macros.carbs,fat:macros.fat,note:macros.note,loading:false,error:null};
+  } catch(e) {
+    const i2 = (S.foodLog||[]).findIndex(f=>f.id===id);
+    if(i2>=0) { S.foodLog[i2].loading=false; S.foodLog[i2].error=e.message; }
+  }
   renderFoodLog();
   updateFoodTotals();
 }
@@ -2924,31 +3051,209 @@ function prefillCheckinFromStrava(act) {
 }
 
 function renderStravaUI() {
-  const connected = D.settings && D.settings.stravaToken;
+  const connected   = !!(D.settings && D.settings.stravaToken);
+  const clientId    = D.settings && D.settings.stravaClientId;
+  const athlete     = D.settings && D.settings.stravaAthlete;
+  const lastImport  = D.settings && D.settings.stravaLastImport;
+  const expires     = D.settings && D.settings.stravaExpires;
+  const tokenExpired = expires && Date.now()/1000 > expires;
+
   const disconnectedEl = document.getElementById('stravaDisconnected');
   const connectedEl    = document.getElementById('stravaConnected');
   const clientIdEl     = document.getElementById('inputStravaClientId');
 
   if (disconnectedEl) disconnectedEl.style.display = connected ? 'none' : 'block';
   if (connectedEl)    connectedEl.style.display    = connected ? 'block' : 'none';
+  if (clientIdEl && clientId) clientIdEl.value = clientId;
 
-  if (clientIdEl && D.settings && D.settings.stravaClientId) {
-    clientIdEl.value = D.settings.stravaClientId;
+  if (connected) {
+    // Name + avatar
+    if (athlete) {
+      const nameEl   = document.getElementById('stravaName');
+      const avatarEl = document.getElementById('stravaAvatar');
+      if (nameEl)   nameEl.textContent = athlete.firstname + ' ' + (athlete.lastname || '');
+      if (avatarEl && athlete.profile) { avatarEl.src = athlete.profile; avatarEl.style.display = 'block'; }
+    }
+
+    // Connection status detail
+    const statusEl = document.getElementById('stravaLastImport');
+    if (statusEl) {
+      let statusHtml = '';
+      if (tokenExpired) {
+        statusHtml += '<div style="font-size:0.65rem;color:var(--amber);margin-bottom:0.35rem">⚠ Token expired — tap Sync to refresh automatically</div>';
+      } else {
+        statusHtml += '<div style="font-size:0.65rem;color:var(--green);margin-bottom:0.35rem">✓ Token valid' + (expires ? ' · Expires ' + new Date(expires*1000).toLocaleDateString() : '') + '</div>';
+      }
+      if (lastImport) {
+        const imp = lastImport;
+        statusHtml += '<div style="font-size:0.65rem;color:var(--muted2)">'
+          + '📍 Last import: <strong style="color:var(--text)">' + imp.name + '</strong> · ' + imp.date
+          + (imp.workoutType ? ' · ' + imp.workoutType : '')
+          + (imp.duration    ? ' · ' + imp.duration + ' min' : '')
+          + (imp.avgHR       ? ' · ' + imp.avgHR + ' bpm avg' : '')
+          + '</div>';
+        if (!clientId) {
+          statusHtml += '<div style="font-size:0.62rem;color:var(--amber);margin-top:0.3rem">⚠ Client ID not set — re-auth may fail. Enter it in the setup guide below.</div>';
+        }
+      } else {
+        statusHtml += '<div style="font-size:0.65rem;color:var(--muted2)">No activities imported yet — tap Sync Latest Activity</div>';
+      }
+      statusEl.innerHTML = statusHtml;
+    }
+  } else {
+    // Not connected — show setup state
+    if (!clientId) {
+      const guideEl = document.getElementById('stravaSetupGuide');
+      if (guideEl) guideEl.style.borderColor = 'rgba(255,179,64,0.4)';
+    }
+  }
+}
+
+
+// ═══════════════════════════════
+// SYSTEM CHECK
+// ═══════════════════════════════
+async function runSystemCheck() {
+  const el = document.getElementById('sysCheckResults');
+  if (!el) return;
+
+  const row = (label, status, detail) => {
+    const color = status==='pass'?'var(--green)':status==='fail'?'var(--red)':'var(--amber)';
+    const icon  = status==='pass'?'✓':status==='fail'?'✗':'⚠';
+    return `<div style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.55rem 0;border-bottom:1px solid var(--border)">
+      <span style="color:${color};font-size:0.85rem;flex-shrink:0;margin-top:0.05rem">${icon}</span>
+      <div style="flex:1">
+        <div style="font-size:0.73rem;color:var(--text)">${label}</div>
+        <div style="font-size:0.65rem;color:var(--muted2);margin-top:0.15rem">${detail}</div>
+      </div>
+    </div>`;
+  };
+
+  el.innerHTML = '<div style="font-size:0.68rem;color:var(--muted2);padding:0.5rem 0">Running checks…</div>';
+
+  const results = [];
+
+  // ── 1. localStorage ──
+  try {
+    const testKey = '__qh_test__';
+    localStorage.setItem(testKey, '1');
+    const val = localStorage.getItem(testKey);
+    localStorage.removeItem(testKey);
+    results.push(row('Local Storage', val==='1'?'pass':'fail', val==='1'?'Read/write working — your data is safe':'localStorage not working — data will not persist'));
+  } catch(e) {
+    results.push(row('Local Storage', 'fail', 'Error: ' + e.message));
   }
 
-  if (connected && D.settings.stravaAthlete) {
-    const a = D.settings.stravaAthlete;
-    const nameEl   = document.getElementById('stravaName');
-    const avatarEl = document.getElementById('stravaAvatar');
-    if (nameEl)   nameEl.textContent = a.firstname + ' ' + (a.lastname || '');
-    if (avatarEl && a.profile) { avatarEl.src = a.profile; avatarEl.style.display = 'block'; }
+  // ── 2. Data integrity ──
+  const entries = D.entries || [];
+  const today = new Date().toISOString().split('T')[0];
+  const todayEntry = entries.find(e => e.date === today);
+  results.push(row('Entry Data',
+    entries.length > 0 ? 'pass' : 'warn',
+    entries.length > 0
+      ? `${entries.length} entries stored · Last: ${entries[entries.length-1]?.date || '?'}${todayEntry?' · Today logged':''}`
+      : 'No entries yet — log your first check-in'
+  ));
+
+  // ── 3. Netlify proxy — Claude ──
+  try {
+    const resp = await fetch('/api/claude-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 20,
+        messages: [{ role: 'user', content: 'Reply with just the word PONG' }]
+      })
+    });
+    if (resp.status === 404) {
+      results.push(row('Claude Proxy (/api/claude-proxy)', 'fail',
+        'Function not found (404). Check that claude-proxy.js is in netlify/functions/ in your GitHub repo and the site has redeployed.'));
+    } else if (resp.status === 500) {
+      const data = await resp.json().catch(() => ({}));
+      const msg = data.error || 'Internal server error';
+      results.push(row('Claude Proxy (/api/claude-proxy)', 'fail',
+        `Function running but errored: ${msg}. Check ANTHROPIC_API_KEY is set in Netlify environment variables.`));
+    } else if (resp.ok) {
+      const data = await resp.json();
+      const txt = data.content?.[0]?.text || '';
+      results.push(row('Claude Proxy (/api/claude-proxy)', 'pass',
+        `Connected · Response: "${txt.slice(0,40)}" · Food log and meal plan will work`));
+    } else {
+      results.push(row('Claude Proxy (/api/claude-proxy)', 'fail', `HTTP ${resp.status}`));
+    }
+  } catch(e) {
+    results.push(row('Claude Proxy (/api/claude-proxy)', 'fail',
+      `Network error: ${e.message}. Are you on the live Netlify URL (quant-health.netlify.app)?`));
   }
 
-  if (connected && D.settings.stravaLastImport) {
-    const imp = D.settings.stravaLastImport;
-    const el  = document.getElementById('stravaLastImport');
-    if (el) el.textContent = 'Last import: ' + imp.name + ' · ' + imp.date;
+  // ── 4. Netlify proxy — Strava auth function ──
+  try {
+    const resp = await fetch('/api/strava-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'test' })
+    });
+    if (resp.status === 404) {
+      results.push(row('Strava Auth Function (/api/strava-auth)', 'fail',
+        'Function not found (404). Check strava-auth.js is in netlify/functions/ in GitHub.'));
+    } else {
+      // Any response (even 400 for bad action) means the function exists
+      const data = await resp.json().catch(() => ({}));
+      const hasCredentials = !data.error?.includes('not configured');
+      results.push(row('Strava Auth Function', hasCredentials ? 'pass' : 'fail',
+        hasCredentials
+          ? 'Function deployed · STRAVA_CLIENT_ID and STRAVA_CLIENT_SECRET found'
+          : 'Function deployed but credentials missing. Add STRAVA_CLIENT_ID and STRAVA_CLIENT_SECRET in Netlify environment variables.'));
+    }
+  } catch(e) {
+    results.push(row('Strava Auth Function', 'fail', 'Network error: ' + e.message));
   }
+
+  // ── 5. Strava token ──
+  const hasToken = !!(D.settings && D.settings.stravaToken);
+  if (hasToken) {
+    try {
+      const token = await stravaGetValidToken();
+      if (token) {
+        const resp = await fetch('https://www.strava.com/api/v3/athlete', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (resp.ok) {
+          const athlete = await resp.json();
+          results.push(row('Strava Connection', 'pass',
+            `Connected as ${athlete.firstname} ${athlete.lastname} · Token valid`));
+        } else {
+          results.push(row('Strava Connection', 'fail', `Token rejected by Strava (HTTP ${resp.status}) — reconnect in the Strava card above`));
+        }
+      } else {
+        results.push(row('Strava Connection', 'warn', 'Token expired and refresh failed — tap Connect Strava again'));
+      }
+    } catch(e) {
+      results.push(row('Strava Connection', 'warn', 'Could not verify token: ' + e.message));
+    }
+  } else {
+    const clientId = D.settings && D.settings.stravaClientId;
+    results.push(row('Strava Connection', 'warn',
+      clientId ? 'Client ID set but not connected. Tap "Connect with Strava" above.' : 'Not connected. Enter your Strava Client ID and tap Connect.'));
+  }
+
+  // ── 6. ExerciseDB key ──
+  const exKey = D.settings && D.settings.exerciseDbKey;
+  results.push(row('ExerciseDB API Key', exKey ? 'pass' : 'warn',
+    exKey ? 'Key saved — exercise images will load in Program → Exercises tab' : 'No key set — exercise images will show Google Images links instead'));
+
+  // Summary
+  const passes  = results.filter(r => r.includes('var(--green)')).length;
+  const fails   = results.filter(r => r.includes('var(--red)')).length;
+  const warns   = results.filter(r => r.includes('var(--amber)')).length;
+  const summary = `<div style="font-size:0.7rem;margin-bottom:0.65rem;padding:0.5rem 0.65rem;border-radius:8px;background:var(--surface2);border:1px solid var(--border2)">
+    <span style="color:var(--green)">✓ ${passes} pass</span> &nbsp;
+    <span style="color:var(--red)">✗ ${fails} fail</span> &nbsp;
+    <span style="color:var(--amber)">⚠ ${warns} warn</span>
+  </div>`;
+
+  el.innerHTML = summary + results.join('');
 }
 
 
