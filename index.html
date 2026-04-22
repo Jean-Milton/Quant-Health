@@ -3197,28 +3197,52 @@ async function runSystemCheck() {
       : 'No entries yet — log your first check-in'
   ));
 
-  // ── 3. Netlify proxy — Claude ──
-  try {
-    try {
-      const resp = await callClaudeAPI({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 20,
-        messages: [{ role: 'user', content: 'Reply with just the word PONG' }]
-      });
-      const data = await resp.json();
-      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-      const txt = data.content?.[0]?.text || '';
-      const apiKey = D.settings && D.settings.anthropicKey;
-      const cfId = D.settings && D.settings.cfAccountId;
-      results.push(row('Claude API', 'pass',
-        `Connected · "${txt.slice(0,30)}" · ${cfId ? '✓ Cloudflare AI Gateway active' : 'Direct API (add CF Account ID for Gateway)'}`));
-    } catch(claudeErr) {
+  // ── 3. Claude API diagnostic ──
+  {
+    const userKey = D.settings && D.settings.anthropicKey;
+    const cfId    = D.settings && D.settings.cfAccountId;
+    const testUrl = cfId
+      ? `https://gateway.ai.cloudflare.com/v1/${cfId}/quant-health/anthropic/v1/messages`
+      : 'https://api.anthropic.com/v1/messages';
+
+    if (!userKey) {
       results.push(row('Claude API', 'fail',
-        `Failed: ${claudeErr.message}. Add your Anthropic API key in the field below, or check your internet connection.`));
+        'No Anthropic API key set — add it in the Anthropic API Key field below.'));
+    } else {
+      try {
+        const resp = await fetch(testUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': userKey,
+            'anthropic-version': '2023-06-01'
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 20,
+            messages: [{ role: 'user', content: 'Reply PONG' }]
+          })
+        });
+        const raw = await resp.text();
+        let data;
+        try { data = JSON.parse(raw); } catch(pe) { throw new Error('Bad JSON: ' + raw.slice(0,100)); }
+        if (data.error) {
+          results.push(row('Claude API', 'fail',
+            `API error (${resp.status}): ${data.error.message || JSON.stringify(data.error).slice(0,80)}`
+            + ` · Key: …${userKey.slice(-4)} · ${cfId ? 'Gateway: '+cfId.slice(0,8)+'…' : 'Direct API'}`));
+        } else {
+          const txt = data.content?.[0]?.text || '';
+          results.push(row('Claude API', 'pass',
+            `Connected · "${txt.slice(0,25)}" · ${cfId ? 'Cloudflare AI Gateway ✓' : 'Direct Anthropic'} · Key: …${userKey.slice(-4)}`));
+        }
+      } catch(e) {
+        results.push(row('Claude API', 'fail',
+          `Fetch error: ${e.message}`
+          + ` | URL: ${testUrl.slice(0,65)}…`
+          + ` | Key: ${userKey ? '…'+userKey.slice(-4) : 'not set'}`
+          + ` | CF ID: ${cfId ? cfId.slice(0,8)+'…' : 'not set'}`));
+      }
     }
-  } catch(e) {
-    results.push(row('Claude API', 'fail',
-      `Network error: ${e.message}. Are you on the live Netlify URL (quant-health.pages.dev)?`));
   }
 
   // ── 4. Netlify proxy — Strava auth function ──
