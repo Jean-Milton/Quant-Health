@@ -3193,10 +3193,7 @@ async function runSystemCheck() {
   // ── 3. Claude API diagnostic ──
   {
     const userKey = D.settings && D.settings.anthropicKey;
-    const cfId    = D.settings && D.settings.cfAccountId;
-    const testUrl = cfId
-      ? `https://gateway.ai.cloudflare.com/v1/${cfId}/quant-health/anthropic/v1/messages`
-      : 'https://api.anthropic.com/v1/messages';
+    const testUrl = 'https://api.anthropic.com/v1/messages';
 
     if (!userKey) {
       results.push(row('Claude API', 'fail',
@@ -3226,7 +3223,7 @@ async function runSystemCheck() {
         } else {
           const txt = data.content?.[0]?.text || '';
           results.push(row('Claude API', 'pass',
-            `Connected · "${txt.slice(0,25)}" · ${cfId ? 'Cloudflare AI Gateway ✓' : 'Direct Anthropic'} · Key: …${userKey.slice(-4)}`));
+            `Connected · "${txt.slice(0,25)}" · Direct Anthropic API ✓ · Key: …${userKey.slice(-4)}`));
         }
       } catch(e) {
         results.push(row('Claude API', 'fail',
