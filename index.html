@@ -1577,16 +1577,45 @@ document.addEventListener('input', function(e) {
 // CLAUDE API — direct browser call
 // ═══════════════════════════════
 async function callClaudeAPI(body) {
-  // Direct Anthropic API — supports browser CORS natively
-  // Key stored in app settings (Sync → Anthropic API Key)
-  const userKey = D.settings && D.settings.anthropicKey;
+  // Calls Claude via Cloudflare AI Gateway (token auth) if CF Account ID is set,
+  // otherwise falls back to direct Anthropic API with key.
+  const userKey     = D.settings && D.settings.anthropicKey;
+  const cfAccountId = D.settings && D.settings.cfAccountId;
 
   if (!userKey) {
-    throw new Error('No API key. Add your Anthropic API key in Sync → Profile.');
+    throw new Error('No API key. Add your key in Sync → Anthropic API Key.');
   }
 
-  return fetch('https://api.anthropic.com/v1/messages', {
+  if (cfAccountId) {
+    // Gateway URL — token goes in Authorization header, no x-api-key needed
+    const gatewayUrl = `https://gateway.ai.cloudflare.com/v1/${cfAccountId}/quant-health/anthropic/v1/messages`;
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 12000);
+    try {
+      const resp = await fetch(gatewayUrl, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userKey}`,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify(body)
+      });
+      clearTimeout(t);
+      return resp;
+    } catch(e) {
+      clearTimeout(t);
+      // Gateway failed — fall through to direct API
+    }
+  }
+
+  // Direct Anthropic API fallback (works on desktop)
+  const controller2 = new AbortController();
+  const t2 = setTimeout(() => controller2.abort(), 12000);
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
+    signal: controller2.signal,
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': userKey,
@@ -1594,6 +1623,8 @@ async function callClaudeAPI(body) {
     },
     body: JSON.stringify(body)
   });
+  clearTimeout(t2);
+  return resp;
 }
 
 // ═══════════════════════════════
@@ -3192,8 +3223,12 @@ async function runSystemCheck() {
 
   // ── 3. Claude API diagnostic ──
   {
-    const userKey = D.settings && D.settings.anthropicKey;
-    const testUrl = 'https://api.anthropic.com/v1/messages';
+    const userKey     = D.settings && D.settings.anthropicKey;
+    const cfAccountId = D.settings && D.settings.cfAccountId;
+    const testUrl = cfAccountId
+      ? `https://gateway.ai.cloudflare.com/v1/${cfAccountId}/quant-health/anthropic/v1/messages`
+      : 'https://api.anthropic.com/v1/messages';
+    const isGateway = !!cfAccountId;
 
     if (!userKey) {
       results.push(row('Claude API', 'fail',
@@ -3201,15 +3236,14 @@ async function runSystemCheck() {
     } else {
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000);
+        const timeout = setTimeout(() => controller.abort(), 10000);
+        const authHeaders = isGateway
+          ? { 'Content-Type': 'application/json', 'Authorization': `Bearer ${userKey}`, 'anthropic-version': '2023-06-01' }
+          : { 'Content-Type': 'application/json', 'x-api-key': userKey, 'anthropic-version': '2023-06-01' };
         const resp = await fetch(testUrl, {
           method: 'POST',
           signal: controller.signal,
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': userKey,
-            'anthropic-version': '2023-06-01'
-          },
+          headers: authHeaders,
           body: JSON.stringify({
             model: 'claude-sonnet-4-20250514',
             max_tokens: 20,
@@ -3227,7 +3261,7 @@ async function runSystemCheck() {
         } else {
           const txt = data.content?.[0]?.text || '';
           results.push(row('Claude API', 'pass',
-            `Connected · "${txt.slice(0,25)}" · Direct Anthropic API ✓ · Key: …${userKey.slice(-4)}`));
+            `Connected · "${txt.slice(0,25)}" · ${isGateway ? "Cloudflare Gateway ✓" : "Direct Anthropic ✓"} · Key: …${userKey.slice(-4)}`));
         }
       } catch(e) {
         const errMsg = e.name==='AbortError' ? 'Timed out after 8s — check mobile data connection' : e.message;
