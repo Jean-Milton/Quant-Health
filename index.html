@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="QuantHealth">
 <meta name="theme-color" content="#06080b">
-<title>QuantHealth v2.5</title>
+<title>QuantHealth v2.6</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
@@ -110,8 +110,15 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 
 .form-group{display:flex;flex-direction:column;gap:0.35rem;margin-bottom:0.65rem}
 .form-label{font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted)}
-.form-input{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:0.65rem 0.85rem;color:var(--text);font-family:var(--mono);font-size:0.88rem;width:100%;transition:border-color 0.15s;-webkit-appearance:none}
+.form-input{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:0.65rem 0.85rem;color:var(--text);font-family:var(--mono);font-size:0.88rem;width:100%;transition:border-color 0.15s,color 0.15s;-webkit-appearance:none}
 .form-input:focus{outline:none;border-color:var(--accent)}
+.form-input.carried{color:var(--muted);border-style:dashed;border-color:var(--border)}
+.form-input.carried:focus{color:var(--text);border-style:solid;border-color:var(--accent)}
+.carry-meta{font-size:0.6rem;color:var(--muted);margin-top:0.2rem;font-style:italic;letter-spacing:0.02em;display:flex;align-items:center;gap:0.3rem;line-height:1.3;transition:opacity 0.2s}
+.carry-meta.hidden{opacity:0;height:0;overflow:hidden;margin:0}
+.carry-meta.stale{color:var(--amber)}
+.carry-meta-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.carry-meta.stale .carry-meta-dot{background:var(--amber)}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem}
 
 .pain-inputs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;margin-bottom:0.65rem}
@@ -377,7 +384,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
 <header class="app-header">
   <div>
-    <div class="logo">Quant<span>Health</span><sub>v2.5</sub></div>
+    <div class="logo">Quant<span>Health</span><sub>v2.6</sub></div>
   </div>
   <div class="header-right">
     <div class="date-chip" id="headerDate"></div>
@@ -836,12 +843,12 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   </div>
 
   <div class="card" style="border-color:rgba(255,179,64,0.2);background:rgba(255,179,64,0.03)">
-    <div class="card-title" style="color:var(--amber)">Build Notes — v2.5</div>
+    <div class="card-title" style="color:var(--amber)">Build Notes — v2.6</div>
     <div style="font-size:0.72rem;color:var(--muted2);line-height:1.7">
-      <strong style="color:var(--text)">New in v2.5:</strong> Food log on Today and Check-In — type freely ("steak, broccoli, glass of red"), parser scores it for inflammation, plant diversity, and organ load. 250+ food lexicon built in. Tap any food to adjust portion or see the score breakdown. Tap unknown ⚠ words to teach the system. Recent foods chip row for quick re-tapping. New text size toggle (Compact/Normal/Large) on this page. Brighter colors and bigger default text for readability.<br><br>
-      <strong style="color:var(--text)">v2.4:</strong> Hydration (L or glasses) and alcohol drinks. Body composition in Weekly Benchmark.<br><br>
+      <strong style="color:var(--text)">New in v2.6:</strong> Smart carry-over on Check-In. Each numeric field pre-fills with your last logged value in dim text and shows "↻ from yesterday" or "↻ from Apr 14" below it. Touch the field and it goes bright; leave it carried and it won't save (so you don't accidentally re-log stale values). Stale values (7+ days old) get an amber warning dot.<br><br>
+      <strong style="color:var(--text)">v2.5:</strong> Food log with 250+ food lexicon, inflammation/gut/organ scoring, portion adjust, teach-unknown. Brighter colors, bigger default text, Compact/Normal/Large toggle on Sync.<br><br>
+      <strong style="color:var(--text)">v2.4:</strong> Hydration & alcohol. Body composition in Weekly Benchmark.<br><br>
       <strong style="color:var(--text)">v2.3:</strong> Multi-activity per day. Felt 1–5 scale. Long-press to delete with undo.<br><br>
-      <strong style="color:var(--text)">v2.2:</strong> Date picker on Check-In. Editable spreadsheet view in History.<br><br>
       <strong style="color:var(--text)">Stable Core:</strong> Zero external API calls. All data stays on this device.
     </div>
   </div>
@@ -1140,7 +1147,7 @@ const LEX_INDEX = (() => {
 // ═══════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════
-const STORE = 'quanthealth_v25';
+const STORE = 'quanthealth_v26';
 const PROGRAM_START = new Date('2026-04-21');
 const VAC_START = new Date('2026-06-28');
 const VAC_END = new Date('2026-07-10');
@@ -1332,6 +1339,12 @@ let D = (() => {
   try {
     const stored = JSON.parse(localStorage.getItem(STORE));
     if (stored) return migrate(stored);
+    // Try migrating from v2.5
+    const v25 = JSON.parse(localStorage.getItem('quanthealth_v25'));
+    if (v25 && v25.entries) {
+      console.log('Migrating from v2.5');
+      return migrate(v25);
+    }
     // Try migrating from v2.4
     const v24 = JSON.parse(localStorage.getItem('quanthealth_v24'));
     if (v24 && v24.entries) {
@@ -1892,10 +1905,19 @@ function toastWithUndo(msg, onUndo) {
 }
 
 function saveCheckin() {
-  const get = id => parseFloat(document.getElementById(id).value) || null;
+  // Returns null if the field is still in carried (untouched) state, so we don't
+  // accidentally save stale carried-over values as if they were today's reading.
+  const get = id => {
+    const el = document.getElementById(id);
+    if (!el) return null;
+    if (el.classList.contains('carried')) return null;
+    return parseFloat(el.value) || null;
+  };
   const geti = id => parseInt(document.getElementById(id).value) || 1;
-  const tt = parseFloat(document.getElementById('inTouchToes').value);
-  const sr = parseFloat(document.getElementById('inShoulderReach').value);
+  const ttEl = document.getElementById('inTouchToes');
+  const srEl = document.getElementById('inShoulderReach');
+  const tt = ttEl?.classList.contains('carried') ? NaN : parseFloat(ttEl?.value);
+  const sr = srEl?.classList.contains('carried') ? NaN : parseFloat(srEl?.value);
 
   const hr = get('inHR'), weight = get('inWeight');
   const calIn = get('inCalIn'), calOut = get('inCalOut');
@@ -1903,12 +1925,19 @@ function saveCheckin() {
   const entryDate = S.entryDate || todayISO();
   const existing = D.entries.find(e=>e.date===entryDate);
 
-  if (!hr && !weight && !calIn && !existing?.activities?.length) {
+  // Check if user has touched ANY field — including carry-cleared, sleep, flex, drinks
+  const touchedAny = Object.keys(CARRY_FIELDS).some(id => {
+    const el = document.getElementById(id);
+    return el && el.value !== '' && !el.classList.contains('carried');
+  }) || S.sleep != null || S.flex != null || S.drinks > 0 || existing?.activities?.length;
+
+  if (!touchedAny) {
     toast('⚠ Enter at least one value or add an activity');
     return;
   }
 
-  const waterRaw = document.getElementById('inWater').value;
+  const waterEl = document.getElementById('inWater');
+  const waterRaw = waterEl?.classList.contains('carried') ? '' : waterEl?.value;
   const waterL = waterToLiters(waterRaw, S.waterUnit);
 
   const entry = existing || {};
@@ -1937,6 +1966,7 @@ function saveCheckin() {
   save();
   S.entryDate = todayISO();
   clearCheckin();
+  clearCarryOver();
   toast(existing ? '✓ Entry updated' : '✓ Entry saved');
   setTimeout(()=>showPage('today',document.querySelector('.nav-item')),700);
 }
@@ -2000,6 +2030,9 @@ function prefillFromExisting(date) {
 
   if (isPast) dateEl.classList.add('past'); else dateEl.classList.remove('past');
 
+  // Always clear carry-over state from any previous render
+  clearCarryOver();
+
   if (existing) {
     warn.style.display = 'block';
     warn.textContent = isPast ? `✏️ Editing ${formatNiceDate(date)} — values pre-filled below` : '✏️ Editing today\'s entry — values pre-filled below';
@@ -2034,10 +2067,14 @@ function prefillFromExisting(date) {
     });
     if (existing.sleep) setSleep(existing.sleep);
     if (existing.flex) setFlex(existing.flex);
+    // For fields that exist for THIS entry but are empty, still try carry-over
+    applyCarryOver(date, existing);
   } else {
     warn.style.display = isPast ? 'block' : 'none';
     if (isPast) warn.textContent = `📝 New entry for ${formatNiceDate(date)} — fill in what you remember`;
     clearCheckin();
+    // Carry over last known values for new entries
+    applyCarryOver(date, null);
   }
 
   renderActivitiesPanel();
@@ -2048,6 +2085,98 @@ function prefillFromExisting(date) {
   if (body) body.classList.remove('open');
   if (toggle) toggle.textContent = '+ Add';
   clearActivityForm();
+}
+
+// ═══════════════════════════════
+// CARRY-OVER LAST KNOWN VALUES
+// ═══════════════════════════════
+// Map of input ID → entry field name
+const CARRY_FIELDS = {
+  'inHR':            { field:'hr',            label:'HR' },
+  'inWeight':        { field:'weight',        label:'Weight' },
+  'inVO2':           { field:'vo2',           label:'VO2' },
+  'inStrava':        { field:'strava',        label:'Strava' },
+  'inCalIn':         { field:'calIn',         label:'Cal In' },
+  'inCalOut':        { field:'calOut',        label:'Cal Out' },
+  'inProtein':       { field:'protein',       label:'Protein' },
+  'inCarbs':         { field:'carbs',         label:'Carbs' },
+  'inWater':         { field:'water',         label:'Water', xform: v => litersToDisplay(v, S.waterUnit) },
+  'inTouchToes':     { field:'touchToes',     label:'Touch toes' },
+  'inShoulderReach': { field:'shoulderReach', label:'Shoulder reach' },
+  'inBodyFat':       { field:'bodyFat',       label:'Body fat' },
+  'inWaist':         { field:'waist',         label:'Waist' },
+  'inHips':          { field:'hips',          label:'Hips' },
+  'inChest':         { field:'chest',         label:'Chest' },
+  'inThigh':         { field:'thigh',         label:'Thigh' },
+  'inBicep':         { field:'bicep',         label:'Bicep' }
+};
+
+function findLastKnown(field, beforeDate) {
+  // Walk entries backwards (sorted ascending), find the most recent non-null value
+  // strictly before `beforeDate` (so editing today doesn't carry from today)
+  for (let i = D.entries.length - 1; i >= 0; i--) {
+    const e = D.entries[i];
+    if (e.date >= beforeDate) continue;
+    if (e[field] != null && e[field] !== '') {
+      return { value: e[field], date: e.date };
+    }
+  }
+  return null;
+}
+
+function applyCarryOver(date, existing) {
+  Object.entries(CARRY_FIELDS).forEach(([inputId, cfg]) => {
+    const el = document.getElementById(inputId);
+    if (!el) return;
+    // Skip if field already has a value (either typed or pre-filled from existing)
+    if (existing && existing[cfg.field] != null && existing[cfg.field] !== '') return;
+    if (el.value && el.value !== '') return;
+    // Find last known
+    const last = findLastKnown(cfg.field, date);
+    if (!last) return;
+    const display = cfg.xform ? cfg.xform(last.value) : last.value;
+    el.value = display;
+    el.classList.add('carried');
+    // Add carry-meta label below
+    addCarryMeta(el, last.date, date);
+    // Wire one-time clear on focus/input
+    const clear = () => {
+      el.classList.remove('carried');
+      const meta = el.parentElement?.querySelector('.carry-meta');
+      if (meta) meta.classList.add('hidden');
+      el.removeEventListener('focus', clear);
+      el.removeEventListener('input', clear);
+    };
+    el.addEventListener('focus', clear);
+    el.addEventListener('input', clear);
+  });
+}
+
+function addCarryMeta(inputEl, sourceDate, currentDate) {
+  // Remove any existing meta
+  const existing = inputEl.parentElement?.querySelector('.carry-meta');
+  if (existing) existing.remove();
+  // Compute "from X" string
+  const dayDiff = Math.round((new Date(currentDate+'T12:00:00') - new Date(sourceDate+'T12:00:00')) / (24*60*60*1000));
+  let label;
+  if (dayDiff === 1) label = 'yesterday';
+  else if (dayDiff < 7) label = `${dayDiff} days ago`;
+  else if (dayDiff < 14) label = `${Math.floor(dayDiff/7)}w ago`;
+  else label = formatNiceDate(sourceDate);
+  const stale = dayDiff >= 7;
+  const meta = document.createElement('div');
+  meta.className = 'carry-meta' + (stale ? ' stale' : '');
+  meta.innerHTML = `<span class="carry-meta-dot"></span>↻ from ${label}`;
+  inputEl.parentElement.appendChild(meta);
+}
+
+function clearCarryOver() {
+  Object.keys(CARRY_FIELDS).forEach(inputId => {
+    const el = document.getElementById(inputId);
+    if (!el) return;
+    el.classList.remove('carried');
+  });
+  document.querySelectorAll('.carry-meta').forEach(m => m.remove());
 }
 
 function setVal(id, val) {
