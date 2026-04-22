@@ -3200,8 +3200,11 @@ async function runSystemCheck() {
         'No Anthropic API key set — add it in the Anthropic API Key field below.'));
     } else {
       try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
         const resp = await fetch(testUrl, {
           method: 'POST',
+          signal: controller.signal,
           headers: {
             'Content-Type': 'application/json',
             'x-api-key': userKey,
@@ -3213,6 +3216,7 @@ async function runSystemCheck() {
             messages: [{ role: 'user', content: 'Reply PONG' }]
           })
         });
+        clearTimeout(timeout);
         const raw = await resp.text();
         let data;
         try { data = JSON.parse(raw); } catch(pe) { throw new Error('Bad JSON: ' + raw.slice(0,100)); }
@@ -3226,22 +3230,24 @@ async function runSystemCheck() {
             `Connected · "${txt.slice(0,25)}" · Direct Anthropic API ✓ · Key: …${userKey.slice(-4)}`));
         }
       } catch(e) {
+        const errMsg = e.name==='AbortError' ? 'Timed out after 8s — check mobile data connection' : e.message;
         results.push(row('Claude API', 'fail',
-          `Fetch error: ${e.message}`
-          + ` | URL: ${testUrl.slice(0,65)}…`
-          + ` | Key: ${userKey ? '…'+userKey.slice(-4) : 'not set'}`
-          + ` | CF ID: ${cfId ? cfId.slice(0,8)+'…' : 'not set'}`));
+          `${errMsg} | URL: ${testUrl.slice(0,55)}… | Key: ${userKey ? '…'+userKey.slice(-4) : 'not set'}`));
       }
     }
   }
 
   // ── 4. Netlify proxy — Strava auth function ──
   try {
+    const sc = new AbortController();
+    const st = setTimeout(() => sc.abort(), 6000);
     const resp = await fetch('https://strava-auth.jcmjtamblyn.workers.dev', {
       method: 'POST',
+      signal: sc.signal,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'test' })
     });
+    clearTimeout(st);
     if (resp.status === 404) {
       results.push(row('Strava Auth Function (https://strava-auth.jcmjtamblyn.workers.dev)', 'fail',
         'Function not found (404). Check strava-auth.js is in netlify/functions/ in GitHub.'));
