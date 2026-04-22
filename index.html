@@ -1577,22 +1577,15 @@ document.addEventListener('input', function(e) {
 // CLAUDE API — direct browser call
 // ═══════════════════════════════
 async function callClaudeAPI(body) {
-  // Cloudflare AI Gateway — no outbound restrictions, free, built for this
-  // Falls back to direct Anthropic API if gateway not configured
+  // Direct Anthropic API — supports browser CORS natively
+  // Key stored in app settings (Sync → Anthropic API Key)
   const userKey = D.settings && D.settings.anthropicKey;
-  const cfAccountId = D.settings && D.settings.cfAccountId;
-  const gatewayName = 'quant-health';
 
   if (!userKey) {
     throw new Error('No API key. Add your Anthropic API key in Sync → Profile.');
   }
 
-  // Use Cloudflare AI Gateway if account ID is set, otherwise direct API
-  const url = cfAccountId
-    ? `https://gateway.ai.cloudflare.com/v1/${cfAccountId}/${gatewayName}/anthropic/v1/messages`
-    : 'https://api.anthropic.com/v1/messages';
-
-  return fetch(url, {
+  return fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
