@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="QuantHealth">
 <meta name="theme-color" content="#06080b">
-<title>QuantHealth v2.2</title>
+<title>QuantHealth v2.3</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
@@ -230,6 +230,43 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 .table-help{font-size:0.6rem;color:var(--muted);text-align:center;line-height:1.6;padding:0.5rem 0;margin-bottom:0.5rem;letter-spacing:0.03em}
 .add-row-btn{width:100%;padding:0.7rem;background:var(--surface);border:1px dashed var(--border2);border-radius:10px;color:var(--accent);font-family:var(--mono);font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;margin-bottom:0.65rem;transition:all 0.15s}
 .add-row-btn:hover{border-color:var(--accent);background:var(--accent-dim)}
+
+/* ACTIVITIES PANEL */
+.activities-panel{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:0.75rem;margin-bottom:0.65rem}
+.activities-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border)}
+.activities-title{font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted2)}
+.activities-total{font-family:var(--display);font-size:0.7rem;font-weight:700;color:var(--accent)}
+.activity-row{display:flex;gap:0.6rem;padding:0.55rem 0;border-bottom:1px solid var(--border);position:relative}
+.activity-row:last-child{border-bottom:none;padding-bottom:0.2rem}
+.activity-icon{font-size:1.1rem;flex-shrink:0;width:24px;text-align:center;padding-top:0.05rem}
+.activity-info{flex:1;min-width:0}
+.activity-name{font-size:0.78rem;color:var(--text);font-weight:500;line-height:1.3;margin-bottom:0.15rem}
+.activity-meta{font-size:0.62rem;color:var(--muted2);line-height:1.5}
+.activity-notes{font-size:0.62rem;color:var(--muted);font-style:italic;margin-top:0.2rem;line-height:1.4}
+.activity-source{display:inline-block;font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.1rem 0.35rem;border-radius:3px;background:rgba(0,200,255,0.1);color:var(--accent);margin-left:0.4rem;vertical-align:middle}
+.activity-del{position:relative;width:32px;height:32px;border-radius:8px;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:0.95rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:border-color 0.15s,color 0.15s;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.activity-del:active{background:var(--surface3)}
+.activity-del.holding{border-color:var(--red);color:var(--red)}
+.activity-del-progress{position:absolute;inset:0;border-radius:8px;background:conic-gradient(var(--red) calc(var(--p,0)*1%), transparent 0);opacity:0.3;pointer-events:none;transition:opacity 0.1s}
+.activities-empty{font-size:0.65rem;color:var(--muted);text-align:center;padding:0.65rem 0;font-style:italic}
+
+/* ADD ACTIVITY MINI-FORM */
+.add-activity-form{background:var(--surface);border:1px dashed var(--border2);border-radius:10px;padding:0.75rem;margin-bottom:0.65rem}
+.add-activity-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem}
+.add-activity-title{font-family:var(--display);font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2)}
+.add-activity-toggle{background:none;border:none;color:var(--accent);font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;padding:0.3rem 0.55rem;border-radius:6px;border:1px solid rgba(0,200,255,0.2)}
+.add-activity-toggle:hover{background:var(--accent-dim)}
+.add-activity-body{display:none;padding-top:0.5rem;border-top:1px solid var(--border)}
+.add-activity-body.open{display:block;animation:fadeUp 0.15s ease}
+.felt-btns{display:flex;gap:0.3rem;margin-bottom:0.5rem}
+.felt-btn{flex:1;padding:0.45rem 0.2rem;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--mono);font-size:0.68rem;cursor:pointer;text-align:center;transition:all 0.15s}
+.felt-btn.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+.felt-btn .felt-emoji{display:block;font-size:0.85rem;margin-bottom:0.1rem}
+.felt-btn .felt-num{font-family:var(--display);font-weight:700}
+
+/* UNDO TOAST */
+.toast.with-action{padding:0.55rem 0.5rem 0.55rem 1.1rem;display:flex;align-items:center;gap:0.5rem}
+.toast-undo{background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.25);color:#000;font-family:var(--mono);font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.25rem 0.65rem;border-radius:14px;cursor:pointer;font-weight:700}
 </style>
 </head>
 <body>
@@ -237,7 +274,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
 <header class="app-header">
   <div>
-    <div class="logo">Quant<span>Health</span><sub>v2.2</sub></div>
+    <div class="logo">Quant<span>Health</span><sub>v2.3</sub></div>
   </div>
   <div class="header-right">
     <div class="date-chip" id="headerDate"></div>
@@ -409,22 +446,48 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
     </div>
 
     <hr class="div">
-    <div class="card-title">Today's Workout</div>
-    <div class="form-group">
-      <label class="form-label">Type</label>
-      <div class="chip-btns" id="workoutChips">
-        <button class="chip" onclick="setWorkout('MTB')">🚵 MTB</button>
-        <button class="chip" onclick="setWorkout('Rollers')">🚴 Rollers</button>
-        <button class="chip" onclick="setWorkout('Strength')">🏋️ Strength</button>
-        <button class="chip" onclick="setWorkout('Recovery')">🌿 Recovery</button>
-        <button class="chip" onclick="setWorkout('Rest')">😴 Rest</button>
+    <div class="card-title">Activities</div>
+    <div id="activitiesPanel"></div>
+
+    <div class="add-activity-form">
+      <div class="add-activity-header">
+        <div class="add-activity-title">Add Activity</div>
+        <button class="add-activity-toggle" id="addActivityToggle" onclick="toggleAddActivity()">+ Add</button>
+      </div>
+      <div class="add-activity-body" id="addActivityBody">
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <div class="chip-btns" id="actTypeChips">
+            <button class="chip" onclick="setActType('MTB')">🚵 MTB</button>
+            <button class="chip" onclick="setActType('Rollers')">🚴 Rollers</button>
+            <button class="chip" onclick="setActType('Strength')">🏋️ Strength</button>
+            <button class="chip" onclick="setActType('Recovery')">🌿 Recovery</button>
+            <button class="chip" onclick="setActType('Walk')">🚶 Walk</button>
+            <button class="chip" onclick="setActType('Rest')">😴 Rest</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Name (optional)</label>
+          <input type="text" class="form-input" id="actName" placeholder="e.g. Hydrocut loop, Strength A">
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Duration (min)</label><input type="number" class="form-input" id="actDuration" placeholder="60" min="0" max="300"></div>
+          <div class="form-group"><label class="form-label">Avg HR (bpm)</label><input type="number" class="form-input" id="actHR" placeholder="142"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">How did it feel? (1=brutal · 5=effortless)</label>
+          <div class="felt-btns" id="feltBtns">
+            <button class="felt-btn" data-felt="1" onclick="setFelt(1)"><span class="felt-emoji">😵</span><span class="felt-num">1</span></button>
+            <button class="felt-btn" data-felt="2" onclick="setFelt(2)"><span class="felt-emoji">😓</span><span class="felt-num">2</span></button>
+            <button class="felt-btn" data-felt="3" onclick="setFelt(3)"><span class="felt-emoji">😐</span><span class="felt-num">3</span></button>
+            <button class="felt-btn" data-felt="4" onclick="setFelt(4)"><span class="felt-emoji">💪</span><span class="felt-num">4</span></button>
+            <button class="felt-btn" data-felt="5" onclick="setFelt(5)"><span class="felt-emoji">🚀</span><span class="felt-num">5</span></button>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Notes</label><input type="text" class="form-input" id="actNotes" placeholder="What stood out?"></div>
+        <button class="btn-primary" onclick="saveActivity()" style="margin-top:0.2rem">Save Activity</button>
       </div>
     </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Duration (min)</label><input type="number" class="form-input" id="inDuration" placeholder="60" min="0" max="180"></div>
-      <div class="form-group"><label class="form-label">Avg HR (bpm)</label><input type="number" class="form-input" id="inWorkoutHR" placeholder="142"></div>
-    </div>
-    <div class="form-group"><label class="form-label">Notes</label><input type="text" class="form-input" id="inNotes" placeholder="How did it feel?"></div>
 
     <hr class="div">
     <div class="card-title">Weekly Benchmark <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(test once a week)</span></div>
@@ -596,9 +659,10 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   </div>
 
   <div class="card" style="border-color:rgba(255,179,64,0.2);background:rgba(255,179,64,0.03)">
-    <div class="card-title" style="color:var(--amber)">Build Notes — v2.2</div>
+    <div class="card-title" style="color:var(--amber)">Build Notes — v2.3</div>
     <div style="font-size:0.72rem;color:var(--muted2);line-height:1.7">
-      <strong style="color:var(--text)">New in v2.2:</strong> Date picker on Check-In to catch up missed days. Editable spreadsheet view in History — tap any cell to edit, tap a card to jump to a full edit form.<br><br>
+      <strong style="color:var(--text)">New in v2.3:</strong> Multiple activities per day. Inline "+ Add" form on Check-In with type, duration, HR, "felt" 1–5 scale, and notes. Long-press the × to delete (with undo). Program "Mark Done" auto-logs an activity to today.<br><br>
+      <strong style="color:var(--text)">v2.2:</strong> Date picker on Check-In. Editable spreadsheet view in History.<br><br>
       <strong style="color:var(--text)">Stable Core:</strong> Zero external API calls. All data stays on this device.
     </div>
   </div>
@@ -636,7 +700,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 // ═══════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════
-const STORE = 'quanthealth_v22';
+const STORE = 'quanthealth_v23';
 const PROGRAM_START = new Date('2026-04-21');
 const VAC_START = new Date('2026-06-28');
 const VAC_END = new Date('2026-07-10');
@@ -787,20 +851,51 @@ const PROGRAM = {
 // DATA
 // ═══════════════════════════════
 let D = (() => {
+  const migrate = (data) => {
+    if (!data) return data;
+    if (!data.entries) data.entries = [];
+    // Convert legacy single-workout entries into activities[]
+    data.entries.forEach(e => {
+      if (!e.activities) {
+        e.activities = [];
+        if (e.workout || e.duration || e.workoutHR) {
+          e.activities.push({
+            id: 'mig_' + e.date + '_' + Math.random().toString(36).slice(2,8),
+            type: e.workout || 'Other',
+            name: '',
+            duration: e.duration || null,
+            avgHR: e.workoutHR || null,
+            felt: null,
+            notes: e.notes || '',
+            source: 'manual'
+          });
+        }
+      }
+    });
+    if (!data.completedWorkouts) data.completedWorkouts = {};
+    return data;
+  };
+
   try {
     const stored = JSON.parse(localStorage.getItem(STORE));
-    if (stored) return stored;
+    if (stored) return migrate(stored);
+    // Try migrating from v2.2
+    const v22 = JSON.parse(localStorage.getItem('quanthealth_v22'));
+    if (v22 && v22.entries) {
+      console.log('Migrating from v2.2');
+      return migrate(v22);
+    }
     // Try migrating from v2.1
     const v21 = JSON.parse(localStorage.getItem('quanthealth_v21'));
     if (v21 && v21.entries) {
       console.log('Migrating from v2.1');
-      return v21;
+      return migrate(v21);
     }
     // Try migrating from v2
     const old = JSON.parse(localStorage.getItem('quanthealth_v2'));
     if (old && old.entries) {
       console.log('Migrating from v2');
-      return { entries:old.entries||[], trail:old.trail||'unknown', trailDate:old.trailDate||null, completedWorkouts:{}, profile:old.profile };
+      return migrate({ entries:old.entries||[], trail:old.trail||'unknown', trailDate:old.trailDate||null, completedWorkouts:{}, profile:old.profile });
     }
   } catch(e) {}
   return { entries:[], trail:'unknown', trailDate:null, completedWorkouts:{}, profile:null };
@@ -808,7 +903,8 @@ let D = (() => {
 
 function save() { localStorage.setItem(STORE, JSON.stringify(D)); }
 
-let S = { sleep:null, flex:null, workout:null, programDay:null, entryDate:null, historyView:'cards' };
+let S = { sleep:null, flex:null, programDay:null, entryDate:null, historyView:'cards',
+          actType:null, actFelt:null, addActivityOpen:false, undoState:null };
 let charts = {};
 
 // ═══════════════════════════════
@@ -1016,9 +1112,240 @@ function setFlex(v) {
   S.flex = v;
   document.querySelectorAll('[data-flex]').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.flex)===v));
 }
-function setWorkout(t) {
-  S.workout = t;
-  document.querySelectorAll('#workoutChips .chip').forEach(b=>b.classList.toggle('active',b.textContent.includes(t)));
+
+// ═══════════════════════════════
+// ACTIVITY MINI-FORM
+// ═══════════════════════════════
+const ACT_ICONS = {MTB:'🚵',Rollers:'🚴',Strength:'🏋️',Recovery:'🌿',Walk:'🚶',Rest:'😴',Other:'📅'};
+
+function setActType(t) {
+  S.actType = t;
+  document.querySelectorAll('#actTypeChips .chip').forEach(b=>b.classList.toggle('active', b.textContent.includes(t)));
+}
+
+function setFelt(v) {
+  S.actFelt = v;
+  document.querySelectorAll('[data-felt]').forEach(b=>b.classList.toggle('active', parseInt(b.dataset.felt)===v));
+}
+
+function toggleAddActivity() {
+  S.addActivityOpen = !S.addActivityOpen;
+  const body = document.getElementById('addActivityBody');
+  const toggle = document.getElementById('addActivityToggle');
+  if (S.addActivityOpen) {
+    body.classList.add('open');
+    toggle.textContent = '× Cancel';
+  } else {
+    body.classList.remove('open');
+    toggle.textContent = '+ Add';
+    clearActivityForm();
+  }
+}
+
+function clearActivityForm() {
+  ['actName','actDuration','actHR','actNotes'].forEach(id=>{
+    const el = document.getElementById(id); if (el) el.value='';
+  });
+  S.actType = null; S.actFelt = null;
+  document.querySelectorAll('#actTypeChips .chip').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('[data-felt]').forEach(b=>b.classList.remove('active'));
+}
+
+function saveActivity() {
+  if (!S.actType) { toast('⚠ Pick a type first'); return; }
+  const date = S.entryDate || todayISO();
+  // Ensure an entry exists for this date (so activities have somewhere to live)
+  let entry = D.entries.find(e=>e.date===date);
+  if (!entry) {
+    entry = { date, hr:null, weight:null, vo2:null, strava:null, calIn:null, calOut:null, calBal:null,
+      protein:null, carbs:null, sleep:null, flex:null,
+      elbowPain:1, shoulderPain:1, kneePain:1, trail: (date===todayISO()?D.trail:'unknown'),
+      touchToes:null, shoulderReach:null, activities:[] };
+    D.entries.push(entry);
+    D.entries.sort((a,b)=>a.date.localeCompare(b.date));
+  }
+  if (!entry.activities) entry.activities = [];
+
+  const dur = parseFloat(document.getElementById('actDuration').value) || null;
+  const hr = parseFloat(document.getElementById('actHR').value) || null;
+  const name = document.getElementById('actName').value.trim();
+  const notes = document.getElementById('actNotes').value.trim();
+
+  entry.activities.push({
+    id: 'a_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    type: S.actType,
+    name: name,
+    duration: dur,
+    avgHR: hr,
+    felt: S.actFelt,
+    notes: notes,
+    source: 'manual'
+  });
+
+  save();
+  clearActivityForm();
+  S.addActivityOpen = false;
+  document.getElementById('addActivityBody').classList.remove('open');
+  document.getElementById('addActivityToggle').textContent = '+ Add';
+  renderActivitiesPanel();
+  toast('✓ Activity added');
+}
+
+function deleteActivity(date, activityId) {
+  const entry = D.entries.find(e=>e.date===date);
+  if (!entry || !entry.activities) return;
+  const idx = entry.activities.findIndex(a=>a.id===activityId);
+  if (idx<0) return;
+
+  // Stash for undo
+  const removed = entry.activities[idx];
+  S.undoState = { date, activity: removed, index: idx };
+  entry.activities.splice(idx,1);
+
+  // If this activity was auto-logged from Program, also clear that completion
+  if (removed.source === 'program' && removed.programWeekKey != null && removed.programDayIdx != null) {
+    if (D.completedWorkouts[removed.programWeekKey]) {
+      delete D.completedWorkouts[removed.programWeekKey][removed.programDayIdx];
+    }
+  }
+
+  save();
+  renderActivitiesPanel();
+  toastWithUndo('Activity deleted', undoDeleteActivity);
+}
+
+function undoDeleteActivity() {
+  if (!S.undoState) return;
+  const { date, activity, index } = S.undoState;
+  const entry = D.entries.find(e=>e.date===date);
+  if (!entry) return;
+  if (!entry.activities) entry.activities = [];
+  entry.activities.splice(index, 0, activity);
+  // Restore program completion if this came from there
+  if (activity.source === 'program' && activity.programWeekKey != null && activity.programDayIdx != null) {
+    if (!D.completedWorkouts[activity.programWeekKey]) D.completedWorkouts[activity.programWeekKey] = {};
+    D.completedWorkouts[activity.programWeekKey][activity.programDayIdx] = 'done';
+  }
+  S.undoState = null;
+  save();
+  renderActivitiesPanel();
+  toast('✓ Restored');
+}
+
+// Long-press delete handler
+function attachLongPress(btn, onComplete) {
+  let timer = null, startTime = 0, fired = false;
+  const HOLD_MS = 700;
+  const start = (e) => {
+    fired = false;
+    startTime = Date.now();
+    btn.classList.add('holding');
+    const prog = btn.querySelector('.activity-del-progress');
+    let raf;
+    const tick = () => {
+      const elapsed = Date.now() - startTime;
+      const pct = Math.min(100, (elapsed/HOLD_MS)*100);
+      if (prog) prog.style.setProperty('--p', pct);
+      if (elapsed >= HOLD_MS) {
+        fired = true;
+        cleanup();
+        onComplete();
+      } else {
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    timer = { cancel: () => { cancelAnimationFrame(raf); } };
+  };
+  const cleanup = () => {
+    if (timer) { timer.cancel(); timer = null; }
+    btn.classList.remove('holding');
+    const prog = btn.querySelector('.activity-del-progress');
+    if (prog) prog.style.setProperty('--p', 0);
+  };
+  const cancel = (e) => {
+    if (!fired && timer) {
+      cleanup();
+      // Quick tap = no-op (don't accidentally delete)
+    } else {
+      cleanup();
+    }
+  };
+  btn.addEventListener('mousedown', start);
+  btn.addEventListener('touchstart', (e)=>{e.preventDefault(); start(e);}, {passive:false});
+  btn.addEventListener('mouseup', cancel);
+  btn.addEventListener('mouseleave', cancel);
+  btn.addEventListener('touchend', cancel);
+  btn.addEventListener('touchcancel', cancel);
+}
+
+function renderActivitiesPanel() {
+  const date = S.entryDate || todayISO();
+  const entry = D.entries.find(e=>e.date===date);
+  const acts = entry?.activities || [];
+  const panel = document.getElementById('activitiesPanel');
+  if (!panel) return;
+
+  if (!acts.length) {
+    panel.innerHTML = `<div class="activities-panel"><div class="activities-empty">No activities logged for ${formatNiceDate(date)} yet</div></div>`;
+    return;
+  }
+
+  const totalMin = acts.reduce((s,a)=>s+(a.duration||0),0);
+  let html = `<div class="activities-panel">
+    <div class="activities-header">
+      <div class="activities-title">${date===todayISO()?"Today's":formatNiceDate(date)+"'s"} Activities (${acts.length})</div>
+      <div class="activities-total">${totalMin>0?totalMin+' min':''}</div>
+    </div>`;
+
+  acts.forEach(a=>{
+    const meta = [
+      a.duration ? `${a.duration} min` : null,
+      a.avgHR ? `avg HR ${a.avgHR}` : null,
+      a.felt ? `feel ${a.felt}/5` : null
+    ].filter(Boolean).join(' · ');
+    const displayName = a.name || a.type;
+    html += `<div class="activity-row">
+      <div class="activity-icon">${ACT_ICONS[a.type]||'📅'}</div>
+      <div class="activity-info">
+        <div class="activity-name">${displayName}${a.source==='program'?'<span class="activity-source">Program</span>':''}</div>
+        <div class="activity-meta">${meta||'<span style="color:var(--muted)">no details</span>'}</div>
+        ${a.notes?`<div class="activity-notes">"${a.notes}"</div>`:''}
+      </div>
+      <button class="activity-del" data-act-id="${a.id}" data-date="${date}" title="Long-press to delete">
+        <span class="activity-del-progress"></span>×
+      </button>
+    </div>`;
+  });
+
+  html += '</div>';
+  panel.innerHTML = html;
+
+  // Wire long-press on each delete button
+  panel.querySelectorAll('.activity-del').forEach(btn=>{
+    const aid = btn.dataset.actId;
+    const dt = btn.dataset.date;
+    attachLongPress(btn, ()=>deleteActivity(dt, aid));
+  });
+}
+
+function toastWithUndo(msg, onUndo) {
+  const t = document.getElementById('toast');
+  t.classList.add('with-action');
+  t.innerHTML = `<span>${msg}</span><button class="toast-undo" id="toastUndoBtn">Undo</button>`;
+  t.classList.add('show');
+  const btn = document.getElementById('toastUndoBtn');
+  let timer = setTimeout(()=>{
+    t.classList.remove('show');
+    setTimeout(()=>t.classList.remove('with-action'),300);
+    S.undoState = null;
+  }, 5000);
+  btn.onclick = ()=>{
+    clearTimeout(timer);
+    onUndo();
+    t.classList.remove('show');
+    setTimeout(()=>t.classList.remove('with-action'),300);
+  };
 }
 
 function saveCheckin() {
@@ -1030,43 +1357,46 @@ function saveCheckin() {
   const hr = get('inHR'), weight = get('inWeight');
   const calIn = get('inCalIn'), calOut = get('inCalOut');
 
-  if (!hr && !weight && !calIn) { toast('⚠ Enter at least one value'); return; }
-
   const entryDate = S.entryDate || todayISO();
-  const entry = {
+  const existing = D.entries.find(e=>e.date===entryDate);
+
+  if (!hr && !weight && !calIn && !existing?.activities?.length) {
+    toast('⚠ Enter at least one value or add an activity');
+    return;
+  }
+
+  const entry = existing || {};
+  Object.assign(entry, {
     date: entryDate, hr, weight,
     vo2: get('inVO2'), strava: get('inStrava'),
     calIn, calOut, calBal: (calIn&&calOut)?calIn-calOut:null,
     protein: get('inProtein'), carbs: get('inCarbs'),
     sleep: S.sleep, flex: S.flex,
     elbowPain: geti('sliderElbow'), shoulderPain: geti('sliderShoulder'), kneePain: geti('sliderKnee'),
-    workout: S.workout, duration: get('inDuration'), workoutHR: get('inWorkoutHR'),
-    trail: (entryDate === todayISO()) ? D.trail : (D.entries.find(e=>e.date===entryDate)?.trail || 'unknown'),
-    notes: document.getElementById('inNotes').value.trim(),
-    touchToes: isNaN(tt)?null:tt, shoulderReach: isNaN(sr)?null:sr
-  };
+    trail: (entryDate === todayISO()) ? D.trail : (existing?.trail || 'unknown'),
+    touchToes: isNaN(tt)?null:tt, shoulderReach: isNaN(sr)?null:sr,
+    activities: existing?.activities || []
+  });
 
-  const idx = D.entries.findIndex(e=>e.date===entryDate);
-  const wasEditing = idx >= 0;
-  if (idx>=0) D.entries[idx] = entry; else D.entries.push(entry);
+  if (!existing) D.entries.push(entry);
   D.entries.sort((a,b)=>a.date.localeCompare(b.date));
   save();
-  S.entryDate = todayISO();  // reset to today for next entry
+  S.entryDate = todayISO();
   clearCheckin();
-  toast(wasEditing ? '✓ Entry updated' : '✓ Entry saved');
+  toast(existing ? '✓ Entry updated' : '✓ Entry saved');
   setTimeout(()=>showPage('today',document.querySelector('.nav-item')),700);
 }
 
 function clearCheckin() {
-  ['inHR','inWeight','inVO2','inStrava','inCalIn','inCalOut','inProtein','inCarbs','inDuration','inWorkoutHR','inNotes','inTouchToes','inShoulderReach'].forEach(id=>{
+  ['inHR','inWeight','inVO2','inStrava','inCalIn','inCalOut','inProtein','inCarbs','inTouchToes','inShoulderReach'].forEach(id=>{
     const el = document.getElementById(id); if (el) el.value = '';
   });
   ['sliderElbow','sliderShoulder','sliderKnee'].forEach(id=>{
     const el = document.getElementById(id); if (el) { el.value = 1; updatePainDisplay(id.replace('slider',''),1); }
   });
-  S.sleep = null; S.flex = null; S.workout = null;
+  S.sleep = null; S.flex = null;
   document.querySelectorAll('.rbtn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('#workoutChips .chip').forEach(b=>b.classList.remove('active'));
+  // Note: we don't clear activities here — those are saved separately and persist
 }
 
 // ═══════════════════════════════
@@ -1108,13 +1438,11 @@ function prefillFromExisting(date) {
   const isPast = date < todayISO();
   const dateEl = document.getElementById('entryDate');
 
-  // Highlight past-date editing
   if (isPast) dateEl.classList.add('past'); else dateEl.classList.remove('past');
 
   if (existing) {
     warn.style.display = 'block';
     warn.textContent = isPast ? `✏️ Editing ${formatNiceDate(date)} — values pre-filled below` : '✏️ Editing today\'s entry — values pre-filled below';
-    // Pre-fill all fields
     setVal('inHR', existing.hr);
     setVal('inWeight', existing.weight);
     setVal('inVO2', existing.vo2);
@@ -1123,12 +1451,8 @@ function prefillFromExisting(date) {
     setVal('inCalOut', existing.calOut);
     setVal('inProtein', existing.protein);
     setVal('inCarbs', existing.carbs);
-    setVal('inDuration', existing.duration);
-    setVal('inWorkoutHR', existing.workoutHR);
-    setVal('inNotes', existing.notes);
     setVal('inTouchToes', existing.touchToes);
     setVal('inShoulderReach', existing.shoulderReach);
-    // Pain sliders
     ['Elbow','Shoulder','Knee'].forEach(j=>{
       const v = existing[j.toLowerCase()+'Pain'] || 1;
       document.getElementById('slider'+j).value = v;
@@ -1136,12 +1460,20 @@ function prefillFromExisting(date) {
     });
     if (existing.sleep) setSleep(existing.sleep);
     if (existing.flex) setFlex(existing.flex);
-    if (existing.workout) setWorkout(existing.workout);
   } else {
     warn.style.display = isPast ? 'block' : 'none';
     if (isPast) warn.textContent = `📝 New entry for ${formatNiceDate(date)} — fill in what you remember`;
     clearCheckin();
   }
+
+  renderActivitiesPanel();
+  // Reset add-activity form to closed state
+  S.addActivityOpen = false;
+  const body = document.getElementById('addActivityBody');
+  const toggle = document.getElementById('addActivityToggle');
+  if (body) body.classList.remove('open');
+  if (toggle) toggle.textContent = '+ Add';
+  clearActivityForm();
 }
 
 function setVal(id, val) {
@@ -1210,11 +1542,26 @@ function renderOptimize() {
 
   if (n<5) { document.getElementById('correlationTable').innerHTML = '<div class="empty">Log 5+ days for correlations</div>'; return; }
 
+  // Helper: get primary workout type/HR for an entry from its activities
+  const primaryAct = (e) => {
+    const acts = e.activities || [];
+    if (!acts.length) return { type:null, hr:null, dur:null, felt:null };
+    // Pick the activity with highest duration (or HR if no duration)
+    const sorted = [...acts].sort((a,b)=>(b.duration||0)-(a.duration||0));
+    return { type: sorted[0].type, hr: sorted[0].avgHR, dur: sorted[0].duration, felt: sorted[0].felt };
+  };
+  const totalMin = (e) => (e.activities||[]).reduce((s,a)=>s+(a.duration||0),0);
+  const avgFelt = (e) => {
+    const f = (e.activities||[]).map(a=>a.felt).filter(x=>x!=null);
+    return f.length ? f.reduce((a,b)=>a+b,0)/f.length : null;
+  };
+
   const corrs = [
     {label:'Sleep → Next-day Pain', r: pearson(entries.slice(0,-1).map(e=>e.sleep), entries.slice(1).map(e=>avg([e.elbowPain,e.shoulderPain,e.kneePain]))), note:'Does good sleep reduce pain?'},
     {label:'Cal Balance → Weight Δ', r: pearson(entries.slice(0,-1).map(e=>e.calBal), entries.slice(1).map((e,i)=>entries[i+1]?.weight&&entries[i]?.weight?entries[i+1].weight-entries[i].weight:null)), note:'Calories predict weight change'},
-    {label:'Workout HR → Recovery HR', r: pearson(entries.slice(0,-1).map(e=>e.workoutHR), entries.slice(1).map(e=>e.hr)), note:'Intensity vs resting HR next day'},
-    {label:'Flexibility → Pain Score', r: pearson(entries.map(e=>e.flex), entries.map(e=>avg([e.elbowPain,e.shoulderPain,e.kneePain]))), note:'Flexibility predicts joint pain?'}
+    {label:'Workout HR → Recovery HR', r: pearson(entries.slice(0,-1).map(e=>primaryAct(e).hr), entries.slice(1).map(e=>e.hr)), note:'Intensity vs resting HR next day'},
+    {label:'Flexibility → Pain Score', r: pearson(entries.map(e=>e.flex), entries.map(e=>avg([e.elbowPain,e.shoulderPain,e.kneePain]))), note:'Flexibility predicts joint pain?'},
+    {label:'Felt Score → Pain', r: pearson(entries.map(e=>avgFelt(e)), entries.map(e=>avg([e.elbowPain,e.shoulderPain,e.kneePain]))), note:'How sessions felt vs joint state'}
   ].filter(c=>c.r!==null);
 
   document.getElementById('correlationTable').innerHTML = corrs.length ? corrs.map(c=>{
@@ -1247,15 +1594,26 @@ function renderOptimize() {
 
   document.getElementById('insightsOutput').innerHTML = `<div style="display:flex;flex-wrap:wrap">${insights.map(i=>`<div class="insight-chip ${i.type}">${i.text}</div>`).join('')}</div>`;
 
-  const mtb = entries.filter(e=>e.workout==='MTB');
-  const str = entries.filter(e=>e.workout==='Strength');
-  const rows = [
-    {label:'MTB days logged',val:mtb.length,unit:'sessions'},
-    {label:'Strength days logged',val:str.length,unit:'sessions'},
-    {label:'Avg pain on MTB days',val:mtb.length?avg(mtb.map(e=>avg([e.elbowPain,e.shoulderPain,e.kneePain]))).toFixed(1):null,unit:'/5'},
-    {label:'Avg pain on Strength days',val:str.length?avg(str.map(e=>avg([e.elbowPain,e.shoulderPain,e.kneePain]))).toFixed(1):null,unit:'/5'}
-  ];
-  document.getElementById('sensitivityOutput').innerHTML = rows.filter(r=>r.val!==null).map(r=>`<div class="corr-row"><span class="corr-label">${r.label}</span><span class="corr-val">${r.val} <small style="color:var(--muted)">${r.unit}</small></span></div>`).join('');
+  // Count activity instances across all entries
+  const allActs = entries.flatMap(e=>(e.activities||[]).map(a=>({...a, date:e.date, dayPain:avg([e.elbowPain,e.shoulderPain,e.kneePain])})));
+  const byType = {};
+  allActs.forEach(a=>{
+    if (!byType[a.type]) byType[a.type] = {count:0, painSum:0, painN:0, feltSum:0, feltN:0};
+    byType[a.type].count++;
+    if (a.dayPain!=null) { byType[a.type].painSum+=a.dayPain; byType[a.type].painN++; }
+    if (a.felt!=null) { byType[a.type].feltSum+=a.felt; byType[a.type].feltN++; }
+  });
+
+  const rows = [];
+  ['MTB','Strength','Rollers','Recovery','Walk','Rest'].forEach(t=>{
+    if (byType[t]) {
+      const b = byType[t];
+      rows.push({label:`${ACT_ICONS[t]||''} ${t} sessions`, val:b.count, unit:''});
+      if (b.painN) rows.push({label:`  ↳ avg pain on ${t} days`, val:(b.painSum/b.painN).toFixed(1), unit:'/5'});
+      if (b.feltN) rows.push({label:`  ↳ avg felt score`, val:(b.feltSum/b.feltN).toFixed(1), unit:'/5'});
+    }
+  });
+  document.getElementById('sensitivityOutput').innerHTML = rows.length ? rows.map(r=>`<div class="corr-row"><span class="corr-label">${r.label}</span><span class="corr-val">${r.val} <small style="color:var(--muted)">${r.unit}</small></span></div>`).join('') : '<div class="empty">Log some activities to see breakdown</div>';
 }
 
 // ═══════════════════════════════
@@ -1332,15 +1690,85 @@ function markWorkout(dayIdx, status) {
   const prog = getProgramInfo();
   const weekKey = `phase${prog.phase}-week${prog.week}`;
   if (!D.completedWorkouts[weekKey]) D.completedWorkouts[weekKey] = {};
-  // toggle off if same status tapped
-  if (D.completedWorkouts[weekKey][dayIdx] === status) {
+
+  // Toggle off if same status tapped
+  const wasStatus = D.completedWorkouts[weekKey][dayIdx];
+  if (wasStatus === status) {
     delete D.completedWorkouts[weekKey][dayIdx];
+    // If we're un-marking Done, also remove the auto-created activity
+    if (status === 'done') removeProgramActivity(weekKey, dayIdx);
+    save();
+    renderProgram();
+    toast('Cleared');
+    return;
+  }
+
+  D.completedWorkouts[weekKey][dayIdx] = status;
+
+  // If marking Done, auto-log an activity for today
+  if (status === 'done') {
+    autoLogProgramActivity(prog.phase, dayIdx, weekKey);
+    toast('✓ Logged complete');
   } else {
-    D.completedWorkouts[weekKey][dayIdx] = status;
+    // If skipping (and was previously Done), clear any program activity
+    removeProgramActivity(weekKey, dayIdx);
+    toast('Marked skipped');
   }
   save();
   renderProgram();
-  toast(status==='done'?'✓ Logged complete':'Marked skipped');
+}
+
+function autoLogProgramActivity(phase, dayIdx, weekKey) {
+  const day = PROGRAM.weeks[phase][dayIdx];
+  if (!day) return;
+
+  const today = todayISO();
+  let entry = D.entries.find(e=>e.date===today);
+  if (!entry) {
+    entry = { date: today, hr:null, weight:null, vo2:null, strava:null, calIn:null, calOut:null, calBal:null,
+      protein:null, carbs:null, sleep:null, flex:null,
+      elbowPain:1, shoulderPain:1, kneePain:1, trail: D.trail,
+      touchToes:null, shoulderReach:null, activities:[] };
+    D.entries.push(entry);
+    D.entries.sort((a,b)=>a.date.localeCompare(b.date));
+  }
+  if (!entry.activities) entry.activities = [];
+
+  // Don't double-log if a program activity for this day already exists
+  const exists = entry.activities.some(a=>a.source==='program' && a.programWeekKey===weekKey && a.programDayIdx===dayIdx);
+  if (exists) return;
+
+  // Parse type and default duration from zone string
+  const zoneMatch = day.zone.match(/(\d+)(?:[–-](\d+))?\s*min/);
+  const defaultDur = zoneMatch ? parseInt(zoneMatch[1]) : null;
+  const typeGuess = day.zone.toLowerCase().includes('strength') || day.zone.toLowerCase().includes('power') ? 'Strength'
+    : day.zone.toLowerCase().includes('recovery') ? 'Recovery'
+    : day.name.toLowerCase().includes('mtb') ? 'MTB'
+    : day.name.toLowerCase().includes('roller') ? 'Rollers'
+    : day.name.toLowerCase().includes('walk') ? 'Walk'
+    : day.name.toLowerCase().includes('rest') ? 'Rest'
+    : 'Other';
+
+  entry.activities.push({
+    id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    type: typeGuess,
+    name: day.name,
+    duration: defaultDur,
+    avgHR: null,
+    felt: null,
+    notes: '',
+    source: 'program',
+    programWeekKey: weekKey,
+    programDayIdx: dayIdx
+  });
+}
+
+function removeProgramActivity(weekKey, dayIdx) {
+  // Remove the auto-logged program activity from today's entry, if present
+  const today = todayISO();
+  const entry = D.entries.find(e=>e.date===today);
+  if (!entry || !entry.activities) return;
+  entry.activities = entry.activities.filter(a=>!(a.source==='program' && a.programWeekKey===weekKey && a.programDayIdx===dayIdx));
 }
 
 // ═══════════════════════════════
@@ -1421,7 +1849,6 @@ function renderHistoryCards() {
   const entries = [...D.entries].reverse();
   const el = document.getElementById('historyList');
   if (!entries.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div>No entries yet</div>'; return; }
-  const icons = {MTB:'🚵',Rollers:'🚴',Strength:'🏋️',Recovery:'🌿',Rest:'😴'};
   const tc = {green:'var(--green)',yellow:'var(--amber)',red:'var(--red)',unknown:'var(--muted)'};
   el.innerHTML = entries.map(e=>{
     const d = new Date(e.date+'T12:00:00');
@@ -1431,14 +1858,18 @@ function renderHistoryCards() {
       e.weight?`${e.weight}lbs`:null,
       e.calBal!=null?`Cal ${e.calBal>0?'+':''}${e.calBal}`:null,
       e.sleep?`Sleep ${e.sleep}/5`:null,
-      e.elbowPain?`E${e.elbowPain}S${e.shoulderPain}K${e.kneePain}`:null,
-      e.duration?`${e.duration}min`:null
+      e.elbowPain?`E${e.elbowPain}S${e.shoulderPain}K${e.kneePain}`:null
     ].filter(Boolean).join(' · ');
+    const acts = e.activities || [];
+    const totalMin = acts.reduce((s,a)=>s+(a.duration||0),0);
+    const actSummary = acts.length
+      ? acts.map(a=>`${ACT_ICONS[a.type]||'📅'} ${a.name||a.type}${a.duration?` ${a.duration}m`:''}`).join(' · ')
+      : '<span style="color:var(--muted)">No activities</span>';
     return `<div class="history-item" onclick="editEntryDate('${e.date}')" style="cursor:pointer">
       <div class="h-dot" style="background:${tc[e.trail]||'var(--accent)'}"></div>
       <div style="flex:1">
-        <div class="h-date">${dateStr} <span style="color:var(--muted2);text-transform:none;letter-spacing:0">· tap to edit</span></div>
-        <div class="h-title">${icons[e.workout]||'📅'} ${e.workout||'Check-in'} ${e.notes?'— '+e.notes:''}</div>
+        <div class="h-date">${dateStr} ${acts.length?`· ${acts.length} activit${acts.length>1?'ies':'y'} · ${totalMin}m`:''} <span style="color:var(--muted2);text-transform:none;letter-spacing:0">· tap to edit</span></div>
+        <div class="h-title">${actSummary}</div>
         <div class="h-metrics">${m}</div>
       </div></div>`;
   }).join('');
@@ -1464,14 +1895,12 @@ const TABLE_COLS = [
   { key:'calOut',       label:'Cal Out',type:'number', step:'1' },
   { key:'protein',      label:'Prot',   type:'number', step:'1' },
   { key:'carbs',        label:'Carbs',  type:'number', step:'1' },
-  { key:'workout',      label:'Wkt',    type:'select', opts:['','MTB','Rollers','Strength','Recovery','Rest'] },
-  { key:'duration',     label:'Min',    type:'number', step:'1' },
-  { key:'workoutHR',    label:'WkHR',   type:'number', step:'1' },
+  { key:'_activities',  label:'Activities', type:'readonly' },
+  { key:'_totalMin',    label:'Min',    type:'readonly' },
   { key:'vo2',          label:'VO2',    type:'number', step:'0.1' },
   { key:'strava',       label:'Strv',   type:'number', step:'1' },
   { key:'touchToes',    label:'Toes',   type:'number', step:'0.5' },
-  { key:'shoulderReach',label:'ShRch',  type:'number', step:'0.5' },
-  { key:'notes',        label:'Notes',  type:'text' }
+  { key:'shoulderReach',label:'ShRch',  type:'number', step:'0.5' }
 ];
 
 function renderHistoryTable() {
@@ -1494,10 +1923,22 @@ function renderHistoryTable() {
     html += `<tr data-date="${e.date}">`;
     html += `<td class="sticky-col" title="${e.date}">${dateLabel}</td>`;
     TABLE_COLS.forEach(c => {
-      const v = e[c.key];
-      const display = v==null||v===''?'—':v;
-      const empty = v==null||v===''?' empty':'';
-      html += `<td><span class="qcell${empty}" data-date="${e.date}" data-key="${c.key}" onclick="startEdit(this)">${display}</span></td>`;
+      if (c.type === 'readonly') {
+        const acts = e.activities || [];
+        let display;
+        if (c.key === '_activities') {
+          display = acts.length ? acts.map(a=>a.type).join('+') : '—';
+        } else if (c.key === '_totalMin') {
+          const tot = acts.reduce((s,a)=>s+(a.duration||0),0);
+          display = tot || '—';
+        }
+        html += `<td><span class="qcell" style="cursor:pointer;color:var(--accent)" onclick="editEntryDate('${e.date}')" title="Edit activities on Check-In">${display}</span></td>`;
+      } else {
+        const v = e[c.key];
+        const display = v==null||v===''?'—':v;
+        const empty = v==null||v===''?' empty':'';
+        html += `<td><span class="qcell${empty}" data-date="${e.date}" data-key="${c.key}" onclick="startEdit(this)">${display}</span></td>`;
+      }
     });
     html += `<td class="row-action"><button class="del-btn" onclick="deleteEntry('${e.date}')" title="Delete row">🗑</button></td>`;
     html += '</tr>';
@@ -1577,8 +2018,16 @@ function deleteEntry(date) {
 
 function exportCSV() {
   if (!D.entries.length) { toast('No data to export'); return; }
-  const h = ['Date','HR','Weight','VO2','Strava','CalIn','CalOut','CalBal','Protein','Carbs','Sleep','Flex','ElbowPain','ShoulderPain','KneePain','Workout','Duration','WorkoutHR','Trail','TouchToes','ShoulderReach','Notes'];
-  const rows = D.entries.map(e=>[e.date,e.hr,e.weight,e.vo2,e.strava,e.calIn,e.calOut,e.calBal,e.protein,e.carbs,e.sleep,e.flex,e.elbowPain,e.shoulderPain,e.kneePain,e.workout,e.duration,e.workoutHR,e.trail,e.touchToes,e.shoulderReach,`"${e.notes||''}"`].map(v=>v??''));
+  const h = ['Date','HR','Weight','VO2','Strava','CalIn','CalOut','CalBal','Protein','Carbs','Sleep','Flex','ElbowPain','ShoulderPain','KneePain','Activities','TotalMin','Trail','TouchToes','ShoulderReach'];
+  const rows = D.entries.map(e=>{
+    const acts = e.activities || [];
+    const actStr = acts.map(a=>{
+      const parts = [a.type, a.name||'', a.duration?a.duration+'m':'', a.avgHR?'HR'+a.avgHR:'', a.felt?'felt'+a.felt:''].filter(Boolean);
+      return parts.join('|');
+    }).join(';');
+    const totalMin = acts.reduce((s,a)=>s+(a.duration||0),0);
+    return [e.date,e.hr,e.weight,e.vo2,e.strava,e.calIn,e.calOut,e.calBal,e.protein,e.carbs,e.sleep,e.flex,e.elbowPain,e.shoulderPain,e.kneePain,`"${actStr}"`,totalMin,e.trail,e.touchToes,e.shoulderReach].map(v=>v??'');
+  });
   const csv = [h,...rows].map(r=>r.join(',')).join('\n');
   const b = new Blob([csv],{type:'text/csv'});
   const u = URL.createObjectURL(b);
