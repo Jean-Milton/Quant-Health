@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="QuantHealth">
 <meta name="theme-color" content="#06080b">
-<title>QuantHealth v2.6</title>
+<title>QuantHealth v2.8</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
@@ -384,7 +384,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
 <header class="app-header">
   <div>
-    <div class="logo">Quant<span>Health</span><sub>v2.6</sub></div>
+    <div class="logo">Quant<span>Health</span><sub>v2.8</sub></div>
   </div>
   <div class="header-right">
     <div class="date-chip" id="headerDate"></div>
@@ -467,6 +467,26 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
       <div class="m-label">Body Fat</div>
       <div class="m-val" id="mBodyFat">—<span class="m-unit">%</span></div>
       <div class="m-delta" id="dBodyFat">—</div>
+    </div>
+    <div class="metric-tile p">
+      <div class="m-label">Sleep Score</div>
+      <div class="m-val" id="mSleepScore">—<span class="m-unit">/100</span></div>
+      <div class="m-delta" id="dSleepScore">—</div>
+    </div>
+    <div class="metric-tile g">
+      <div class="m-label">Body Battery</div>
+      <div class="m-val" id="mBodyBattery">—</div>
+      <div class="m-delta" id="dBodyBattery">—</div>
+    </div>
+    <div class="metric-tile a">
+      <div class="m-label">Stress (avg)</div>
+      <div class="m-val" id="mStress">—<span class="m-unit">/100</span></div>
+      <div class="m-delta" id="dStress">—</div>
+    </div>
+    <div class="metric-tile">
+      <div class="m-label">Strava Form</div>
+      <div class="m-val" id="mStravaForm">—</div>
+      <div class="m-delta" id="dStravaForm">—</div>
     </div>
   </div>
 
@@ -746,6 +766,10 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   <div class="sl">Body Composition</div>
   <div class="card"><div class="card-title">Body Fat % <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(weekly)</span></div><div class="chart-wrap"><canvas id="cBodyFat"></canvas></div></div>
   <div class="card"><div class="card-title">Measurements (cm) <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(weekly)</span></div><div class="chart-wrap"><canvas id="cMeasure"></canvas></div></div>
+  <div class="card"><div class="card-title">Sleep Score <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin · 21 days)</span></div><div class="chart-wrap"><canvas id="cSleepScore"></canvas></div></div>
+  <div class="card"><div class="card-title">Stress (avg) <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin · 21 days)</span></div><div class="chart-wrap"><canvas id="cStress"></canvas></div></div>
+  <div class="card"><div class="card-title">Body Battery <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin · low/high · 21 days)</span></div><div class="chart-wrap"><canvas id="cBodyBattery"></canvas></div></div>
+  <div class="card"><div class="card-title">Strava Fitness · Fatigue · Form <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(30 days)</span></div><div class="chart-wrap"><canvas id="cStrava"></canvas></div></div>
 </div>
 
 <!-- ════════════════ HISTORY ════════════════ -->
@@ -806,16 +830,22 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   </div>
 
   <div class="card">
-    <div class="card-title">Backup Your Data</div>
+    <div class="card-title">Backup & Import</div>
     <div style="font-size:0.72rem;color:var(--muted2);line-height:1.7;margin-bottom:0.75rem">
-      Export all entries and settings as a JSON file. Save it to Google Drive or iCloud — restore on any device.
+      Export all entries as JSON for backup. Restore accepts both full backups <em>and</em> partial imports from the Garmin / Strava export scripts (field-level merge — won't overwrite manual entries).
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.5rem">
       <button class="btn-primary" onclick="exportJSON()" style="margin-top:0">↓ Export</button>
-      <button class="btn-secondary" onclick="document.getElementById('importFile').click()" style="margin-top:0;border-color:var(--border2);color:var(--muted2)">↑ Restore</button>
+      <button class="btn-secondary" onclick="document.getElementById('importFile').click()" style="margin-top:0;border-color:var(--border2);color:var(--muted2)">↑ Restore / Import</button>
     </div>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
     <div style="font-size:0.6rem;color:var(--muted);text-align:center">Last backup: <span id="lastBackupDate">Never</span></div>
+  </div>
+
+  <div class="card" id="importHistoryCard" style="display:none">
+    <div class="card-title">Import History</div>
+    <div style="font-size:0.65rem;color:var(--muted);margin-bottom:0.5rem">Last 10 imports — tap to roll back</div>
+    <div id="importHistoryList"></div>
   </div>
 
   <div class="card">
@@ -843,12 +873,16 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   </div>
 
   <div class="card" style="border-color:rgba(255,179,64,0.2);background:rgba(255,179,64,0.03)">
-    <div class="card-title" style="color:var(--amber)">Build Notes — v2.6</div>
+    <div class="card-title" style="color:var(--amber)">Build Notes — v2.8</div>
     <div style="font-size:0.72rem;color:var(--muted2);line-height:1.7">
-      <strong style="color:var(--text)">New in v2.6:</strong> Smart carry-over on Check-In. Each numeric field pre-fills with your last logged value in dim text and shows "↻ from yesterday" or "↻ from Apr 14" below it. Touch the field and it goes bright; leave it carried and it won't save (so you don't accidentally re-log stale values). Stale values (7+ days old) get an amber warning dot.<br><br>
-      <strong style="color:var(--text)">v2.5:</strong> Food log with 250+ food lexicon, inflammation/gut/organ scoring, portion adjust, teach-unknown. Brighter colors, bigger default text, Compact/Normal/Large toggle on Sync.<br><br>
-      <strong style="color:var(--text)">v2.4:</strong> Hydration & alcohol. Body composition in Weekly Benchmark.<br><br>
-      <strong style="color:var(--text)">v2.3:</strong> Multi-activity per day. Felt 1–5 scale. Long-press to delete with undo.<br><br>
+      <strong style="color:var(--text)">New in v2.8:</strong> Garmin + Strava integration foundation. Schema extended with 9 new fields (sleep score, sleep hours, stress, body battery low/high, steps, HRV, Strava fitness/fatigue). New Today tiles for Garmin metrics. New Trends charts. Four new Optimize correlations: sleep score → felt, stress → RHR, body battery → pain, fitness → ride volume.<br><br>
+      <strong style="color:var(--text)">Field-level merge import:</strong> partial JSON imports from Garmin/Strava export scripts patch only the fields they contain — your manual food log, weight, pain entries are preserved. Activities dedup by date+type+duration±10min (Strava wins, manual marked superseded). Per-import rollback in the new Import History card on Sync.<br><br>
+      <strong style="color:var(--text)">Companion scripts (separate, runs on Windows PC):</strong> v2.9 will add <code>scripts/strava-export.py</code> for ongoing Strava sync. v2.10 will add <code>scripts/garmin-import.py</code> for one-shot Garmin Connect data backfill. Request your Garmin export now at garmin.com — it takes 24-48hrs.<br><br>
+      <strong style="color:var(--text)">v2.7:</strong> Program tab mirrors Trail & Iron Google Calendar exactly.<br><br>
+      <strong style="color:var(--text)">v2.6:</strong> Smart carry-over on Check-In numeric fields.<br><br>
+      <strong style="color:var(--text)">v2.5:</strong> Food log with 250+ food lexicon, inflammation/gut/organ scoring.<br><br>
+      <strong style="color:var(--text)">v2.4:</strong> Hydration & alcohol. Body composition.<br><br>
+      <strong style="color:var(--text)">v2.3:</strong> Multi-activity per day. Felt 1–5 scale.<br><br>
       <strong style="color:var(--text)">Stable Core:</strong> Zero external API calls. All data stays on this device.
     </div>
   </div>
@@ -1147,7 +1181,7 @@ const LEX_INDEX = (() => {
 // ═══════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════
-const STORE = 'quanthealth_v26';
+const STORE = 'quanthealth_v28';
 const PROGRAM_START = new Date('2026-04-21');
 const VAC_START = new Date('2026-06-28');
 const VAC_END = new Date('2026-07-10');
@@ -1163,130 +1197,189 @@ const TARGETS = {
 const PROGRAM = {
   phases: {
     1: { name:'Foundation', weeks:'1–4', desc:'Build aerobic base, restore joint integrity, establish movement patterns. Volume over intensity. Heart rate Zone 2 dominant.', notes:[
-      'Goal is consistency, not effort. If a workout feels hard, it was too hard.',
-      'Joint pain >3/5 in any session = drop intensity by half, do not skip.',
-      'Foam roll quads, IT band, and pecs daily — 3 min each side.',
-      'Add 1 cup of bone broth or 15g collagen powder daily for tendon support.',
-      'Cap MTB rides at 90 min. The temptation will be to ride longer. Don\'t.'
+      'ELBOW: Always warm up before pressing. Neutral grip preferred.',
+      'KNEE: Never push through sharp pain. Sub step-ups for squats if flaring.',
+      'Sprint progression Wk1→Wk4: 4 / 5 / 6 / 6 (push harder by week 4).',
+      'Active recovery is how tendons heal. Zone 1 only — no intensity creep.',
+      'If trails closed Saturday, sub 75 min Z2 rollers or road ride.'
     ]},
-    2: { name:'Build', weeks:'5–8', desc:'Introduce sustained intensity intervals and progressive load. Week 8 is a deload — half the volume.', notes:[
-      'First true intervals appear this phase. Keep elbow & shoulder work to bands only.',
-      'If knee pain spikes 2 days in a row, swap squats for split-stance pin work.',
-      'Sleep target: 7.5h minimum, 4 nights/week. Track it.',
-      'Week 8 = deload. Half the volume of week 7. Do not skip the deload.',
-      'If Strava form drops below -25 for 3+ days, take 2 unplanned rest days.'
+    2: { name:'Build', weeks:'5–8', desc:'Introduce sustained intensity intervals and progressive load. Supersets replace straight sets. Build the engine.', notes:[
+      'Sprint progression Wk5→Wk8: 6 / 7 / 8 / 8 reps — push harder effort each week.',
+      'KNEE: Only add load to step-ups in wks 5-6 if zero pain. Never rush.',
+      'Long ride builds to 90 min by week 8. Include 1-2 deliberate climbs.',
+      'Build phase = recovery days matter MORE, not less. Don\'t skip Wednesday.',
+      'Cardio + Core day adds 2× 2-min surges (~80% effort, not all-out).'
     ]},
-    3: { name:'Power', weeks:'9–12', desc:'Trail-specific power, maximal aerobic intervals, plyometric work. Peak fitness for late-summer racing or just feeling strong.', notes:[
-      'Week 10 is the Ireland trip — walk every day, count it as Zone 1, no targets.',
-      'Resume on week 11 — expect to feel sluggish for 2–3 sessions. Normal.',
-      'Power work means quality reps. 5 perfect KB swings > 15 sloppy ones.',
-      'Final week: test PRs only if joints are 1–2/5. Otherwise just maintain.',
-      'Plan a recovery week immediately after week 12. Don\'t roll into another block.'
+    3: { name:'Power', weeks:'9–12', desc:'Trail-specific power, plyometrics, max sprints. Peak fitness. You\'ve built the engine — now use it.', notes:[
+      'Week 10 is Ireland — walk every day, count it as Z1, no targets.',
+      'Welcome-back ride (Jul 11) is 60-90 min — back off from 120 for jet lag.',
+      'KB Clean is new this phase — light practice first, ensure rack is pain-free.',
+      'BOX JUMPS: SKIP if any knee discomfort — replace with step-up jumps.',
+      'Max sprints: full gas for 15 sec, then truly recover. Quality > quantity.'
     ]}
   },
-  // Weekly templates by phase. 7 days each, indexed 0=Mon..6=Sun
+  // Day index: 0=Mon, 1=Tue, 2=Wed, 3=Thu, 4=Fri, 5=Sat, 6=Sun
   weeks: {
     1: [
-      { day:'Mon', name:'Strength A — Foundation', zone:'Strength · 50 min', exercises:[
-        { n:'Goblet squat', s:'3 × 10', note:'Body weight or light KB. Pause 1s at bottom.', cues:['Knees track toes','Heels down'] },
-        { n:'Glute bridge', s:'3 × 12', note:'Squeeze hard at top, hold 2s.', cues:['Ribs down','Glutes only'] },
-        { n:'Band pull-apart', s:'3 × 15', note:'Light band. Shoulder pre-hab.', cues:['Slow tempo','Squeeze blades'] },
-        { n:'Wall slide', s:'3 × 10', note:'Lats engaged the whole time.', cues:['Forearms on wall'] },
-        { n:'Dead bug', s:'3 × 8 each', note:'Slow. Low back pinned to floor.', cues:['Exhale on extend'] },
-        { n:'Farmer carry', s:'3 × 30s', note:'Moderate weight. Tall posture.', cues:['Don\'t shrug'] }
+      // MONDAY — Cardio + Core
+      { day:'Mon', name:'Cardio + Core', zone:'Aerobic + Core · 60 min', exercises:[
+        { n:'Bike (rollers or trail)', s:'30 min Z2', note:'Steady, conversational pace.', cues:['Nose breathing','High cadence'] },
+        { n:'Dead Bug', s:'2 × 12', note:'Slow, controlled.', cues:['Low back pinned','Exhale on extend'] },
+        { n:'Bird Dog', s:'2 × 10 each side', note:'Slow extension, pause at top.', cues:['Square hips'] },
+        { n:'Plank Hold (knees if needed)', s:'2 × 30s', note:'Drop to knees if pain — keep it pain-free.', cues:['Body in line'] },
+        { n:'Pallof Press (band, anchored)', s:'2 × 12 each side', note:'Anti-rotation core.', cues:['Don\'t twist'] },
+        { n:'Glute Bridge', s:'2 × 15', note:'Squeeze hard at top.', cues:['Ribs down','Glutes only'] },
+        { n:'Foam roll quads + IT band', s:'5 min', note:'Post-session.', cues:[] }
       ]},
-      { day:'Tue', name:'Zone 2 Spin', zone:'Aerobic · 45 min', exercises:[
-        { n:'Easy roller spin', s:'45 min @ HR 110–135', note:'Conversational pace. If you can\'t hum a tune you\'re too hard.', cues:['Nose breathing','High cadence'] }
+      // TUESDAY — Strength A: Upper Body
+      { day:'Tue', name:'Strength A — Upper Body', zone:'Strength · 60 min', exercises:[
+        { n:'WARMUP: Band pull-aparts + arm circles', s:'2 × 15', note:'Elbow prep — keep light.', cues:[] },
+        { n:'DB Floor Press (35 lb)', s:'3 × 12', note:'Avoid full elbow lockout.', cues:['Slow eccentric'] },
+        { n:'Band Lat Pulldown', s:'3 × 15', note:'Neutral grip.', cues:['Pull to chest'] },
+        { n:'DB Shoulder Press seated (10 lb)', s:'3 × 15', note:'Elbow-safe range.', cues:['Stack overhead'] },
+        { n:'Band Bicep Curl', s:'3 × 15', note:'', cues:['Slow tempo'] },
+        { n:'Band Tricep Pushdown', s:'3 × 15', note:'Not to full extension.', cues:[] },
+        { n:'CORE: Exercise Ball Pass (hands to feet)', s:'2 × 10', note:'', cues:[] },
+        { n:'CORE: Side Plank Hold', s:'2 × 20s each side', note:'', cues:['Stack ankles'] }
       ]},
-      { day:'Wed', name:'Mobility + Walk', zone:'Recovery · 40 min', exercises:[
-        { n:'Hip flow', s:'10 min', note:'90/90 transitions, pigeon, couch stretch each side.', cues:['Breathe into stretch'] },
-        { n:'T-spine opener', s:'10 reps each', note:'Side-lying bookopener.', cues:['Arms heavy'] },
-        { n:'Outdoor walk', s:'25 min brisk', note:'No phone. Just walk.', cues:[] }
+      // WEDNESDAY — Active Recovery
+      { day:'Wed', name:'Active Recovery', zone:'Recovery · 30 min', exercises:[
+        { n:'Easy flat ride or walk (Z1)', s:'20–30 min', note:'No intensity. This is how tendons heal.', cues:[] },
+        { n:'Hip flexor & IT band stretch', s:'5 min', note:'Couch stretch each side, pigeon.', cues:['Breathe into stretch'] },
+        { n:'Foam roll quads, calves, glutes', s:'5 min', note:'', cues:[] }
       ]},
-      { day:'Thu', name:'Strength B — Foundation', zone:'Strength · 50 min', exercises:[
-        { n:'Romanian deadlift (KB)', s:'3 × 8', note:'Hinge from hips. Light KB.', cues:['Long spine','Push floor away'] },
-        { n:'Push-up (knee or full)', s:'3 × 8', note:'Drop to knees if elbow flares.', cues:['Body in line'] },
-        { n:'Single-leg glute bridge', s:'3 × 8 each', note:'Slow tempo.', cues:['Square hips'] },
-        { n:'Banded row', s:'3 × 12', note:'Pull to ribs, not chest. Squeeze.', cues:['Elbows close'] },
-        { n:'Side plank', s:'3 × 20s each', note:'Build to 30s by week 4.', cues:['Stack ankles'] }
+      // THURSDAY — Strength B: Lower + Core
+      { day:'Thu', name:'Strength B — Lower + Core', zone:'Strength · 60 min', exercises:[
+        { n:'WARMUP: Band clamshells + leg swings', s:'2 × 15', note:'Activates glutes, protects knees.', cues:[] },
+        { n:'Goblet Squat (KB 30 lb)', s:'3 × 12', note:'Comfortable depth only — no pain.', cues:['Knees track toes','Heels down'] },
+        { n:'Romanian Deadlift (35 lb DB)', s:'3 × 12', note:'Hinge not squat — knee-friendly.', cues:['Long spine','Push floor away'] },
+        { n:'Step-Up onto box/step (BW)', s:'3 × 10 each leg', note:'Control the descent.', cues:['Drive through heel'] },
+        { n:'Side-Lying Hip Abduction (band)', s:'3 × 15', note:'', cues:[] },
+        { n:'Single Leg Calf Raise (eccentric)', s:'3 × 15', note:'Lower slowly — 3 sec down.', cues:[] },
+        { n:'CORE: Exercise Ball Jackknife', s:'2 × 10', note:'', cues:[] },
+        { n:'CORE: Russian Twist (BW)', s:'2 × 20', note:'', cues:[] }
       ]},
-      { day:'Fri', name:'MTB or Rollers', zone:'Aerobic · 60–75 min', exercises:[
-        { n:'Hydrocut Z2 ride', s:'60–75 min', note:'If trails open. Easy gears, no climbs hammered.', cues:['Eyes up','Loose grip'] },
-        { n:'OR roller spin', s:'45 min @ Z2', note:'If trails closed.', cues:[] }
+      // FRIDAY — Cardio + Sprints
+      { day:'Fri', name:'Cardio + Sprints', zone:'Threshold · 45 min', exercises:[
+        { n:'Warmup — easy ride', s:'10 min', note:'', cues:[] },
+        { n:'Sprint intervals', s:'4 × (20s hard / 90s easy)', note:'Build to 6× by week 4. Wk1: 4 / Wk2: 5 / Wk3: 6 / Wk4: 6.', cues:['Full effort 20s'] },
+        { n:'Cool down — easy spin', s:'10 min', note:'', cues:[] },
+        { n:'OPT: Hollow body hold', s:'3 × 20s', note:'', cues:[] },
+        { n:'OPT: Superman hold', s:'3 × 20s', note:'', cues:[] }
       ]},
-      { day:'Sat', name:'Long Easy Ride', zone:'Aerobic · 75–90 min', exercises:[
-        { n:'Trail or road, Z2', s:'75–90 min', note:'Longest session of the week. Stay easy.', cues:['Fuel halfway'] }
+      // SATURDAY — Long Ride / MTB
+      { day:'Sat', name:'Long Ride / MTB', zone:'Aerobic · 60–90 min', exercises:[
+        { n:'Hydrocut trail or long roller', s:'60–90 min', note:'Zone 2 — comfortable, aerobic, enjoyable.', cues:['Eyes up','Loose grip'] },
+        { n:'IF TRAILS CLOSED: Z2 rollers/road', s:'75 min', note:'Same effort, different surface.', cues:[] }
       ]},
+      // SUNDAY — Full Rest
       { day:'Sun', name:'Full Rest', zone:'Recovery · 0 min', exercises:[
-        { n:'Walk only', s:'20–30 min if you want', note:'No structured exercise. Foam roll if stiff.', cues:[] }
+        { n:'Walk only (optional)', s:'20–30 min if you want', note:'No structured exercise. Foam roll if stiff.', cues:[] }
       ]}
     ],
+
+    // ═══════ PHASE 2 — BUILD (Wks 5-8) ═══════
     2: [
-      { day:'Mon', name:'Strength A — Build', zone:'Strength · 55 min', exercises:[
-        { n:'Goblet squat', s:'4 × 8', note:'Heavier KB this phase. Pause 1s.', cues:['Knees track toes'] },
-        { n:'KB swing', s:'4 × 12', note:'Hip drive, not arm pull.', cues:['Snap hips','Float don\'t lift'] },
-        { n:'Push-up tempo', s:'3 × 6', note:'3s down, 1s hold, up. Watch elbow.', cues:['Body line'] },
-        { n:'Banded row', s:'4 × 12', note:'Heavier band. Slow eccentric.', cues:['Elbows close'] },
-        { n:'Pallof press', s:'3 × 10 each', note:'Anti-rotation core.', cues:['Don\'t twist'] },
-        { n:'Farmer carry', s:'3 × 40s', note:'Heavier this phase.', cues:[] }
+      // MONDAY — Cardio + Core (with surges)
+      { day:'Mon', name:'Cardio + Core', zone:'Aerobic + Core · 60 min', exercises:[
+        { n:'Ride with 2× 2-min moderate surges', s:'30 min', note:'Surges at ~80% effort, not all-out.', cues:['Steady cadence'] },
+        { n:'Dead Bug', s:'3 × 15', note:'', cues:[] },
+        { n:'Plank (full, feet elevated on ball)', s:'3 × 40s', note:'Pain-free only.', cues:['Body in line'] },
+        { n:'Pallof Press (heavier band)', s:'3 × 15 each side', note:'Anti-rotation.', cues:[] },
+        { n:'Exercise Ball Rollout', s:'3 × 12', note:'', cues:['Slow extend'] }
       ]},
-      { day:'Tue', name:'Roller Intervals', zone:'Threshold · 50 min', exercises:[
-        { n:'Warm-up Z2', s:'15 min', note:'Easy spin to open up.', cues:[] },
-        { n:'4 × 5min @ HR 150–160', s:'4 sets, 3min rest', note:'First real intervals. Sustained, not max.', cues:['Steady cadence','Breathe through nose if possible'] },
-        { n:'Cool-down', s:'10 min easy', note:'', cues:[] }
+      // TUESDAY — Strength A: Upper Body (supersets)
+      { day:'Tue', name:'Strength A — Upper Body', zone:'Strength · 60 min', exercises:[
+        { n:'WARMUP: Band pull-aparts + arm circles', s:'2 × 15', note:'', cues:[] },
+        { n:'SUPERSET: DB Floor Press (35 lb)', s:'4 × 12', note:'Paired with Band Seated Row.', cues:[] },
+        { n:'  + Band Seated Row', s:'4 × 15', note:'Pull to ribs, squeeze.', cues:['Elbows close'] },
+        { n:'SUPERSET: DB Arnold Press (10 lb)', s:'4 × 12', note:'Paired with Band Face Pull.', cues:[] },
+        { n:'  + Band Face Pull', s:'4 × 15', note:'Rotator cuff + elbow protection.', cues:['Pull to forehead'] },
+        { n:'Hammer Curl (10 lb)', s:'3 × 15', note:'', cues:[] },
+        { n:'Band Tricep Overhead Extension', s:'3 × 15', note:'', cues:[] },
+        { n:'CORE: V-sit hold (or tuck)', s:'3 × 20s', note:'', cues:[] },
+        { n:'CORE: Side Plank + hip dip', s:'2 × 12 each side', note:'', cues:[] }
       ]},
-      { day:'Wed', name:'Mobility + Walk', zone:'Recovery · 45 min', exercises:[
-        { n:'Hip + T-spine flow', s:'15 min', note:'Same as Phase 1 but add 90/90 hip rotations.', cues:[] },
-        { n:'Walk', s:'30 min brisk', note:'', cues:[] }
+      // WEDNESDAY — Active Recovery
+      { day:'Wed', name:'Active Recovery', zone:'Recovery · 30 min', exercises:[
+        { n:'Easy flat ride or walk (Z1)', s:'20–30 min', note:'Build phase = recovery matters MORE.', cues:[] },
+        { n:'Hip flexor & IT band stretch', s:'5 min', note:'', cues:[] },
+        { n:'Foam roll quads, calves, glutes', s:'5 min', note:'', cues:[] }
       ]},
-      { day:'Thu', name:'Strength B — Build', zone:'Strength · 55 min', exercises:[
-        { n:'Split squat', s:'4 × 8 each', note:'Pin position, no bouncing. Watch knee.', cues:['Front knee tracks','Back knee soft'] },
-        { n:'KB Romanian deadlift', s:'4 × 8', note:'Heavier. Slow eccentric.', cues:['Hinge'] },
-        { n:'Banded face-pull', s:'4 × 15', note:'Shoulder integrity.', cues:['Pull to forehead'] },
-        { n:'Single-arm row', s:'3 × 8 each', note:'KB or DB. Brace hard.', cues:['No twist'] },
-        { n:'Dead bug', s:'3 × 10 each', note:'Add 2s pause at extension.', cues:[] }
+      // THURSDAY — Strength B: Lower + Core
+      { day:'Thu', name:'Strength B — Lower + Core', zone:'Strength · 60 min', exercises:[
+        { n:'WARMUP: Band clamshells + leg swings', s:'2 × 15', note:'', cues:[] },
+        { n:'Front Squat (empty bar or light)', s:'4 × 10', note:'Depth governs weight — check knees.', cues:['Elbows up'] },
+        { n:'KB Romanian Deadlift (30 lb)', s:'4 × 12', note:'', cues:['Hinge'] },
+        { n:'Lateral Step-Up (BW)', s:'4 × 10 each leg', note:'Add 10 lb DB wks 7-8 if pain-free.', cues:['Control descent'] },
+        { n:'Terminal Knee Extension (band)', s:'3 × 20', note:'VMO activation.', cues:[] },
+        { n:'Single Leg Calf Raise (eccentric 3 sec)', s:'3 × 12', note:'', cues:[] }
       ]},
-      { day:'Fri', name:'MTB Skill Ride', zone:'Mixed · 75–90 min', exercises:[
-        { n:'Hydrocut technical loop', s:'75–90 min', note:'Pick lines deliberately. Practice cornering.', cues:['Eyes ahead','Outside foot down'] }
+      // FRIDAY — Cardio + Sprints
+      { day:'Fri', name:'Cardio + Sprints', zone:'Threshold · 45 min', exercises:[
+        { n:'Warmup — easy ride', s:'10 min', note:'', cues:[] },
+        { n:'6× (20s max / 90s easy)', s:'6 sprints', note:'Add 1 rep per week. Wk5: 6 / Wk6: 7 / Wk7: 8 / Wk8: 8.', cues:['Push harder'] },
+        { n:'Cool down', s:'5 min easy', note:'', cues:[] }
       ]},
-      { day:'Sat', name:'Long Ride + Climb', zone:'Aerobic + Tempo · 90–105 min', exercises:[
-        { n:'Long trail ride', s:'90–105 min', note:'Include 2–3 sustained climbs at tempo (HR 145–155).', cues:['Steady on climbs'] }
+      // SATURDAY — Long Ride
+      { day:'Sat', name:'Long Ride / MTB', zone:'Aerobic · 75–90 min', exercises:[
+        { n:'Hydrocut trail or long roller', s:'75–90 min', note:'Build to 90 min by week 8. 1-2 deliberate climbs if MTB.', cues:['Eyes far ahead'] },
+        { n:'IF TRAILS CLOSED: Z2 rollers', s:'75–90 min', note:'', cues:[] }
       ]},
+      // SUNDAY — Full Rest
       { day:'Sun', name:'Full Rest', zone:'Recovery', exercises:[
-        { n:'Walk only', s:'20–30 min optional', note:'Foam roll quads + IT band 5 min each side.', cues:[] }
+        { n:'Walk only (optional)', s:'20–30 min', note:'Foam roll quads + IT band 5 min each side.', cues:[] }
       ]}
     ],
+
+    // ═══════ PHASE 3 — POWER (Wks 9-12) ═══════
     3: [
-      { day:'Mon', name:'Strength A — Power', zone:'Power · 60 min', exercises:[
-        { n:'KB swing', s:'5 × 10', note:'Explosive. Heaviest bell you can swing well.', cues:['Snap hips'] },
-        { n:'Goblet squat tempo', s:'4 × 6', note:'3s down, explode up.', cues:['Drive heels'] },
-        { n:'Push-up', s:'4 × 8', note:'Add tempo or elevate feet.', cues:[] },
-        { n:'Single-arm row', s:'4 × 6 each', note:'Heavy. Strict form.', cues:[] },
-        { n:'Pallof press', s:'3 × 12 each', note:'', cues:[] },
-        { n:'Heavy farmer carry', s:'3 × 45s', note:'Test grip.', cues:[] }
+      // MONDAY — Power Cardio + Core
+      { day:'Mon', name:'Power Cardio + Core', zone:'Threshold + Core · 60 min', exercises:[
+        { n:'Warmup — easy ride', s:'10 min', note:'', cues:[] },
+        { n:'4× (3 min hard / 2 min easy)', s:'25 min total', note:'Hard = sustained tempo, not max.', cues:[] },
+        { n:'Cool down — easy', s:'5 min', note:'', cues:[] },
+        { n:'Exercise Ball Pike', s:'3 × 12', note:'', cues:[] },
+        { n:'Plank Shoulder Taps (full plank)', s:'3 × 20 taps', note:'', cues:['Hips still'] },
+        { n:'Hollow Body Rocks', s:'3 × 20', note:'', cues:[] },
+        { n:'Russian Twist (10 lb)', s:'3 × 20', note:'', cues:[] },
+        { n:'Dead Bug (slow, controlled)', s:'3 × 10', note:'', cues:[] }
       ]},
-      { day:'Tue', name:'Threshold Intervals', zone:'Threshold · 60 min', exercises:[
-        { n:'Warm-up Z2', s:'15 min', note:'', cues:[] },
-        { n:'5 × 4min @ HR 155–165', s:'5 sets, 2min rest', note:'Hard sustained. Should feel "comfortably uncomfortable" by rep 3.', cues:[] },
-        { n:'Cool-down', s:'10 min easy', note:'', cues:[] }
+      // TUESDAY — Strength A: Power Upper
+      { day:'Tue', name:'Strength A — Power Upper', zone:'Power · 60 min', exercises:[
+        { n:'WARMUP: Band pull-aparts + arm circles', s:'2 × 15', note:'', cues:[] },
+        { n:'SUPERSET: Push-Up (explosive)', s:'4 × 12', note:'Controlled descent, fast push.', cues:['Body line'] },
+        { n:'  + Band Seated Row (fast pull)', s:'4 × 12', note:'Slow return.', cues:[] },
+        { n:'KB Clean (30 lb)', s:'3 × 8 each side', note:'Elbow lands in rack — don\'t overgrip.', cues:['Snap hips'] },
+        { n:'DB Floor Press (35 lb fast push)', s:'3 × 10', note:'', cues:[] },
+        { n:'Band Reverse Fly', s:'3 × 15', note:'', cues:[] }
       ]},
-      { day:'Wed', name:'Active Recovery', zone:'Recovery · 45 min', exercises:[
-        { n:'Easy walk or spin', s:'30 min Z1', note:'HR < 120.', cues:[] },
-        { n:'Full mobility flow', s:'15 min', note:'Hips, T-spine, ankles, shoulders.', cues:[] }
+      // WEDNESDAY — Active Recovery
+      { day:'Wed', name:'Active Recovery', zone:'Recovery · 30 min', exercises:[
+        { n:'Easy ride or walk (Z1)', s:'20–30 min', note:'Peak phase = peak recovery need. Don\'t skip.', cues:[] },
+        { n:'Hip flexor & IT band stretch', s:'5 min', note:'', cues:[] },
+        { n:'Foam roll quads, calves, glutes', s:'5 min', note:'', cues:[] }
       ]},
-      { day:'Thu', name:'Strength B — Power', zone:'Power · 60 min', exercises:[
-        { n:'Split squat jumps (low)', s:'4 × 6 each', note:'Light, explosive. STOP if knee >2/5.', cues:['Land soft'] },
-        { n:'KB Romanian deadlift', s:'4 × 6', note:'Heaviest of the program.', cues:[] },
-        { n:'Push press (KB)', s:'4 × 6', note:'Drive from legs. Watch shoulder.', cues:['Stack overhead'] },
-        { n:'Banded face-pull', s:'4 × 15', note:'', cues:[] },
-        { n:'Side plank w/ reach', s:'3 × 8 each', note:'', cues:[] }
+      // THURSDAY — Strength B: Lower Power
+      { day:'Thu', name:'Strength B — Lower Power', zone:'Power · 60 min', exercises:[
+        { n:'WARMUP: Band clamshells + leg swings', s:'2 × 15', note:'', cues:[] },
+        { n:'Box Jump (12 in)', s:'4 × 6', note:'Land soft — SKIP if any knee pain. Sub step-up jumps if needed.', cues:['Land soft'] },
+        { n:'KB Swing (30 lb)', s:'4 × 15', note:'Hip-dominant — great for biking power.', cues:['Snap hips','Float don\'t lift'] },
+        { n:'Rear-Foot Elevated Split Squat (BW)', s:'4 × 10 each leg', note:'Add 10 lb KB wks 11-12 if knee tolerates.', cues:['Front knee tracks'] },
+        { n:'Lateral Band Walk', s:'3 × 20 steps each direction', note:'', cues:['Tension on band'] },
+        { n:'Nordic Hamstring Curl', s:'3 × 6', note:'Off rack or couch.', cues:['Slow descent'] }
       ]},
-      { day:'Fri', name:'MTB Hard Effort', zone:'Mixed · 90–120 min', exercises:[
-        { n:'Hydrocut full ride', s:'90–120 min', note:'Push the climbs. Recover on descents. This is your peak fitness ride.', cues:['Smooth lines','Eyes far ahead'] }
+      // FRIDAY — Max Sprints
+      { day:'Fri', name:'Max Sprints', zone:'Power · 45 min', exercises:[
+        { n:'Warmup — easy ride', s:'10 min', note:'', cues:[] },
+        { n:'8× (15s MAX sprint / 2 min easy)', s:'8 sprints', note:'Full gas for 15 sec, then truly recover.', cues:['Max effort'] },
+        { n:'Cool down — easy spin', s:'5 min', note:'', cues:[] }
       ]},
-      { day:'Sat', name:'Long Endurance', zone:'Aerobic · 105–120 min', exercises:[
-        { n:'Long trail or road ride', s:'105–120 min', note:'Build duration. Easier intensity than Friday.', cues:['Fuel every 30 min'] }
+      // SATURDAY — Long Ride
+      { day:'Sat', name:'Long Ride / MTB', zone:'Aerobic · 90–120 min', exercises:[
+        { n:'Hydrocut trail or long roller', s:'90–120 min', note:'Comfortable-to-moderate effort. You\'ve built the engine — use it.', cues:['Smooth lines'] }
       ]},
+      // SUNDAY — Full Rest
       { day:'Sun', name:'Full Rest', zone:'Recovery', exercises:[
         { n:'Walk + mobility', s:'20–30 min', note:'Long foam roll session — 15 min.', cues:[] }
       ]}
@@ -1329,16 +1422,39 @@ let D = (() => {
       if (e.bicep === undefined) e.bicep = null;
       // v2.5 fields
       if (!e.foodEntries) e.foodEntries = [];
+      // v2.8 fields — Garmin + Strava
+      if (e.sleepScore === undefined) e.sleepScore = null;
+      if (e.sleepHours === undefined) e.sleepHours = null;
+      if (e.stressAvg === undefined) e.stressAvg = null;
+      if (e.bodyBatteryLow === undefined) e.bodyBatteryLow = null;
+      if (e.bodyBatteryHigh === undefined) e.bodyBatteryHigh = null;
+      if (e.steps === undefined) e.steps = null;
+      if (e.hrv === undefined) e.hrv = null;
+      if (e.stravaFitness === undefined) e.stravaFitness = null;
+      if (e.stravaFatigue === undefined) e.stravaFatigue = null;
     });
     if (!data.completedWorkouts) data.completedWorkouts = {};
     if (!data.userFoods) data.userFoods = {};
     if (!data.settings) data.settings = { textSize: 'normal' };
+    if (!data.importHistory) data.importHistory = [];  // v2.8
     return data;
   };
 
   try {
     const stored = JSON.parse(localStorage.getItem(STORE));
     if (stored) return migrate(stored);
+    // Try migrating from v2.7
+    const v27 = JSON.parse(localStorage.getItem('quanthealth_v27'));
+    if (v27 && v27.entries) {
+      console.log('Migrating from v2.7');
+      return migrate(v27);
+    }
+    // Try migrating from v2.6
+    const v26 = JSON.parse(localStorage.getItem('quanthealth_v26'));
+    if (v26 && v26.entries) {
+      console.log('Migrating from v2.6');
+      return migrate(v26);
+    }
     // Try migrating from v2.5
     const v25 = JSON.parse(localStorage.getItem('quanthealth_v25'));
     if (v25 && v25.entries) {
@@ -1567,6 +1683,11 @@ function renderToday() {
         document.getElementById('dBodyFat').textContent = `as of ${formatNiceDate(lastBF.date)}`;
       }
     }
+    // v2.8 Garmin + Strava tiles — render last available value with date age
+    setGarminTile('mSleepScore','dSleepScore','sleepScore','/100', false);
+    setGarminTile('mBodyBattery','dBodyBattery','bodyBatteryHigh','', false, 'bodyBatteryLow');
+    setGarminTile('mStress','dStress','stressAvg','/100', true); // higher is worse
+    setGarminTile('mStravaForm','dStravaForm','strava','', false);
     setPainTile('todayElbow','barElbow',last.elbowPain);
     setPainTile('todayShoulder','barShoulder',last.shoulderPain);
     setPainTile('todayKnee','barKnee',last.kneePain);
@@ -1574,6 +1695,35 @@ function renderToday() {
 
   // Food log on Today
   renderFoodLog('foodLogToday', todayISO());
+}
+
+// v2.8 helper: render a Garmin/Strava tile from latest non-null value
+function setGarminTile(valId, deltaId, fieldName, unit, higherWorse, secondaryField) {
+  const valEl = document.getElementById(valId);
+  const deltaEl = document.getElementById(deltaId);
+  if (!valEl) return;
+  const last = [...D.entries].reverse().find(e=>e[fieldName]!=null);
+  if (!last) {
+    valEl.innerHTML = `—${unit?`<span class="m-unit">${unit}</span>`:''}`;
+    deltaEl.textContent = 'no data yet';
+    return;
+  }
+  // Body Battery: show range "low–high"
+  if (secondaryField && last[secondaryField] != null) {
+    valEl.innerHTML = `${last[secondaryField]}–${last[fieldName]}`;
+  } else {
+    valEl.innerHTML = `${last[fieldName]}${unit?`<span class="m-unit">${unit}</span>`:''}`;
+  }
+  // Find prior non-null for delta
+  const prev = [...D.entries].reverse().find(e=>e.date<last.date && e[fieldName]!=null);
+  if (prev) {
+    const d = (last[fieldName] - prev[fieldName]).toFixed(1);
+    const isImprovement = higherWorse ? d < 0 : d > 0;
+    const cls = d == 0 ? '' : (isImprovement ? 'du' : 'dd');
+    deltaEl.innerHTML = `<span class="${cls}">${d>0?'+':''}${d} since ${formatNiceDate(prev.date)}</span>`;
+  } else {
+    deltaEl.textContent = `as of ${formatNiceDate(last.date)}`;
+  }
 }
 
 function setMetric(valId,deltaId,val,prev,unit,direction) {
@@ -2267,7 +2417,12 @@ function renderOptimize() {
     {label:'Felt Score → Pain', r: pearson(entries.map(e=>avgFelt(e)), entries.map(e=>avg([e.elbowPain,e.shoulderPain,e.kneePain]))), note:'How sessions felt vs joint state'},
     {label:'Hydration → Pain', r: pearson(entries.map(e=>e.water), entries.map(e=>avg([e.elbowPain,e.shoulderPain,e.kneePain]))), note:'Water intake vs joint pain'},
     {label:'Alcohol → Next-day Sleep', r: pearson(entries.slice(0,-1).map(e=>e.drinks), entries.slice(1).map(e=>e.sleep)), note:'Drinks tonight vs sleep tomorrow'},
-    {label:'Alcohol → Next-day HR', r: pearson(entries.slice(0,-1).map(e=>e.drinks), entries.slice(1).map(e=>e.hr)), note:'Drinks tonight vs resting HR tomorrow'}
+    {label:'Alcohol → Next-day HR', r: pearson(entries.slice(0,-1).map(e=>e.drinks), entries.slice(1).map(e=>e.hr)), note:'Drinks tonight vs resting HR tomorrow'},
+    // v2.8 Garmin/Strava correlations
+    {label:'Sleep Score → Felt Score', r: pearson(entries.map(e=>e.sleepScore), entries.map(e=>avgFelt(e))), note:'Garmin sleep predicts session quality'},
+    {label:'Stress → Resting HR', r: pearson(entries.map(e=>e.stressAvg), entries.map(e=>e.hr)), note:'Garmin stress vs RHR (validation)'},
+    {label:'Body Battery Low → Pain', r: pearson(entries.map(e=>e.bodyBatteryLow), entries.map(e=>avg([e.elbowPain,e.shoulderPain,e.kneePain]))), note:'Depleted recovery → joint flares'},
+    {label:'Strava Fitness → Long Ride', r: pearson(entries.map(e=>e.stravaFitness), entries.map(e=>totalMin(e))), note:'Higher CTL enables more volume'}
   ].filter(c=>c.r!==null);
 
   document.getElementById('correlationTable').innerHTML = corrs.length ? corrs.map(c=>{
@@ -2586,6 +2741,41 @@ function renderTrends() {
   } else {
     if (charts['cMeasure']) charts['cMeasure'].destroy();
   }
+
+  // v2.8 Garmin: Sleep Score
+  const ssEntries = D.entries.filter(e=>e.sleepScore!=null).slice(-21);
+  if (ssEntries.length) {
+    const ssLabels = ssEntries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
+    makeChart('cSleepScore',[{data:ssEntries.map(e=>e.sleepScore),borderColor:'#b44fff',backgroundColor:'rgba(180,79,255,0.06)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#b44fff',tension:0.3,fill:true,spanGaps:true}],{labels:ssLabels,extra:{scales:{...chartCfg.scales,y:{...chartCfg.scales.y,min:0,max:100}}}});
+  } else if (charts['cSleepScore']) charts['cSleepScore'].destroy();
+
+  // v2.8 Garmin: Stress
+  const stEntries = D.entries.filter(e=>e.stressAvg!=null).slice(-21);
+  if (stEntries.length) {
+    const stLabels = stEntries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
+    makeChart('cStress',[{data:stEntries.map(e=>e.stressAvg),borderColor:'#ffb340',backgroundColor:'rgba(255,179,64,0.06)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#ffb340',tension:0.3,fill:true,spanGaps:true}],{labels:stLabels,extra:{scales:{...chartCfg.scales,y:{...chartCfg.scales.y,min:0,max:100}}}});
+  } else if (charts['cStress']) charts['cStress'].destroy();
+
+  // v2.8 Garmin: Body Battery (high/low band)
+  const bbEntries = D.entries.filter(e=>e.bodyBatteryHigh!=null || e.bodyBatteryLow!=null).slice(-21);
+  if (bbEntries.length) {
+    const bbLabels = bbEntries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
+    makeChart('cBodyBattery',[
+      {label:'High',data:bbEntries.map(e=>e.bodyBatteryHigh),borderColor:'#00e87a',backgroundColor:'rgba(0,232,122,0.05)',borderWidth:2,pointRadius:2,tension:0.3,fill:'+1',spanGaps:true},
+      {label:'Low',data:bbEntries.map(e=>e.bodyBatteryLow),borderColor:'#ff4560',borderWidth:2,pointRadius:2,tension:0.3,spanGaps:true}
+    ],{labels:bbLabels,extra:{plugins:{legend:{display:true,labels:{color:'#7a8a9a',font:{family:'DM Mono',size:9},boxWidth:12}}},scales:{...chartCfg.scales,y:{...chartCfg.scales.y,min:0,max:100}}}});
+  } else if (charts['cBodyBattery']) charts['cBodyBattery'].destroy();
+
+  // v2.8 Strava: Fitness/Fatigue/Form
+  const sfEntries = D.entries.filter(e=>e.stravaFitness!=null||e.stravaFatigue!=null||e.strava!=null).slice(-30);
+  if (sfEntries.length) {
+    const sfLabels = sfEntries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
+    makeChart('cStrava',[
+      {label:'Fitness (CTL)',data:sfEntries.map(e=>e.stravaFitness),borderColor:'#00c8ff',borderWidth:2,pointRadius:2,tension:0.3,spanGaps:true},
+      {label:'Fatigue (ATL)',data:sfEntries.map(e=>e.stravaFatigue),borderColor:'#ff4560',borderWidth:2,pointRadius:2,tension:0.3,spanGaps:true},
+      {label:'Form (TSB)',data:sfEntries.map(e=>e.strava),borderColor:'#00e87a',borderWidth:2,pointRadius:2,tension:0.3,spanGaps:true}
+    ],{labels:sfLabels,extra:{plugins:{legend:{display:true,labels:{color:'#7a8a9a',font:{family:'DM Mono',size:8},boxWidth:10}}}}});
+  } else if (charts['cStrava']) charts['cStrava'].destroy();
 }
 
 // ═══════════════════════════════
@@ -3362,6 +3552,36 @@ function renderSync() {
     const btn = document.getElementById('sizeBtn-' + s);
     if (btn) btn.classList.toggle('active', s === cur);
   });
+  // v2.8: Import History
+  renderImportHistory();
+}
+
+function renderImportHistory() {
+  const card = document.getElementById('importHistoryCard');
+  const list = document.getElementById('importHistoryList');
+  if (!card || !list) return;
+  const hist = D.importHistory || [];
+  if (hist.length === 0) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = 'block';
+  list.innerHTML = hist.map(imp => {
+    const when = new Date(imp.timestamp).toLocaleDateString('en-CA',{month:'short',day:'numeric'}) + ' · ' + new Date(imp.timestamp).toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'});
+    const summary = [];
+    if (imp.created) summary.push(`${imp.created} created`);
+    if (imp.patched) summary.push(`${imp.patched} patched`);
+    if (imp.activitiesAdded) summary.push(`${imp.activitiesAdded} activities`);
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:0.75rem;color:var(--text)">${imp.sourceLabel}</div>
+          <div style="font-size:0.6rem;color:var(--muted)">${when} · ${summary.join(', ')}</div>
+        </div>
+        <button class="btn-secondary" onclick="rollbackImport('${imp.id}')" style="margin-top:0;padding:0.35rem 0.7rem;font-size:0.65rem;color:var(--red);border-color:rgba(255,69,96,0.3)">↩ Undo</button>
+      </div>
+    `;
+  }).join('');
 }
 
 function setTextSize(size) {
@@ -3416,9 +3636,16 @@ function importJSON(input) {
   reader.onload = (e) => {
     try {
       const data = JSON.parse(e.target.result);
-      if (!data.entries && !data.version) { toast('⚠ Invalid backup file'); return; }
+      if (!data.entries && !data.version && !data.source) { toast('⚠ Invalid backup file'); return; }
+
+      // v2.8: detect partial import (Garmin/Strava export) vs full backup
+      const isPartial = data.source === 'garmin' || data.source === 'strava';
       const existing = D.entries?.length || 0;
-      if (existing > 0) {
+
+      if (isPartial) {
+        // Field-level merge: only patch non-null fields, preserve everything else
+        importPartial(data);
+      } else if (existing > 0) {
         const merge = confirm(`You have ${existing} existing entries. Merge with backup (${data.entries?.length||0} entries)?\n\nOK = Merge\nCancel = Replace`);
         if (merge) {
           const all = [...(data.entries||[]), ...(D.entries||[])];
@@ -3426,16 +3653,151 @@ function importJSON(input) {
         } else {
           Object.assign(D, data);
         }
+        save();
+        toast(`✓ Restored ${D.entries?.length||0} entries`);
+        renderToday(); renderSync();
       } else {
         Object.assign(D, data);
+        save();
+        toast(`✓ Restored ${D.entries?.length||0} entries`);
+        renderToday(); renderSync();
       }
-      save();
-      toast(`✓ Restored ${D.entries?.length||0} entries`);
-      renderToday(); renderSync();
-    } catch(err) { toast('⚠ Could not read backup file'); }
+    } catch(err) {
+      console.error(err);
+      toast('⚠ Could not read import file');
+    }
   };
   reader.readAsText(file);
   input.value = '';
+}
+
+// v2.8: Field-level merge for Garmin/Strava partial imports
+// Snapshot existing entries for rollback, then patch only non-null fields.
+// For activities: dedup by date + type + duration±10min (Strava wins, manual marked superseded).
+function importPartial(data) {
+  const source = data.source; // 'garmin' or 'strava'
+  const entries = data.entries || [];
+  if (entries.length === 0) { toast('⚠ Import file has no entries'); return; }
+
+  // Snapshot for rollback — save the full state of any entry that will be touched
+  const touchedDates = new Set(entries.map(e => e.date));
+  const snapshot = D.entries.filter(e => touchedDates.has(e.date)).map(e => JSON.parse(JSON.stringify(e)));
+
+  // Counters for the import history record
+  let patched = 0, created = 0, fieldsTouched = 0, activitiesAdded = 0, activitiesSuperseded = 0;
+
+  entries.forEach(incoming => {
+    let entry = D.entries.find(e => e.date === incoming.date);
+    if (!entry) {
+      // Create a new shell entry with all default null fields, then patch
+      entry = makeEmptyEntry(incoming.date);
+      D.entries.push(entry);
+      created++;
+    } else {
+      patched++;
+    }
+
+    // Field-level patch: only copy non-null incoming values, skip activities (handled separately)
+    Object.keys(incoming).forEach(key => {
+      if (key === 'date' || key === 'activities' || key === 'foodEntries') return;
+      if (incoming[key] !== null && incoming[key] !== undefined) {
+        if (entry[key] !== incoming[key]) fieldsTouched++;
+        entry[key] = incoming[key];
+      }
+    });
+
+    // Activity dedup (Strava case)
+    if (Array.isArray(incoming.activities)) {
+      incoming.activities.forEach(newAct => {
+        if (!entry.activities) entry.activities = [];
+        // Match by type + duration ±10 min
+        const dup = entry.activities.find(existAct =>
+          !existAct.superseded &&
+          existAct.type === newAct.type &&
+          Math.abs((existAct.duration||0) - (newAct.duration||0)) <= 10
+        );
+        if (dup) {
+          // Mark manual entry as superseded; add Strava entry as canonical
+          dup.superseded = true;
+          dup.supersededBy = newAct.stravaId || `import-${Date.now()}`;
+          activitiesSuperseded++;
+        }
+        entry.activities.push({
+          ...newAct,
+          source: source,
+          id: newAct.stravaId ? `strava-${newAct.stravaId}` : `import-${Date.now()}-${Math.random().toString(36).slice(2,8)}`
+        });
+        activitiesAdded++;
+      });
+    }
+  });
+
+  // Sort entries by date
+  D.entries.sort((a,b) => a.date.localeCompare(b.date));
+
+  // Record import history (keep last 10, with snapshot for rollback)
+  if (!D.importHistory) D.importHistory = [];
+  D.importHistory.unshift({
+    id: `imp-${Date.now()}`,
+    timestamp: new Date().toISOString(),
+    source: source,
+    sourceLabel: source === 'garmin' ? '🟦 Garmin' : '🟧 Strava',
+    fileDate: data.exportedAt || null,
+    datesCount: entries.length,
+    patched, created, fieldsTouched, activitiesAdded, activitiesSuperseded,
+    snapshot: snapshot,  // snapshot of entries BEFORE this import (for rollback)
+    snapshotDates: [...touchedDates]
+  });
+  // Keep last 10 imports — more than that and the snapshots bloat localStorage
+  if (D.importHistory.length > 10) {
+    D.importHistory = D.importHistory.slice(0, 10);
+  }
+
+  save();
+  toast(`✓ ${source === 'garmin' ? 'Garmin' : 'Strava'}: ${patched} patched, ${created} created${activitiesAdded?`, ${activitiesAdded} activities`:''}`);
+  renderToday(); renderSync();
+}
+
+// v2.8: Rollback an import using its snapshot
+function rollbackImport(impId) {
+  const imp = (D.importHistory || []).find(i => i.id === impId);
+  if (!imp) { toast('⚠ Import not found'); return; }
+  if (!confirm(`Roll back ${imp.sourceLabel} import from ${formatNiceDate(imp.timestamp.slice(0,10))}?\n\nThis will restore ${imp.snapshot.length} entries to their state before this import.\n\nThis cannot be undone.`)) return;
+
+  // Remove all entries on the affected dates that AREN'T in the snapshot (i.e. created by this import)
+  const snapshotDateSet = new Set(imp.snapshotDates);
+  const snapshotDates = new Set(imp.snapshot.map(e => e.date));
+  // Remove created entries (in snapshotDates but not in snapshot)
+  D.entries = D.entries.filter(e => {
+    if (!snapshotDateSet.has(e.date)) return true; // not touched, keep
+    if (snapshotDates.has(e.date)) return false;   // will be replaced from snapshot
+    return false; // this date was touched but not in snapshot = was created, drop it
+  });
+  // Re-insert snapshotted entries
+  D.entries.push(...imp.snapshot.map(e => JSON.parse(JSON.stringify(e))));
+  D.entries.sort((a,b) => a.date.localeCompare(b.date));
+
+  // Remove the import from history
+  D.importHistory = D.importHistory.filter(i => i.id !== impId);
+  save();
+  toast(`✓ Rolled back ${imp.sourceLabel} import`);
+  renderToday(); renderSync();
+}
+
+// v2.8: Build an empty entry shell with all known nullable fields
+function makeEmptyEntry(date) {
+  return {
+    date,
+    weight: null, hr: null, energy: null, mood: null, sleep: null, flex: null,
+    elbowPain: null, shoulderPain: null, kneePain: null,
+    strava: null, calIn: null, calOut: null, focus: null, notes: '',
+    water: null, drinks: 0, bodyFat: null, waist: null, hips: null, chest: null, thigh: null, bicep: null,
+    foodEntries: [], activities: [],
+    sleepScore: null, sleepHours: null, stressAvg: null,
+    bodyBatteryLow: null, bodyBatteryHigh: null,
+    steps: null, hrv: null,
+    stravaFitness: null, stravaFatigue: null
+  };
 }
 
 function confirmClear() {
