@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="QuantHealth">
 <meta name="theme-color" content="#06080b">
-<title>QuantHealth v2.8</title>
+<title>QuantHealth v2.8c</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
@@ -157,6 +157,9 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .insight-chip.bad{border-color:var(--red);background:var(--red-dim);color:var(--red)}
 
 .chart-wrap{position:relative;height:150px;margin-bottom:0.4rem}
+.yearly-wrap{position:relative;height:60px;margin-bottom:0.5rem;padding-bottom:0.3rem;border-bottom:1px solid var(--border)}
+.yearly-label{font-size:0.55rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.15rem}
+.recent-label{font-size:0.55rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top:0.5rem;margin-bottom:0.15rem}
 
 .history-item{display:flex;gap:0.65rem;align-items:flex-start;padding:0.65rem 0;border-bottom:1px solid var(--border)}
 .history-item:last-child{border-bottom:none}
@@ -384,7 +387,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
 <header class="app-header">
   <div>
-    <div class="logo">Quant<span>Health</span><sub>v2.8</sub></div>
+    <div class="logo">Quant<span>Health</span><sub>v2.8c</sub></div>
   </div>
   <div class="header-right">
     <div class="date-chip" id="headerDate"></div>
@@ -751,24 +754,84 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 <!-- ════════════════ TRENDS ════════════════ -->
 <div class="page" id="page-trends">
   <div class="sl">Biometric Trends</div>
-  <div class="card"><div class="card-title">Resting Heart Rate</div><div class="chart-wrap"><canvas id="cHR"></canvas></div></div>
-  <div class="card"><div class="card-title">Weight (lbs)</div><div class="chart-wrap"><canvas id="cWeight"></canvas></div></div>
+  <div class="card">
+    <div class="card-title">Resting Heart Rate</div>
+    <div class="yearly-wrap" id="cHR-yearly-card"><div class="yearly-label">Yearly Average · bpm</div><canvas id="cHR-yearly"></canvas></div>
+    <div class="recent-label">Recent · 21 days</div>
+    <div class="chart-wrap"><canvas id="cHR"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Weight (lbs)</div>
+    <div class="yearly-wrap" id="cWeight-yearly-card"><div class="yearly-label">Yearly Average · lbs</div><canvas id="cWeight-yearly"></canvas></div>
+    <div class="recent-label">Recent · 21 days</div>
+    <div class="chart-wrap"><canvas id="cWeight"></canvas></div>
+  </div>
   <div class="sl">Joint Pain Trends</div>
-  <div class="card"><div class="card-title">Pain Scores (1=none · 5=severe)</div><div class="chart-wrap"><canvas id="cPain"></canvas></div></div>
+  <div class="card">
+    <div class="card-title">Pain Scores (1=none · 5=severe)</div>
+    <div class="chart-wrap"><canvas id="cPain"></canvas></div>
+  </div>
   <div class="sl">Recovery & Performance</div>
-  <div class="card"><div class="card-title">Sleep · Flexibility</div><div class="chart-wrap"><canvas id="cRecovery"></canvas></div></div>
-  <div class="card"><div class="card-title">Calorie Balance</div><div class="chart-wrap"><canvas id="cCal"></canvas></div></div>
+  <div class="card">
+    <div class="card-title">Sleep · Flexibility</div>
+    <div class="chart-wrap"><canvas id="cRecovery"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Calorie Balance</div>
+    <div class="yearly-wrap" id="cCal-yearly-card"><div class="yearly-label">Yearly Average · kcal</div><canvas id="cCal-yearly"></canvas></div>
+    <div class="recent-label">Recent · 21 days</div>
+    <div class="chart-wrap"><canvas id="cCal"></canvas></div>
+  </div>
 
   <div class="sl">Hydration & Alcohol</div>
-  <div class="card"><div class="card-title">Water Intake (L)</div><div class="chart-wrap"><canvas id="cWater"></canvas></div></div>
-  <div class="card"><div class="card-title">Alcohol (drinks/day)</div><div class="chart-wrap"><canvas id="cDrinks"></canvas></div></div>
+  <div class="card">
+    <div class="card-title">Water Intake (L)</div>
+    <div class="yearly-wrap" id="cWater-yearly-card"><div class="yearly-label">Yearly Average · L</div><canvas id="cWater-yearly"></canvas></div>
+    <div class="recent-label">Recent · 21 days</div>
+    <div class="chart-wrap"><canvas id="cWater"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Alcohol (drinks/day)</div>
+    <div class="yearly-wrap" id="cDrinks-yearly-card"><div class="yearly-label">Yearly Average · drinks/day</div><canvas id="cDrinks-yearly"></canvas></div>
+    <div class="recent-label">Recent · 21 days</div>
+    <div class="chart-wrap"><canvas id="cDrinks"></canvas></div>
+  </div>
 
   <div class="sl">Body Composition</div>
-  <div class="card"><div class="card-title">Body Fat % <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(weekly)</span></div><div class="chart-wrap"><canvas id="cBodyFat"></canvas></div></div>
-  <div class="card"><div class="card-title">Measurements (cm) <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(weekly)</span></div><div class="chart-wrap"><canvas id="cMeasure"></canvas></div></div>
-  <div class="card"><div class="card-title">Sleep Hours <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin · 21 days)</span></div><div class="chart-wrap"><canvas id="cSleepHours"></canvas></div></div>
-  <div class="card"><div class="card-title">Daily Steps <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin · 21 days)</span></div><div class="chart-wrap"><canvas id="cSteps"></canvas></div></div>
-  <div class="card"><div class="card-title">Stress (avg) <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin · 21 days)</span></div><div class="chart-wrap"><canvas id="cStress"></canvas></div></div>
+  <div class="card">
+    <div class="card-title">Body Fat % <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(weekly)</span></div>
+    <div class="yearly-wrap" id="cBodyFat-yearly-card"><div class="yearly-label">Yearly Average · %</div><canvas id="cBodyFat-yearly"></canvas></div>
+    <div class="recent-label">Recent</div>
+    <div class="chart-wrap"><canvas id="cBodyFat"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Measurements (cm) <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(weekly)</span></div>
+    <div class="chart-wrap"><canvas id="cMeasure"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Sleep Hours <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin)</span></div>
+    <div class="yearly-wrap" id="cSleepHours-yearly-card"><div class="yearly-label">Yearly Average · hrs</div><canvas id="cSleepHours-yearly"></canvas></div>
+    <div class="recent-label">Recent · 21 days</div>
+    <div class="chart-wrap"><canvas id="cSleepHours"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Daily Steps <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin)</span></div>
+    <div class="yearly-wrap" id="cSteps-yearly-card"><div class="yearly-label">Yearly Average · steps/day</div><canvas id="cSteps-yearly"></canvas></div>
+    <div class="recent-label">Recent · 21 days</div>
+    <div class="chart-wrap"><canvas id="cSteps"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Stress (avg) <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin)</span></div>
+    <div class="yearly-wrap" id="cStress-yearly-card"><div class="yearly-label">Yearly Average · /100</div><canvas id="cStress-yearly"></canvas></div>
+    <div class="recent-label">Recent · 21 days</div>
+    <div class="chart-wrap"><canvas id="cStress"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">VO2 Max <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin)</span></div>
+    <div class="yearly-wrap" id="cVO2-yearly-card"><div class="yearly-label">Yearly Average · ml/kg/min</div><canvas id="cVO2-yearly"></canvas></div>
+    <div class="recent-label">Recent measurements</div>
+    <div class="chart-wrap"><canvas id="cVO2"></canvas></div>
+  </div>
   <div class="card"><div class="card-title">Strava Fitness · Fatigue · Form <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(30 days)</span></div><div class="chart-wrap"><canvas id="cStrava"></canvas></div></div>
 </div>
 
@@ -873,10 +936,10 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   </div>
 
   <div class="card" style="border-color:rgba(255,179,64,0.2);background:rgba(255,179,64,0.03)">
-    <div class="card-title" style="color:var(--amber)">Build Notes — v2.8b</div>
+    <div class="card-title" style="color:var(--amber)">Build Notes — v2.8c</div>
     <div style="font-size:0.72rem;color:var(--muted2);line-height:1.7">
-      <strong style="color:var(--text)">v2.8b revisions:</strong> After inspecting actual Garmin data export, schema updated to match what Vivoactive 3 records. Dropped Sleep Score and Body Battery tiles (not in export — V3 pre-dates those features). Added <strong>Sleep Hours</strong> and <strong>Daily Steps</strong> tiles. New fields: sleepHours, deepSleepMin, lightSleepMin, stressMax, stressAsleep, hrMin, hrMax, moderateMin, vigorousMin, activeKcal, floors. These populate via the v2.10 Garmin import script.<br><br>
-      <strong style="color:var(--text)">Revised correlations:</strong> sleep hours → felt, sleep stress → next-day pain, steps → weight change, plus the existing stress → RHR and Strava fitness → ride volume.<br><br>
+      <strong style="color:var(--text)">New in v2.8c:</strong> Yearly-average bars added above most Trends line charts. When you have multi-year data (e.g. from the Garmin import), you see solid bars for each past year's average (2019, 2020, 2021...) providing baseline context before the 21-day line chart. Current year is excluded from bars — it's what the line chart shows. Bars auto-hide when no multi-year history exists (e.g. new metrics). Added VO2 Max trend chart.<br><br>
+      <strong style="color:var(--text)">v2.8b:</strong> Schema aligned with actual Vivoactive 3 export. Dropped Sleep Score / Body Battery tiles, added Sleep Hours + Steps. New fields for deep/light sleep, stress max, sleep stress, HR min/max, intensity minutes, active calories, floors.<br><br>
       <strong style="color:var(--text)">v2.7:</strong> Program tab mirrors Trail & Iron Google Calendar exactly.<br><br>
       <strong style="color:var(--text)">v2.6:</strong> Smart carry-over on Check-In numeric fields.<br><br>
       <strong style="color:var(--text)">v2.5:</strong> Food log with 250+ food lexicon, inflammation/gut/organ scoring.<br><br>
@@ -2703,10 +2766,95 @@ function makeChart(id, datasets, opts={}) {
   charts[id] = new Chart(ctx,{type:'line',data:{labels:opts.labels||[],datasets},options:{...chartCfg,...opts.extra}});
 }
 
+// v2.8c — make a bar chart for yearly averages. Same config shell as makeChart.
+function makeBarChart(id, datasets, opts={}) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(ctx,{type:'bar',data:{labels:opts.labels||[],datasets},options:{...chartCfg,...opts.extra}});
+}
+
+// v2.8c — compute yearly averages for a given field, excluding the current year.
+// Returns {labels:['2019','2020',...], data:[62.1, 63.4,...]} or null if no data.
+function yearlyAvg(fieldName, minYear) {
+  const byYear = {};
+  const currentYear = new Date().getFullYear();
+  D.entries.forEach(e => {
+    if (e[fieldName] == null) return;
+    const year = parseInt(e.date.slice(0, 4));
+    if (year >= currentYear) return; // Exclude current year — it's in the line chart
+    if (minYear && year < minYear) return;
+    if (!byYear[year]) byYear[year] = { sum: 0, count: 0 };
+    byYear[year].sum += e[fieldName];
+    byYear[year].count++;
+  });
+  const years = Object.keys(byYear).sort();
+  if (years.length === 0) return null;
+  return {
+    labels: years.map(y => `'${y.slice(2)}`),  // '19, '20, '21...
+    data: years.map(y => +(byYear[y].sum / byYear[y].count).toFixed(1))
+  };
+}
+
+// v2.8c — render a yearly-avg bar chart. Color matches the main chart's accent.
+// Hides the chart card entirely if there's no multi-year data (e.g. brand new fields).
+function renderYearlyBars(canvasId, fieldName, color, unit) {
+  const ya = yearlyAvg(fieldName);
+  const cardId = canvasId + '-card';
+  const card = document.getElementById(cardId);
+  if (!ya) {
+    if (card) card.style.display = 'none';
+    if (charts[canvasId]) { charts[canvasId].destroy(); delete charts[canvasId]; }
+    return;
+  }
+  if (card) card.style.display = '';
+  makeBarChart(canvasId, [{
+    data: ya.data,
+    backgroundColor: color,
+    borderColor: color,
+    borderWidth: 0,
+    borderRadius: 3,
+    barThickness: 'flex',
+    maxBarThickness: 42
+  }], {
+    labels: ya.labels,
+    extra: {
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0b0f14', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1,
+          titleColor: '#4a5a6a', bodyColor: '#dde4ec',
+          titleFont: { family: 'DM Mono', size: 9 }, bodyFont: { family: 'DM Mono', size: 10 },
+          padding: 8, cornerRadius: 6,
+          callbacks: {
+            label: (ctx) => `avg: ${ctx.parsed.y}${unit||''}`
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#8a9ba9', font: { family: 'DM Mono', size: 9 } } },
+        y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#8a9ba9', font: { family: 'DM Mono', size: 9 }, maxTicksLimit: 4 } }
+      }
+    }
+  });
+}
+
 function renderTrends() {
   const entries = D.entries.slice(-21);
   if (!entries.length) return;
   const labels = entries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
+
+  // v2.8c — yearly average bars (rendered before each line chart)
+  renderYearlyBars('cHR-yearly', 'hr', 'rgba(0,232,122,0.55)', ' bpm');
+  renderYearlyBars('cWeight-yearly', 'weight', 'rgba(0,200,255,0.55)', ' lbs');
+  renderYearlyBars('cCal-yearly', 'calBal', 'rgba(255,179,64,0.55)', ' kcal');
+  renderYearlyBars('cWater-yearly', 'water', 'rgba(0,200,255,0.55)', ' L');
+  renderYearlyBars('cDrinks-yearly', 'drinks', 'rgba(255,69,96,0.55)', ' drinks');
+  renderYearlyBars('cBodyFat-yearly', 'bodyFat', 'rgba(255,69,96,0.55)', '%');
+  renderYearlyBars('cSleepHours-yearly', 'sleepHours', 'rgba(180,79,255,0.55)', ' hrs');
+  renderYearlyBars('cSteps-yearly', 'steps', 'rgba(0,232,122,0.55)', '');
+  renderYearlyBars('cStress-yearly', 'stressAvg', 'rgba(255,179,64,0.55)', '/100');
+  renderYearlyBars('cVO2-yearly', 'vo2Max', 'rgba(0,200,255,0.55)', '');
 
   makeChart('cHR',[{data:entries.map(e=>e.hr),borderColor:'#00e87a',backgroundColor:'rgba(0,232,122,0.05)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#00e87a',tension:0.3,fill:true,spanGaps:true}],{labels});
   makeChart('cWeight',[{data:entries.map(e=>e.weight),borderColor:'#00c8ff',backgroundColor:'rgba(0,200,255,0.05)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#00c8ff',tension:0.3,fill:true,spanGaps:true}],{labels});
@@ -2781,6 +2929,13 @@ function renderTrends() {
     const stLabels = stEntries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
     makeChart('cStress',[{data:stEntries.map(e=>e.stressAvg),borderColor:'#ffb340',backgroundColor:'rgba(255,179,64,0.06)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#ffb340',tension:0.3,fill:true,spanGaps:true}],{labels:stLabels,extra:{scales:{...chartCfg.scales,y:{...chartCfg.scales.y,min:0,max:100}}}});
   } else if (charts['cStress']) charts['cStress'].destroy();
+
+  // v2.8c VO2 Max — recent measurements (Garmin measures sporadically, not daily)
+  const vo2Entries = D.entries.filter(e=>e.vo2Max!=null).slice(-21);
+  if (vo2Entries.length) {
+    const vo2Labels = vo2Entries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
+    makeChart('cVO2',[{data:vo2Entries.map(e=>e.vo2Max),borderColor:'#00c8ff',backgroundColor:'rgba(0,200,255,0.06)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#00c8ff',tension:0.3,fill:true,spanGaps:true}],{labels:vo2Labels});
+  } else if (charts['cVO2']) charts['cVO2'].destroy();
 
   // v2.8 Strava: Fitness/Fatigue/Form (unchanged)
   const sfEntries = D.entries.filter(e=>e.stravaFitness!=null||e.stravaFatigue!=null||e.strava!=null).slice(-30);
