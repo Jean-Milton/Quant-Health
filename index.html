@@ -469,14 +469,14 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
       <div class="m-delta" id="dBodyFat">—</div>
     </div>
     <div class="metric-tile p">
-      <div class="m-label">Sleep Score</div>
-      <div class="m-val" id="mSleepScore">—<span class="m-unit">/100</span></div>
-      <div class="m-delta" id="dSleepScore">—</div>
+      <div class="m-label">Sleep</div>
+      <div class="m-val" id="mSleepHours">—<span class="m-unit">hrs</span></div>
+      <div class="m-delta" id="dSleepHours">—</div>
     </div>
     <div class="metric-tile g">
-      <div class="m-label">Body Battery</div>
-      <div class="m-val" id="mBodyBattery">—</div>
-      <div class="m-delta" id="dBodyBattery">—</div>
+      <div class="m-label">Steps</div>
+      <div class="m-val" id="mSteps">—</div>
+      <div class="m-delta" id="dSteps">—</div>
     </div>
     <div class="metric-tile a">
       <div class="m-label">Stress (avg)</div>
@@ -766,9 +766,9 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   <div class="sl">Body Composition</div>
   <div class="card"><div class="card-title">Body Fat % <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(weekly)</span></div><div class="chart-wrap"><canvas id="cBodyFat"></canvas></div></div>
   <div class="card"><div class="card-title">Measurements (cm) <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(weekly)</span></div><div class="chart-wrap"><canvas id="cMeasure"></canvas></div></div>
-  <div class="card"><div class="card-title">Sleep Score <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin · 21 days)</span></div><div class="chart-wrap"><canvas id="cSleepScore"></canvas></div></div>
+  <div class="card"><div class="card-title">Sleep Hours <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin · 21 days)</span></div><div class="chart-wrap"><canvas id="cSleepHours"></canvas></div></div>
+  <div class="card"><div class="card-title">Daily Steps <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin · 21 days)</span></div><div class="chart-wrap"><canvas id="cSteps"></canvas></div></div>
   <div class="card"><div class="card-title">Stress (avg) <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin · 21 days)</span></div><div class="chart-wrap"><canvas id="cStress"></canvas></div></div>
-  <div class="card"><div class="card-title">Body Battery <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin · low/high · 21 days)</span></div><div class="chart-wrap"><canvas id="cBodyBattery"></canvas></div></div>
   <div class="card"><div class="card-title">Strava Fitness · Fatigue · Form <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(30 days)</span></div><div class="chart-wrap"><canvas id="cStrava"></canvas></div></div>
 </div>
 
@@ -873,11 +873,10 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   </div>
 
   <div class="card" style="border-color:rgba(255,179,64,0.2);background:rgba(255,179,64,0.03)">
-    <div class="card-title" style="color:var(--amber)">Build Notes — v2.8</div>
+    <div class="card-title" style="color:var(--amber)">Build Notes — v2.8b</div>
     <div style="font-size:0.72rem;color:var(--muted2);line-height:1.7">
-      <strong style="color:var(--text)">New in v2.8:</strong> Garmin + Strava integration foundation. Schema extended with 9 new fields (sleep score, sleep hours, stress, body battery low/high, steps, HRV, Strava fitness/fatigue). New Today tiles for Garmin metrics. New Trends charts. Four new Optimize correlations: sleep score → felt, stress → RHR, body battery → pain, fitness → ride volume.<br><br>
-      <strong style="color:var(--text)">Field-level merge import:</strong> partial JSON imports from Garmin/Strava export scripts patch only the fields they contain — your manual food log, weight, pain entries are preserved. Activities dedup by date+type+duration±10min (Strava wins, manual marked superseded). Per-import rollback in the new Import History card on Sync.<br><br>
-      <strong style="color:var(--text)">Companion scripts (separate, runs on Windows PC):</strong> v2.9 will add <code>scripts/strava-export.py</code> for ongoing Strava sync. v2.10 will add <code>scripts/garmin-import.py</code> for one-shot Garmin Connect data backfill. Request your Garmin export now at garmin.com — it takes 24-48hrs.<br><br>
+      <strong style="color:var(--text)">v2.8b revisions:</strong> After inspecting actual Garmin data export, schema updated to match what Vivoactive 3 records. Dropped Sleep Score and Body Battery tiles (not in export — V3 pre-dates those features). Added <strong>Sleep Hours</strong> and <strong>Daily Steps</strong> tiles. New fields: sleepHours, deepSleepMin, lightSleepMin, stressMax, stressAsleep, hrMin, hrMax, moderateMin, vigorousMin, activeKcal, floors. These populate via the v2.10 Garmin import script.<br><br>
+      <strong style="color:var(--text)">Revised correlations:</strong> sleep hours → felt, sleep stress → next-day pain, steps → weight change, plus the existing stress → RHR and Strava fitness → ride volume.<br><br>
       <strong style="color:var(--text)">v2.7:</strong> Program tab mirrors Trail & Iron Google Calendar exactly.<br><br>
       <strong style="color:var(--text)">v2.6:</strong> Smart carry-over on Check-In numeric fields.<br><br>
       <strong style="color:var(--text)">v2.5:</strong> Food log with 250+ food lexicon, inflammation/gut/organ scoring.<br><br>
@@ -1422,16 +1421,27 @@ let D = (() => {
       if (e.bicep === undefined) e.bicep = null;
       // v2.5 fields
       if (!e.foodEntries) e.foodEntries = [];
-      // v2.8 fields — Garmin + Strava
-      if (e.sleepScore === undefined) e.sleepScore = null;
+      // v2.8 fields — Garmin + Strava (revised: only fields the V3 actually records)
       if (e.sleepHours === undefined) e.sleepHours = null;
+      if (e.deepSleepMin === undefined) e.deepSleepMin = null;
+      if (e.lightSleepMin === undefined) e.lightSleepMin = null;
       if (e.stressAvg === undefined) e.stressAvg = null;
-      if (e.bodyBatteryLow === undefined) e.bodyBatteryLow = null;
-      if (e.bodyBatteryHigh === undefined) e.bodyBatteryHigh = null;
+      if (e.stressMax === undefined) e.stressMax = null;
+      if (e.stressAsleep === undefined) e.stressAsleep = null;
       if (e.steps === undefined) e.steps = null;
+      if (e.hrMin === undefined) e.hrMin = null;
+      if (e.hrMax === undefined) e.hrMax = null;
       if (e.hrv === undefined) e.hrv = null;
+      if (e.moderateMin === undefined) e.moderateMin = null;
+      if (e.vigorousMin === undefined) e.vigorousMin = null;
+      if (e.activeKcal === undefined) e.activeKcal = null;
+      if (e.floors === undefined) e.floors = null;
       if (e.stravaFitness === undefined) e.stravaFitness = null;
       if (e.stravaFatigue === undefined) e.stravaFatigue = null;
+      // Clean up never-populated fields from the earlier v2.8 design
+      delete e.sleepScore;
+      delete e.bodyBatteryLow;
+      delete e.bodyBatteryHigh;
     });
     if (!data.completedWorkouts) data.completedWorkouts = {};
     if (!data.userFoods) data.userFoods = {};
@@ -1684,8 +1694,8 @@ function renderToday() {
       }
     }
     // v2.8 Garmin + Strava tiles — render last available value with date age
-    setGarminTile('mSleepScore','dSleepScore','sleepScore','/100', false);
-    setGarminTile('mBodyBattery','dBodyBattery','bodyBatteryHigh','', false, 'bodyBatteryLow');
+    setGarminTile('mSleepHours','dSleepHours','sleepHours','hrs', false);
+    setGarminTile('mSteps','dSteps','steps','', false);
     setGarminTile('mStress','dStress','stressAvg','/100', true); // higher is worse
     setGarminTile('mStravaForm','dStravaForm','strava','', false);
     setPainTile('todayElbow','barElbow',last.elbowPain);
@@ -1708,19 +1718,27 @@ function setGarminTile(valId, deltaId, fieldName, unit, higherWorse, secondaryFi
     deltaEl.textContent = 'no data yet';
     return;
   }
-  // Body Battery: show range "low–high"
+  // Format value based on type
+  let displayVal;
   if (secondaryField && last[secondaryField] != null) {
-    valEl.innerHTML = `${last[secondaryField]}–${last[fieldName]}`;
+    displayVal = `${last[secondaryField]}–${last[fieldName]}`;
+  } else if (fieldName === 'sleepHours') {
+    displayVal = last[fieldName].toFixed(1);
+  } else if (fieldName === 'steps') {
+    displayVal = last[fieldName].toLocaleString();
   } else {
-    valEl.innerHTML = `${last[fieldName]}${unit?`<span class="m-unit">${unit}</span>`:''}`;
+    displayVal = last[fieldName];
   }
+  valEl.innerHTML = `${displayVal}${unit?`<span class="m-unit">${unit}</span>`:''}`;
+
   // Find prior non-null for delta
   const prev = [...D.entries].reverse().find(e=>e.date<last.date && e[fieldName]!=null);
   if (prev) {
-    const d = (last[fieldName] - prev[fieldName]).toFixed(1);
-    const isImprovement = higherWorse ? d < 0 : d > 0;
-    const cls = d == 0 ? '' : (isImprovement ? 'du' : 'dd');
-    deltaEl.innerHTML = `<span class="${cls}">${d>0?'+':''}${d} since ${formatNiceDate(prev.date)}</span>`;
+    const raw = last[fieldName] - prev[fieldName];
+    const d = fieldName === 'sleepHours' ? raw.toFixed(1) : raw.toFixed(0);
+    const isImprovement = higherWorse ? raw < 0 : raw > 0;
+    const cls = raw == 0 ? '' : (isImprovement ? 'du' : 'dd');
+    deltaEl.innerHTML = `<span class="${cls}">${raw>0?'+':''}${d} since ${formatNiceDate(prev.date)}</span>`;
   } else {
     deltaEl.textContent = `as of ${formatNiceDate(last.date)}`;
   }
@@ -2418,10 +2436,11 @@ function renderOptimize() {
     {label:'Hydration → Pain', r: pearson(entries.map(e=>e.water), entries.map(e=>avg([e.elbowPain,e.shoulderPain,e.kneePain]))), note:'Water intake vs joint pain'},
     {label:'Alcohol → Next-day Sleep', r: pearson(entries.slice(0,-1).map(e=>e.drinks), entries.slice(1).map(e=>e.sleep)), note:'Drinks tonight vs sleep tomorrow'},
     {label:'Alcohol → Next-day HR', r: pearson(entries.slice(0,-1).map(e=>e.drinks), entries.slice(1).map(e=>e.hr)), note:'Drinks tonight vs resting HR tomorrow'},
-    // v2.8 Garmin/Strava correlations
-    {label:'Sleep Score → Felt Score', r: pearson(entries.map(e=>e.sleepScore), entries.map(e=>avgFelt(e))), note:'Garmin sleep predicts session quality'},
+    // v2.8b Garmin/Strava correlations (revised)
+    {label:'Sleep Hours → Felt Score', r: pearson(entries.map(e=>e.sleepHours), entries.map(e=>avgFelt(e))), note:'Garmin sleep duration predicts session quality'},
     {label:'Stress → Resting HR', r: pearson(entries.map(e=>e.stressAvg), entries.map(e=>e.hr)), note:'Garmin stress vs RHR (validation)'},
-    {label:'Body Battery Low → Pain', r: pearson(entries.map(e=>e.bodyBatteryLow), entries.map(e=>avg([e.elbowPain,e.shoulderPain,e.kneePain]))), note:'Depleted recovery → joint flares'},
+    {label:'Sleep Stress → Next-day Pain', r: pearson(entries.slice(0,-1).map(e=>e.stressAsleep), entries.slice(1).map(e=>avg([e.elbowPain,e.shoulderPain,e.kneePain]))), note:'Restful sleep → joint recovery'},
+    {label:'Steps → Weight Δ', r: pearson(entries.slice(0,-1).map(e=>e.steps), entries.slice(1).map((e,i)=>entries[i+1]?.weight&&entries[i]?.weight?entries[i+1].weight-entries[i].weight:null)), note:'Daily activity volume vs weight trend'},
     {label:'Strava Fitness → Long Ride', r: pearson(entries.map(e=>e.stravaFitness), entries.map(e=>totalMin(e))), note:'Higher CTL enables more volume'}
   ].filter(c=>c.r!==null);
 
@@ -2742,31 +2761,28 @@ function renderTrends() {
     if (charts['cMeasure']) charts['cMeasure'].destroy();
   }
 
-  // v2.8 Garmin: Sleep Score
-  const ssEntries = D.entries.filter(e=>e.sleepScore!=null).slice(-21);
-  if (ssEntries.length) {
-    const ssLabels = ssEntries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
-    makeChart('cSleepScore',[{data:ssEntries.map(e=>e.sleepScore),borderColor:'#b44fff',backgroundColor:'rgba(180,79,255,0.06)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#b44fff',tension:0.3,fill:true,spanGaps:true}],{labels:ssLabels,extra:{scales:{...chartCfg.scales,y:{...chartCfg.scales.y,min:0,max:100}}}});
-  } else if (charts['cSleepScore']) charts['cSleepScore'].destroy();
+  // v2.8b Garmin: Sleep Hours
+  const shEntries = D.entries.filter(e=>e.sleepHours!=null).slice(-21);
+  if (shEntries.length) {
+    const shLabels = shEntries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
+    makeChart('cSleepHours',[{data:shEntries.map(e=>e.sleepHours),borderColor:'#b44fff',backgroundColor:'rgba(180,79,255,0.06)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#b44fff',tension:0.3,fill:true,spanGaps:true}],{labels:shLabels,extra:{scales:{...chartCfg.scales,y:{...chartCfg.scales.y,min:0,max:12}}}});
+  } else if (charts['cSleepHours']) charts['cSleepHours'].destroy();
 
-  // v2.8 Garmin: Stress
+  // v2.8b Garmin: Daily Steps
+  const stepsEntries = D.entries.filter(e=>e.steps!=null).slice(-21);
+  if (stepsEntries.length) {
+    const stepsLabels = stepsEntries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
+    makeChart('cSteps',[{data:stepsEntries.map(e=>e.steps),borderColor:'#00e87a',backgroundColor:'rgba(0,232,122,0.06)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#00e87a',tension:0.3,fill:true,spanGaps:true}],{labels:stepsLabels});
+  } else if (charts['cSteps']) charts['cSteps'].destroy();
+
+  // v2.8 Garmin: Stress (kept from earlier)
   const stEntries = D.entries.filter(e=>e.stressAvg!=null).slice(-21);
   if (stEntries.length) {
     const stLabels = stEntries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
     makeChart('cStress',[{data:stEntries.map(e=>e.stressAvg),borderColor:'#ffb340',backgroundColor:'rgba(255,179,64,0.06)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#ffb340',tension:0.3,fill:true,spanGaps:true}],{labels:stLabels,extra:{scales:{...chartCfg.scales,y:{...chartCfg.scales.y,min:0,max:100}}}});
   } else if (charts['cStress']) charts['cStress'].destroy();
 
-  // v2.8 Garmin: Body Battery (high/low band)
-  const bbEntries = D.entries.filter(e=>e.bodyBatteryHigh!=null || e.bodyBatteryLow!=null).slice(-21);
-  if (bbEntries.length) {
-    const bbLabels = bbEntries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
-    makeChart('cBodyBattery',[
-      {label:'High',data:bbEntries.map(e=>e.bodyBatteryHigh),borderColor:'#00e87a',backgroundColor:'rgba(0,232,122,0.05)',borderWidth:2,pointRadius:2,tension:0.3,fill:'+1',spanGaps:true},
-      {label:'Low',data:bbEntries.map(e=>e.bodyBatteryLow),borderColor:'#ff4560',borderWidth:2,pointRadius:2,tension:0.3,spanGaps:true}
-    ],{labels:bbLabels,extra:{plugins:{legend:{display:true,labels:{color:'#7a8a9a',font:{family:'DM Mono',size:9},boxWidth:12}}},scales:{...chartCfg.scales,y:{...chartCfg.scales.y,min:0,max:100}}}});
-  } else if (charts['cBodyBattery']) charts['cBodyBattery'].destroy();
-
-  // v2.8 Strava: Fitness/Fatigue/Form
+  // v2.8 Strava: Fitness/Fatigue/Form (unchanged)
   const sfEntries = D.entries.filter(e=>e.stravaFitness!=null||e.stravaFatigue!=null||e.strava!=null).slice(-30);
   if (sfEntries.length) {
     const sfLabels = sfEntries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
@@ -3784,7 +3800,7 @@ function rollbackImport(impId) {
   renderToday(); renderSync();
 }
 
-// v2.8: Build an empty entry shell with all known nullable fields
+// v2.8 Build an empty entry shell with all known nullable fields
 function makeEmptyEntry(date) {
   return {
     date,
@@ -3793,9 +3809,11 @@ function makeEmptyEntry(date) {
     strava: null, calIn: null, calOut: null, focus: null, notes: '',
     water: null, drinks: 0, bodyFat: null, waist: null, hips: null, chest: null, thigh: null, bicep: null,
     foodEntries: [], activities: [],
-    sleepScore: null, sleepHours: null, stressAvg: null,
-    bodyBatteryLow: null, bodyBatteryHigh: null,
-    steps: null, hrv: null,
+    // v2.8b Garmin (revised for actual V3 data)
+    sleepHours: null, deepSleepMin: null, lightSleepMin: null,
+    stressAvg: null, stressMax: null, stressAsleep: null,
+    steps: null, hrMin: null, hrMax: null, hrv: null,
+    moderateMin: null, vigorousMin: null, activeKcal: null, floors: null,
     stravaFitness: null, stravaFatigue: null
   };
 }
