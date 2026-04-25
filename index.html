@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="QuantHealth">
 <meta name="theme-color" content="#06080b">
-<title>QuantHealth v2.8c</title>
+<title>QuantHealth v2.9</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
@@ -208,6 +208,52 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .toggle-btn.skip{background:var(--surface3);color:var(--muted)}
 .toggle-btn.skip.active{background:var(--amber-dim);border-color:var(--amber);color:var(--amber)}
 
+/* v2.9 — Workout logger UI */
+.ex-expand{background:transparent;border:none;color:var(--muted);font-family:var(--mono);font-size:0.6rem;cursor:pointer;margin-left:0.4rem;padding:0.1rem 0.3rem;border-radius:4px;letter-spacing:0.05em}
+.ex-expand:active{background:var(--surface3)}
+.state-chips{display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.5rem}
+.state-chip{padding:0.3rem 0.55rem;border-radius:14px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--mono);font-size:0.6rem;cursor:pointer;letter-spacing:0.04em}
+.state-chip.active.s-easy{background:rgba(0,232,122,0.12);border-color:var(--green);color:var(--green)}
+.state-chip.active.s-prescribed{background:rgba(0,200,255,0.12);border-color:var(--accent);color:var(--accent)}
+.state-chip.active.s-failed{background:rgba(255,179,64,0.12);border-color:var(--amber);color:var(--amber)}
+.state-chip.active.s-pain{background:rgba(255,69,96,0.12);border-color:var(--red);color:var(--red)}
+.set-grid{margin-top:0.55rem;padding:0.55rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
+.set-grid-head{display:grid;grid-template-columns:35px 1fr 1fr;gap:0.4rem;font-size:0.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;padding-bottom:0.3rem;border-bottom:1px solid var(--border);margin-bottom:0.3rem}
+.set-grid-head span:first-child{text-align:center}
+.set-row{display:grid;grid-template-columns:35px 1fr 1fr;gap:0.4rem;align-items:center;padding:0.25rem 0}
+.set-num{text-align:center;font-size:0.7rem;color:var(--muted2);font-family:var(--display);font-weight:700}
+.set-input{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.4rem 0.5rem;color:var(--text);font-family:var(--mono);font-size:0.75rem;width:100%;-webkit-appearance:none}
+.set-input:focus{outline:none;border-color:var(--accent)}
+.set-input::placeholder{color:var(--muted)}
+.add-set-btn{margin-top:0.3rem;width:100%;padding:0.4rem;background:transparent;border:1px dashed var(--border);border-radius:5px;color:var(--muted);font-family:var(--mono);font-size:0.6rem;cursor:pointer;letter-spacing:0.05em;text-transform:uppercase}
+.add-set-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ex-note-input{margin-top:0.45rem;width:100%;padding:0.45rem 0.6rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:0.7rem;-webkit-appearance:none}
+.ex-note-input:focus{outline:none;border-color:var(--accent)}
+.cardio-log{margin-top:0.65rem;padding:0.65rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
+.cardio-row{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.6rem}
+.cardio-row label{display:flex;flex-direction:column;gap:0.25rem;font-size:0.58rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
+.cardio-row input{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.5rem;color:var(--text);font-family:var(--mono);font-size:0.78rem;-webkit-appearance:none}
+.cardio-row input:focus{outline:none;border-color:var(--accent)}
+.cardio-felt{margin-bottom:0.5rem}
+.felt-row{display:grid;grid-template-columns:repeat(5,1fr);gap:0.3rem;margin-top:0.35rem}
+.felt-btn{padding:0.5rem 0.2rem;border-radius:6px;border:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;align-items:center;gap:0.2rem;cursor:pointer;color:var(--muted)}
+.felt-btn span:first-child{font-size:1.05rem}
+.felt-btn.active{border-color:var(--accent);background:rgba(0,200,255,0.08);color:var(--text)}
+
+/* v2.9 — Compliance strip */
+.compliance-strip{margin-bottom:0.6rem;padding:0.55rem 0.65rem;background:var(--surface);border:1px solid var(--border);border-radius:8px}
+.compliance-title{font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.45rem;display:flex;justify-content:space-between;align-items:center}
+.compliance-title strong{color:var(--text);font-weight:700}
+.compliance-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:0.25rem}
+.compliance-cell{aspect-ratio:1;border-radius:3px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.55rem;color:var(--muted);font-family:var(--mono);cursor:pointer}
+.compliance-cell.done{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+.compliance-cell.skip{background:var(--amber-dim);border-color:var(--amber);color:var(--amber)}
+.compliance-cell.future{opacity:0.4}
+.compliance-cell.today{box-shadow:0 0 0 1.5px var(--accent)}
+.compliance-cell.partial{background:rgba(180,79,255,0.12);border-color:var(--purple);color:var(--purple)}
+.compliance-week-row{margin-bottom:0.4rem}
+.compliance-week-label{font-size:0.55rem;color:var(--muted);font-family:var(--mono);letter-spacing:0.08em;display:flex;justify-content:space-between;margin-bottom:0.2rem}
+
 hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
 .toast{position:fixed;bottom:calc(80px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(16px);background:var(--accent);color:#000;font-family:var(--display);font-size:0.72rem;font-weight:700;letter-spacing:0.08em;padding:0.55rem 1.1rem;border-radius:20px;opacity:0;transition:all 0.25s;pointer-events:none;z-index:500;white-space:nowrap}
@@ -387,7 +433,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
 <header class="app-header">
   <div>
-    <div class="logo">Quant<span>Health</span><sub>v2.8c</sub></div>
+    <div class="logo">Quant<span>Health</span><sub>v2.9</sub></div>
   </div>
   <div class="header-right">
     <div class="date-chip" id="headerDate"></div>
@@ -740,6 +786,8 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
     <div class="phase-desc" id="progPhaseDesc">Build aerobic base, restore joint integrity, establish movement patterns. Volume over intensity.</div>
   </div>
 
+  <div id="complianceStripOutput"></div>
+
   <div class="sl">This Week</div>
   <div class="day-nav" id="dayNav"></div>
 
@@ -936,13 +984,16 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   </div>
 
   <div class="card" style="border-color:rgba(255,179,64,0.2);background:rgba(255,179,64,0.03)">
-    <div class="card-title" style="color:var(--amber)">Build Notes — v2.8c</div>
+    <div class="card-title" style="color:var(--amber)">Build Notes — v2.9</div>
     <div style="font-size:0.72rem;color:var(--muted2);line-height:1.7">
-      <strong style="color:var(--text)">New in v2.8c:</strong> Yearly-average bars added above most Trends line charts. When you have multi-year data (e.g. from the Garmin import), you see solid bars for each past year's average (2019, 2020, 2021...) providing baseline context before the 21-day line chart. Current year is excluded from bars — it's what the line chart shows. Bars auto-hide when no multi-year history exists (e.g. new metrics). Added VO2 Max trend chart.<br><br>
-      <strong style="color:var(--text)">v2.8b:</strong> Schema aligned with actual Vivoactive 3 export. Dropped Sleep Score / Body Battery tiles, added Sleep Hours + Steps. New fields for deep/light sleep, stress max, sleep stress, HR min/max, intensity minutes, active calories, floors.<br><br>
+      <strong style="color:var(--text)">New in v2.9:</strong> Program tab is now a <strong>workout logger</strong>. Tap a day → log per-exercise state (😊 easy / ✓ as prescribed / ⚠ failed / 🩹 pain) with optional notes. Tap "▸ sets" on any exercise to drop into per-set logging with reps + weight inputs. Set values pre-fill from the program template. Cardio days get a simpler form (duration + avg HR + felt 1–5). All data stored in <code>D.workoutLogs</code> separately from Check-In activities.<br><br>
+      <strong style="color:var(--text)">Compliance strip:</strong> 12-week overview at top of Program tab. Each day shows ✓ done, × skipped, ◐ partial (logged but not marked), or empty. Tap any cell to jump to that day. Weekly counts and overall % adherence shown.<br><br>
+      <strong style="color:var(--text)">Bug fix:</strong> "Mark Done" no longer dumps program activities into Check-In. The two systems are now independent — program adherence in Program tab, freeform activities (off-program rides, etc.) still live in Check-In. Existing program-sourced activities in Check-In are preserved (delete manually if you want to clean them up).<br><br>
+      <strong style="color:var(--text)">v2.8c:</strong> Yearly-average bars above Trends charts.<br><br>
+      <strong style="color:var(--text)">v2.8b:</strong> Schema aligned with actual Vivoactive 3 export.<br><br>
       <strong style="color:var(--text)">v2.7:</strong> Program tab mirrors Trail & Iron Google Calendar exactly.<br><br>
       <strong style="color:var(--text)">v2.6:</strong> Smart carry-over on Check-In numeric fields.<br><br>
-      <strong style="color:var(--text)">v2.5:</strong> Food log with 250+ food lexicon, inflammation/gut/organ scoring.<br><br>
+      <strong style="color:var(--text)">v2.5:</strong> Food log with 250+ food lexicon.<br><br>
       <strong style="color:var(--text)">v2.4:</strong> Hydration & alcohol. Body composition.<br><br>
       <strong style="color:var(--text)">v2.3:</strong> Multi-activity per day. Felt 1–5 scale.<br><br>
       <strong style="color:var(--text)">Stable Core:</strong> Zero external API calls. All data stays on this device.
@@ -1243,7 +1294,7 @@ const LEX_INDEX = (() => {
 // ═══════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════
-const STORE = 'quanthealth_v28';
+const STORE = 'quanthealth_v29';
 const PROGRAM_START = new Date('2026-04-21');
 const VAC_START = new Date('2026-06-28');
 const VAC_END = new Date('2026-07-10');
@@ -1510,12 +1561,19 @@ let D = (() => {
     if (!data.userFoods) data.userFoods = {};
     if (!data.settings) data.settings = { textSize: 'normal' };
     if (!data.importHistory) data.importHistory = [];  // v2.8
+    if (!data.workoutLogs) data.workoutLogs = {};      // v2.9
     return data;
   };
 
   try {
     const stored = JSON.parse(localStorage.getItem(STORE));
     if (stored) return migrate(stored);
+    // Try migrating from v2.8
+    const v28 = JSON.parse(localStorage.getItem('quanthealth_v28'));
+    if (v28 && v28.entries) {
+      console.log('Migrating from v2.8');
+      return migrate(v28);
+    }
     // Try migrating from v2.7
     const v27 = JSON.parse(localStorage.getItem('quanthealth_v27'));
     if (v27 && v27.entries) {
@@ -2625,6 +2683,97 @@ function renderProgram() {
       <span style="color:var(--accent);font-size:0.7rem">▸</span>
       <span style="font-size:0.72rem;color:var(--muted2);line-height:1.6">${n}</span>
     </div>`).join('');
+
+  // v2.9 — Compliance strip
+  renderComplianceStrip(prog);
+}
+
+// v2.9 — Render the 12-week compliance strip showing daily done/skip status
+function renderComplianceStrip(prog) {
+  const out = document.getElementById('complianceStripOutput');
+  if (!out) return;
+  const todayIdx = todayDayIdx();
+
+  // Build per-week status across all 12 weeks
+  const weekHTML = [];
+  for (let w = 1; w <= 12; w++) {
+    const phaseN = w <= 4 ? 1 : w <= 8 ? 2 : 3;
+    const wk = `phase${phaseN}-week${w}`;
+    const completed = D.completedWorkouts[wk] || {};
+    const logs = D.workoutLogs[wk] || {};
+    const days = PROGRAM.weeks[phaseN] || PROGRAM.weeks[1];
+    const isCurrentWeek = w === prog.week;
+    let doneCount = 0, totalSlotsThisWeek = 0;
+
+    const cells = days.map((d, i) => {
+      totalSlotsThisWeek++;
+      const status = completed[i];
+      const hasLogData = logs[i] && (
+        Object.keys(logs[i].exercises || {}).length ||
+        (logs[i].cardio && (logs[i].cardio.duration || logs[i].cardio.felt))
+      );
+      const isToday = isCurrentWeek && i === todayIdx;
+      const isFuture = isCurrentWeek ? i > todayIdx : (w > prog.week || prog.week === 0);
+
+      let cls = 'compliance-cell';
+      let label = d.day.charAt(0); // M T W T F S S
+      if (status === 'done') { cls += ' done'; label = '✓'; doneCount++; }
+      else if (status === 'skip') { cls += ' skip'; label = '×'; }
+      else if (hasLogData) { cls += ' partial'; label = '◐'; }
+      else if (isFuture) { cls += ' future'; }
+      if (isToday) cls += ' today';
+
+      return `<div class="${cls}" onclick="jumpToWeekDay(${w},${i})" title="${d.day}: ${d.name}">${label}</div>`;
+    }).join('');
+
+    const weekLabel = isCurrentWeek
+      ? `<strong style="color:var(--accent)">Week ${w}</strong>`
+      : `<span>Week ${w}</span>`;
+
+    weekHTML.push(`
+      <div class="compliance-week-row">
+        <div class="compliance-week-label">${weekLabel}<span>${doneCount}/${totalSlotsThisWeek}</span></div>
+        <div class="compliance-grid">${cells}</div>
+      </div>
+    `);
+  }
+
+  // Compute totals
+  let totalDone = 0, totalSlots = 0;
+  for (let w = 1; w <= 12; w++) {
+    const phaseN = w <= 4 ? 1 : w <= 8 ? 2 : 3;
+    const wk = `phase${phaseN}-week${w}`;
+    const days = PROGRAM.weeks[phaseN] || PROGRAM.weeks[1];
+    const completed = D.completedWorkouts[wk] || {};
+    days.forEach((_, i) => {
+      totalSlots++;
+      if (completed[i] === 'done') totalDone++;
+    });
+  }
+  const pct = totalSlots ? Math.round(totalDone / totalSlots * 100) : 0;
+
+  out.innerHTML = `
+    <div class="compliance-strip">
+      <div class="compliance-title">
+        <span>12-Week Compliance</span>
+        <strong>${totalDone}/${totalSlots} · ${pct}%</strong>
+      </div>
+      ${weekHTML.join('')}
+    </div>
+  `;
+}
+
+// v2.9 — Jump to a specific week/day from compliance strip tap
+function jumpToWeekDay(weekNum, dayIdx) {
+  // For now, just jump to the selected day in the current view's phase.
+  // Full week-jumping would require state for "viewing week" separate from "current week".
+  S.programDay = dayIdx;
+  renderProgram();
+  // Scroll the workout card into view
+  setTimeout(() => {
+    const el = document.getElementById('dayWorkoutOutput');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
 }
 
 function selectProgramDay(idx) {
@@ -2639,6 +2788,18 @@ function renderProgramDay(phase, dayIdx, completed) {
   const isToday = dayIdx === todayIdx;
   const status = completed[dayIdx]; // 'done' | 'skip' | undefined
 
+  const prog = getProgramInfo();
+  const weekKey = `phase${prog.phase}-week${prog.week}`;
+  const log = (D.workoutLogs[weekKey] && D.workoutLogs[weekKey][dayIdx]) || null;
+
+  // Detect workout type — cardio days use a simpler form
+  const isCardio = !day.exercises.some(ex => ex.s && /×|x|set/i.test(ex.s));
+  const isCardioOrRecovery = day.zone.toLowerCase().includes('cardio') ||
+                              day.zone.toLowerCase().includes('recovery') ||
+                              day.zone.toLowerCase().includes('aerobic') ||
+                              day.zone.toLowerCase().includes('threshold') ||
+                              day.zone.toLowerCase().includes('power · 45');
+
   document.getElementById('dayWorkoutOutput').innerHTML = `
     <div class="workout-card">
       <div class="workout-header">
@@ -2648,13 +2809,7 @@ function renderProgramDay(phase, dayIdx, completed) {
         </div>
         <div class="workout-time">${isToday?'TODAY':day.day}</div>
       </div>
-      ${day.exercises.map(ex=>`
-        <div class="exercise-row">
-          <div class="ex-name">${ex.n}</div>
-          <div class="ex-spec"><strong style="color:var(--accent)">${ex.s}</strong></div>
-          ${ex.note?`<div class="ex-note">${ex.note}</div>`:''}
-          ${ex.cues&&ex.cues.length?`<div class="ex-cues">${ex.cues.map(c=>`<span class="cue-chip">${c}</span>`).join('')}</div>`:''}
-        </div>`).join('')}
+      ${isCardioOrRecovery ? renderCardioLogger(day, log, weekKey, dayIdx) : renderStrengthLogger(day, log, weekKey, dayIdx)}
       <div class="complete-toggle">
         <button class="toggle-btn ${status==='done'?'done':''}" onclick="markWorkout(${dayIdx},'done')">${status==='done'?'✓ Done':'Mark Done'}</button>
         <button class="toggle-btn skip ${status==='skip'?'active':''}" onclick="markWorkout(${dayIdx},'skip')">${status==='skip'?'Skipped':'Skip'}</button>
@@ -2662,89 +2817,182 @@ function renderProgramDay(phase, dayIdx, completed) {
     </div>`;
 }
 
-function markWorkout(dayIdx, status) {
-  const prog = getProgramInfo();
-  const weekKey = `phase${prog.phase}-week${prog.week}`;
-  if (!D.completedWorkouts[weekKey]) D.completedWorkouts[weekKey] = {};
+// v2.9 — Strength workout: per-exercise logging with state chip + optional sets/note
+function renderStrengthLogger(day, log, weekKey, dayIdx) {
+  const exLog = (log && log.exercises) || {};
+  return day.exercises.map((ex, i) => {
+    const e = exLog[i] || {};
+    const state = e.state || null;  // null | 'easy' | 'prescribed' | 'failed' | 'pain'
+    const expanded = e.expanded || false;
+    const sets = e.sets || parseSetsFromSpec(ex.s);
+    return `
+      <div class="exercise-row" data-ex-idx="${i}">
+        <div class="ex-name">${ex.n}</div>
+        <div class="ex-spec"><strong style="color:var(--accent)">${ex.s}</strong>
+          <button class="ex-expand" onclick="toggleExpand('${weekKey}',${dayIdx},${i})">${expanded?'▾':'▸'} sets</button>
+        </div>
+        ${ex.note?`<div class="ex-note">${ex.note}</div>`:''}
+        ${ex.cues&&ex.cues.length?`<div class="ex-cues">${ex.cues.map(c=>`<span class="cue-chip">${c}</span>`).join('')}</div>`:''}
+        <div class="state-chips">
+          ${['easy','prescribed','failed','pain'].map(s => `
+            <button class="state-chip ${state===s?'active s-'+s:''}" onclick="setExerciseState('${weekKey}',${dayIdx},${i},'${s}')">${
+              s==='easy'?'😊 easy':s==='prescribed'?'✓ as prescribed':s==='failed'?'⚠ failed':'🩹 pain'
+            }</button>`).join('')}
+        </div>
+        ${expanded ? `
+          <div class="set-grid">
+            <div class="set-grid-head"><span>Set</span><span>Reps</span><span>Weight (lb)</span></div>
+            ${sets.map((set, sIdx) => `
+              <div class="set-row">
+                <span class="set-num">${sIdx+1}</span>
+                <input type="number" class="set-input" value="${set.reps||''}" placeholder="${set.repsHint||''}" onchange="updateSet('${weekKey}',${dayIdx},${i},${sIdx},'reps',this.value)">
+                <input type="number" class="set-input" value="${set.weight||''}" placeholder="${set.weightHint||''}" onchange="updateSet('${weekKey}',${dayIdx},${i},${sIdx},'weight',this.value)">
+              </div>`).join('')}
+            <button class="add-set-btn" onclick="addSet('${weekKey}',${dayIdx},${i})">+ add set</button>
+          </div>
+        ` : ''}
+        ${state ? `
+          <input type="text" class="ex-note-input" placeholder="Optional note (how it felt, what you adjusted)" value="${e.note||''}" onchange="setExerciseNote('${weekKey}',${dayIdx},${i},this.value)">
+        ` : ''}
+      </div>`;
+  }).join('');
+}
 
-  // Toggle off if same status tapped
-  const wasStatus = D.completedWorkouts[weekKey][dayIdx];
-  if (wasStatus === status) {
-    delete D.completedWorkouts[weekKey][dayIdx];
-    // If we're un-marking Done, also remove the auto-created activity
-    if (status === 'done') removeProgramActivity(weekKey, dayIdx);
-    save();
-    renderProgram();
-    toast('Cleared');
-    return;
-  }
+// v2.9 — Cardio workout: simpler form (duration / HR / felt)
+function renderCardioLogger(day, log, weekKey, dayIdx) {
+  const c = (log && log.cardio) || {};
+  return `
+    ${day.exercises.map(ex=>`
+      <div class="exercise-row">
+        <div class="ex-name">${ex.n}</div>
+        <div class="ex-spec"><strong style="color:var(--accent)">${ex.s}</strong></div>
+        ${ex.note?`<div class="ex-note">${ex.note}</div>`:''}
+      </div>`).join('')}
+    <div class="cardio-log">
+      <div class="cardio-row">
+        <label>Duration (min)<input type="number" value="${c.duration||''}" placeholder="" onchange="updateCardio('${weekKey}',${dayIdx},'duration',this.value)"></label>
+        <label>Avg HR<input type="number" value="${c.avgHR||''}" placeholder="" onchange="updateCardio('${weekKey}',${dayIdx},'avgHR',this.value)"></label>
+      </div>
+      <div class="cardio-felt">
+        <span style="font-size:0.62rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase">How did it feel?</span>
+        <div class="felt-row">
+          ${[1,2,3,4,5].map(n=>{
+            const emoji = ['','😵','😓','😐','💪','🚀'][n];
+            const lbl = ['','wrecked','rough','ok','strong','crushed'][n];
+            return `<button class="felt-btn ${c.felt===n?'active':''}" onclick="updateCardio('${weekKey}',${dayIdx},'felt',${n})"><span>${emoji}</span><span style="font-size:0.55rem">${lbl}</span></button>`;
+          }).join('')}
+        </div>
+      </div>
+      <input type="text" class="ex-note-input" placeholder="Optional note" value="${c.note||''}" onchange="updateCardio('${weekKey}',${dayIdx},'note',this.value)">
+    </div>`;
+}
 
-  D.completedWorkouts[weekKey][dayIdx] = status;
+// Parse "3 × 12" or "4 × 10 each leg" or "60 min Z2" into a starting sets array
+function parseSetsFromSpec(spec) {
+  if (!spec) return [{reps:null, weight:null}];
+  const m = spec.match(/(\d+)\s*[×x]\s*(\d+)/);
+  if (!m) return [{reps:null, weight:null}];
+  const numSets = parseInt(m[1]);
+  const reps = parseInt(m[2]);
+  const wM = spec.match(/(\d+)\s*lb/i);
+  const weight = wM ? parseInt(wM[1]) : null;
+  return Array.from({length:numSets}, () => ({
+    reps:null, weight:null, repsHint:reps, weightHint:weight
+  }));
+}
 
-  // If marking Done, auto-log an activity for today
-  if (status === 'done') {
-    autoLogProgramActivity(prog.phase, dayIdx, weekKey);
-    toast('✓ Logged complete');
+// v2.9 — Workout log mutation helpers
+function ensureLog(weekKey, dayIdx) {
+  if (!D.workoutLogs[weekKey]) D.workoutLogs[weekKey] = {};
+  if (!D.workoutLogs[weekKey][dayIdx]) D.workoutLogs[weekKey][dayIdx] = { exercises: {}, cardio: {} };
+  return D.workoutLogs[weekKey][dayIdx];
+}
+
+function setExerciseState(weekKey, dayIdx, exIdx, state) {
+  const log = ensureLog(weekKey, dayIdx);
+  if (!log.exercises[exIdx]) log.exercises[exIdx] = {};
+  // Toggle off if same
+  if (log.exercises[exIdx].state === state) {
+    delete log.exercises[exIdx].state;
   } else {
-    // If skipping (and was previously Done), clear any program activity
-    removeProgramActivity(weekKey, dayIdx);
-    toast('Marked skipped');
+    log.exercises[exIdx].state = state;
   }
   save();
   renderProgram();
 }
 
-function autoLogProgramActivity(phase, dayIdx, weekKey) {
-  const day = PROGRAM.weeks[phase][dayIdx];
-  if (!day) return;
-
-  const today = todayISO();
-  let entry = D.entries.find(e=>e.date===today);
-  if (!entry) {
-    entry = { date: today, hr:null, weight:null, vo2:null, strava:null, calIn:null, calOut:null, calBal:null,
-      protein:null, carbs:null, sleep:null, flex:null,
-      elbowPain:1, shoulderPain:1, kneePain:1, trail: D.trail,
-      touchToes:null, shoulderReach:null, activities:[] };
-    D.entries.push(entry);
-    D.entries.sort((a,b)=>a.date.localeCompare(b.date));
-  }
-  if (!entry.activities) entry.activities = [];
-
-  // Don't double-log if a program activity for this day already exists
-  const exists = entry.activities.some(a=>a.source==='program' && a.programWeekKey===weekKey && a.programDayIdx===dayIdx);
-  if (exists) return;
-
-  // Parse type and default duration from zone string
-  const zoneMatch = day.zone.match(/(\d+)(?:[–-](\d+))?\s*min/);
-  const defaultDur = zoneMatch ? parseInt(zoneMatch[1]) : null;
-  const typeGuess = day.zone.toLowerCase().includes('strength') || day.zone.toLowerCase().includes('power') ? 'Strength'
-    : day.zone.toLowerCase().includes('recovery') ? 'Recovery'
-    : day.name.toLowerCase().includes('mtb') ? 'MTB'
-    : day.name.toLowerCase().includes('roller') ? 'Rollers'
-    : day.name.toLowerCase().includes('walk') ? 'Walk'
-    : day.name.toLowerCase().includes('rest') ? 'Rest'
-    : 'Other';
-
-  entry.activities.push({
-    id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
-    type: typeGuess,
-    name: day.name,
-    duration: defaultDur,
-    avgHR: null,
-    felt: null,
-    notes: '',
-    source: 'program',
-    programWeekKey: weekKey,
-    programDayIdx: dayIdx
-  });
+function setExerciseNote(weekKey, dayIdx, exIdx, note) {
+  const log = ensureLog(weekKey, dayIdx);
+  if (!log.exercises[exIdx]) log.exercises[exIdx] = {};
+  log.exercises[exIdx].note = note;
+  save();
 }
 
-function removeProgramActivity(weekKey, dayIdx) {
-  // Remove the auto-logged program activity from today's entry, if present
-  const today = todayISO();
-  const entry = D.entries.find(e=>e.date===today);
-  if (!entry || !entry.activities) return;
-  entry.activities = entry.activities.filter(a=>!(a.source==='program' && a.programWeekKey===weekKey && a.programDayIdx===dayIdx));
+function toggleExpand(weekKey, dayIdx, exIdx) {
+  const log = ensureLog(weekKey, dayIdx);
+  if (!log.exercises[exIdx]) log.exercises[exIdx] = {};
+  log.exercises[exIdx].expanded = !log.exercises[exIdx].expanded;
+  // If we're opening for the first time, init sets from spec
+  if (log.exercises[exIdx].expanded && !log.exercises[exIdx].sets) {
+    const day = PROGRAM.weeks[getProgramInfo().phase][dayIdx];
+    log.exercises[exIdx].sets = parseSetsFromSpec(day.exercises[exIdx].s);
+  }
+  save();
+  renderProgram();
+}
+
+function updateSet(weekKey, dayIdx, exIdx, setIdx, field, val) {
+  const log = ensureLog(weekKey, dayIdx);
+  if (!log.exercises[exIdx]) log.exercises[exIdx] = {};
+  if (!log.exercises[exIdx].sets) {
+    const day = PROGRAM.weeks[getProgramInfo().phase][dayIdx];
+    log.exercises[exIdx].sets = parseSetsFromSpec(day.exercises[exIdx].s);
+  }
+  if (!log.exercises[exIdx].sets[setIdx]) log.exercises[exIdx].sets[setIdx] = {};
+  log.exercises[exIdx].sets[setIdx][field] = val ? parseFloat(val) : null;
+  save();
+}
+
+function addSet(weekKey, dayIdx, exIdx) {
+  const log = ensureLog(weekKey, dayIdx);
+  if (!log.exercises[exIdx]) log.exercises[exIdx] = {};
+  if (!log.exercises[exIdx].sets) log.exercises[exIdx].sets = [];
+  log.exercises[exIdx].sets.push({reps:null, weight:null});
+  save();
+  renderProgram();
+}
+
+function updateCardio(weekKey, dayIdx, field, val) {
+  const log = ensureLog(weekKey, dayIdx);
+  if (!log.cardio) log.cardio = {};
+  if (field === 'duration' || field === 'avgHR') {
+    log.cardio[field] = val ? parseFloat(val) : null;
+  } else {
+    log.cardio[field] = val;
+  }
+  save();
+  if (field === 'felt') renderProgram();
+}
+
+// v2.9 — REWRITTEN markWorkout: no longer dumps into Check-In activities.
+// Just records compliance state.
+function markWorkout(dayIdx, status) {
+  const prog = getProgramInfo();
+  const weekKey = `phase${prog.phase}-week${prog.week}`;
+  if (!D.completedWorkouts[weekKey]) D.completedWorkouts[weekKey] = {};
+
+  const wasStatus = D.completedWorkouts[weekKey][dayIdx];
+  if (wasStatus === status) {
+    delete D.completedWorkouts[weekKey][dayIdx];
+    save();
+    renderProgram();
+    toast('Cleared');
+    return;
+  }
+  D.completedWorkouts[weekKey][dayIdx] = status;
+  save();
+  renderProgram();
+  toast(status === 'done' ? '✓ Marked done' : 'Marked skipped');
 }
 
 // ═══════════════════════════════
