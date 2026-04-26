@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="QuantHealth">
 <meta name="theme-color" content="#06080b">
-<title>QuantHealth v2.9</title>
+<title>QuantHealth v2.9.1</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
@@ -251,8 +251,14 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .compliance-cell.future{opacity:0.4}
 .compliance-cell.today{box-shadow:0 0 0 1.5px var(--accent)}
 .compliance-cell.partial{background:rgba(180,79,255,0.12);border-color:var(--purple);color:var(--purple)}
+.compliance-cell.viewing{box-shadow:0 0 0 1.5px var(--purple)}
 .compliance-week-row{margin-bottom:0.4rem}
 .compliance-week-label{font-size:0.55rem;color:var(--muted);font-family:var(--mono);letter-spacing:0.08em;display:flex;justify-content:space-between;margin-bottom:0.2rem}
+
+/* v2.9.1 — banner shown when viewing a non-current week */
+.view-week-banner{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding:0.55rem 0.75rem;background:rgba(180,79,255,0.08);border:1px solid var(--purple);border-radius:8px;margin-bottom:0.55rem;font-size:0.7rem;color:var(--purple);font-family:var(--mono);letter-spacing:0.04em}
+.back-current-btn{background:transparent;border:1px solid var(--purple);color:var(--purple);padding:0.3rem 0.6rem;border-radius:14px;font-family:var(--mono);font-size:0.6rem;letter-spacing:0.05em;cursor:pointer}
+.back-current-btn:active{background:rgba(180,79,255,0.15)}
 
 hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
@@ -433,7 +439,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
 <header class="app-header">
   <div>
-    <div class="logo">Quant<span>Health</span><sub>v2.9</sub></div>
+    <div class="logo">Quant<span>Health</span><sub>v2.9.1</sub></div>
   </div>
   <div class="header-right">
     <div class="date-chip" id="headerDate"></div>
@@ -788,6 +794,8 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
   <div id="complianceStripOutput"></div>
 
+  <div id="viewWeekBanner"></div>
+
   <div class="sl">This Week</div>
   <div class="day-nav" id="dayNav"></div>
 
@@ -984,11 +992,11 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   </div>
 
   <div class="card" style="border-color:rgba(255,179,64,0.2);background:rgba(255,179,64,0.03)">
-    <div class="card-title" style="color:var(--amber)">Build Notes — v2.9</div>
+    <div class="card-title" style="color:var(--amber)">Build Notes — v2.9.1</div>
     <div style="font-size:0.72rem;color:var(--muted2);line-height:1.7">
-      <strong style="color:var(--text)">New in v2.9:</strong> Program tab is now a <strong>workout logger</strong>. Tap a day → log per-exercise state (😊 easy / ✓ as prescribed / ⚠ failed / 🩹 pain) with optional notes. Tap "▸ sets" on any exercise to drop into per-set logging with reps + weight inputs. Set values pre-fill from the program template. Cardio days get a simpler form (duration + avg HR + felt 1–5). All data stored in <code>D.workoutLogs</code> separately from Check-In activities.<br><br>
-      <strong style="color:var(--text)">Compliance strip:</strong> 12-week overview at top of Program tab. Each day shows ✓ done, × skipped, ◐ partial (logged but not marked), or empty. Tap any cell to jump to that day. Weekly counts and overall % adherence shown.<br><br>
-      <strong style="color:var(--text)">Bug fix:</strong> "Mark Done" no longer dumps program activities into Check-In. The two systems are now independent — program adherence in Program tab, freeform activities (off-program rides, etc.) still live in Check-In. Existing program-sourced activities in Check-In are preserved (delete manually if you want to clean them up).<br><br>
+      <strong style="color:var(--text)">Hotfix v2.9.1:</strong> Cross-week logging now works. Previously, "Mark Done" always wrote to the current week's key, so logging past workouts silently failed. Now you can tap any cell in the compliance strip to switch the viewing week, and all log/done actions write to that week. A purple banner appears at the top of the workout view when you're not on the current week. "← Current week" button jumps you back.<br><br>
+      <strong style="color:var(--text)">v2.9:</strong> Program tab is the workout logger. Per-exercise state (😊 easy / ✓ as prescribed / ⚠ failed / 🩹 pain) with optional notes. Tap "▸ sets" for per-set logging with reps + weight inputs. Cardio days get a simpler form (duration + avg HR + felt 1–5).<br><br>
+      <strong style="color:var(--text)">Compliance strip:</strong> 12-week overview at top of Program tab. Each cell tap-to-jump.<br><br>
       <strong style="color:var(--text)">v2.8c:</strong> Yearly-average bars above Trends charts.<br><br>
       <strong style="color:var(--text)">v2.8b:</strong> Schema aligned with actual Vivoactive 3 export.<br><br>
       <strong style="color:var(--text)">v2.7:</strong> Program tab mirrors Trail & Iron Google Calendar exactly.<br><br>
@@ -1629,6 +1637,7 @@ let D = (() => {
 function save() { localStorage.setItem(STORE, JSON.stringify(D)); }
 
 let S = { sleep:null, flex:null, programDay:null, entryDate:null, historyView:'cards',
+  viewWeek:null, viewPhase:null,
           actType:null, actFelt:null, addActivityOpen:false, undoState:null,
           waterUnit:'L', drinks:0 };
 let charts = {};
@@ -2655,19 +2664,40 @@ function renderOptimize() {
 // ═══════════════════════════════
 function renderProgram() {
   const prog = getProgramInfo();
-  const phase = PROGRAM.phases[prog.phase];
 
-  document.getElementById('progPhaseNum').textContent = `Phase ${prog.phase} · Weeks ${phase.weeks}`;
+  // v2.9.1 — separate "viewing" week from "current" week so you can log past workouts
+  if (S.viewWeek === null) S.viewWeek = Math.max(prog.week, 1);
+  S.viewPhase = S.viewWeek <= 4 ? 1 : S.viewWeek <= 8 ? 2 : 3;
+
+  const phase = PROGRAM.phases[S.viewPhase];
+
+  document.getElementById('progPhaseNum').textContent = `Phase ${S.viewPhase} · Weeks ${phase.weeks}`;
   document.getElementById('progPhaseTitle').textContent = phase.name;
   document.getElementById('progPhaseDesc').textContent = phase.desc;
 
   // Day nav
-  const days = PROGRAM.weeks[prog.phase] || PROGRAM.weeks[1];
+  const days = PROGRAM.weeks[S.viewPhase] || PROGRAM.weeks[1];
   const todayIdx = todayDayIdx();
   if (S.programDay === null) S.programDay = todayIdx;
 
-  const weekKey = `phase${prog.phase}-week${prog.week}`;
+  const weekKey = `phase${S.viewPhase}-week${S.viewWeek}`;
   const completed = D.completedWorkouts[weekKey] || {};
+
+  // v2.9.1 — show "viewing week N" banner if not current week
+  const isCurrentWeek = S.viewWeek === prog.week;
+  const banner = document.getElementById('viewWeekBanner');
+  if (banner) {
+    if (isCurrentWeek) {
+      banner.innerHTML = '';
+    } else {
+      banner.innerHTML = `
+        <div class="view-week-banner">
+          <span>📅 Logging Week ${S.viewWeek} · Phase ${S.viewPhase}</span>
+          <button class="back-current-btn" onclick="jumpToCurrentWeek()">← Current week</button>
+        </div>
+      `;
+    }
+  }
 
   const navEl = document.getElementById('dayNav');
   navEl.innerHTML = days.map((d,i)=>`
@@ -2675,7 +2705,7 @@ function renderProgram() {
       ${d.day}<span class="day-num">${i+1}</span>
     </button>`).join('');
 
-  renderProgramDay(prog.phase, S.programDay, completed);
+  renderProgramDay(S.viewPhase, S.programDay, completed);
 
   // Phase notes
   document.getElementById('phaseNotesOutput').innerHTML = phase.notes.map(n=>`
@@ -2686,6 +2716,15 @@ function renderProgram() {
 
   // v2.9 — Compliance strip
   renderComplianceStrip(prog);
+}
+
+// v2.9.1 — Jump back to the actual current week
+function jumpToCurrentWeek() {
+  const prog = getProgramInfo();
+  S.viewWeek = Math.max(prog.week, 1);
+  S.viewPhase = prog.phase;
+  S.programDay = todayDayIdx();
+  renderProgram();
 }
 
 // v2.9 — Render the 12-week compliance strip showing daily done/skip status
@@ -2703,6 +2742,7 @@ function renderComplianceStrip(prog) {
     const logs = D.workoutLogs[wk] || {};
     const days = PROGRAM.weeks[phaseN] || PROGRAM.weeks[1];
     const isCurrentWeek = w === prog.week;
+    const isViewingWeek = w === S.viewWeek;  // v2.9.1
     let doneCount = 0, totalSlotsThisWeek = 0;
 
     const cells = days.map((d, i) => {
@@ -2722,17 +2762,20 @@ function renderComplianceStrip(prog) {
       else if (hasLogData) { cls += ' partial'; label = '◐'; }
       else if (isFuture) { cls += ' future'; }
       if (isToday) cls += ' today';
+      if (isViewingWeek && i === S.programDay && !isCurrentWeek) cls += ' viewing';  // v2.9.1
 
       return `<div class="${cls}" onclick="jumpToWeekDay(${w},${i})" title="${d.day}: ${d.name}">${label}</div>`;
     }).join('');
 
-    const weekLabel = isCurrentWeek
-      ? `<strong style="color:var(--accent)">Week ${w}</strong>`
-      : `<span>Week ${w}</span>`;
+    const weekLabelText = isCurrentWeek
+      ? `<strong style="color:var(--accent)">Week ${w}${isViewingWeek?'':' (current)'}</strong>`
+      : (isViewingWeek
+          ? `<strong style="color:var(--purple)">Week ${w} (viewing)</strong>`
+          : `<span>Week ${w}</span>`);
 
     weekHTML.push(`
       <div class="compliance-week-row">
-        <div class="compliance-week-label">${weekLabel}<span>${doneCount}/${totalSlotsThisWeek}</span></div>
+        <div class="compliance-week-label">${weekLabelText}<span>${doneCount}/${totalSlotsThisWeek}</span></div>
         <div class="compliance-grid">${cells}</div>
       </div>
     `);
@@ -2764,9 +2807,10 @@ function renderComplianceStrip(prog) {
 }
 
 // v2.9 — Jump to a specific week/day from compliance strip tap
+// v2.9.1 — actually switches the viewing week, not just the day
 function jumpToWeekDay(weekNum, dayIdx) {
-  // For now, just jump to the selected day in the current view's phase.
-  // Full week-jumping would require state for "viewing week" separate from "current week".
+  S.viewWeek = weekNum;
+  S.viewPhase = weekNum <= 4 ? 1 : weekNum <= 8 ? 2 : 3;
   S.programDay = dayIdx;
   renderProgram();
   // Scroll the workout card into view
@@ -2788,8 +2832,8 @@ function renderProgramDay(phase, dayIdx, completed) {
   const isToday = dayIdx === todayIdx;
   const status = completed[dayIdx]; // 'done' | 'skip' | undefined
 
-  const prog = getProgramInfo();
-  const weekKey = `phase${prog.phase}-week${prog.week}`;
+  // v2.9.1 — use viewing week, not current week, for log lookup
+  const weekKey = `phase${S.viewPhase}-week${S.viewWeek}`;
   const log = (D.workoutLogs[weekKey] && D.workoutLogs[weekKey][dayIdx]) || null;
 
   // Detect workout type — cardio days use a simpler form
@@ -2934,7 +2978,10 @@ function toggleExpand(weekKey, dayIdx, exIdx) {
   log.exercises[exIdx].expanded = !log.exercises[exIdx].expanded;
   // If we're opening for the first time, init sets from spec
   if (log.exercises[exIdx].expanded && !log.exercises[exIdx].sets) {
-    const day = PROGRAM.weeks[getProgramInfo().phase][dayIdx];
+    // v2.9.1 — parse phase from weekKey (e.g. "phase2-week5") rather than current phase
+    const phaseMatch = weekKey.match(/phase(\d+)/);
+    const phase = phaseMatch ? parseInt(phaseMatch[1]) : 1;
+    const day = PROGRAM.weeks[phase][dayIdx];
     log.exercises[exIdx].sets = parseSetsFromSpec(day.exercises[exIdx].s);
   }
   save();
@@ -2945,7 +2992,10 @@ function updateSet(weekKey, dayIdx, exIdx, setIdx, field, val) {
   const log = ensureLog(weekKey, dayIdx);
   if (!log.exercises[exIdx]) log.exercises[exIdx] = {};
   if (!log.exercises[exIdx].sets) {
-    const day = PROGRAM.weeks[getProgramInfo().phase][dayIdx];
+    // v2.9.1 — parse phase from weekKey
+    const phaseMatch = weekKey.match(/phase(\d+)/);
+    const phase = phaseMatch ? parseInt(phaseMatch[1]) : 1;
+    const day = PROGRAM.weeks[phase][dayIdx];
     log.exercises[exIdx].sets = parseSetsFromSpec(day.exercises[exIdx].s);
   }
   if (!log.exercises[exIdx].sets[setIdx]) log.exercises[exIdx].sets[setIdx] = {};
@@ -2975,10 +3025,9 @@ function updateCardio(weekKey, dayIdx, field, val) {
 }
 
 // v2.9 — REWRITTEN markWorkout: no longer dumps into Check-In activities.
-// Just records compliance state.
+// v2.9.1 — uses S.viewWeek/viewPhase so you can mark past weeks
 function markWorkout(dayIdx, status) {
-  const prog = getProgramInfo();
-  const weekKey = `phase${prog.phase}-week${prog.week}`;
+  const weekKey = `phase${S.viewPhase}-week${S.viewWeek}`;
   if (!D.completedWorkouts[weekKey]) D.completedWorkouts[weekKey] = {};
 
   const wasStatus = D.completedWorkouts[weekKey][dayIdx];
