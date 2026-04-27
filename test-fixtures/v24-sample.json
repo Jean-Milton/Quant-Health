@@ -1,1 +1,37 @@
+{
+  "entries": [
+    {
+      "date": "2025-12-15",
+      "weight": 192.5,
+      "hr": 68,
+      "sleep": 4,
+      "flex": 3,
+      "elbowPain": 2,
+      "shoulderPain": 1,
+      "kneePain": 3,
+      "calIn": 2400,
+      "calOut": 450,
+      "protein": 180,
+      "workout": "MTB",
+      "duration": 75,
+      "workoutHR": 142,
+      "trail": "green",
+      "notes": "felt strong"
+    },
+    {
+      "date": "2025-12-16",
+      "weight": 192.0,
+      "hr": 66,
+      "sleep": 5,
+      "flex": 4,
+      "elbowPain": 1,
+      "shoulderPain": 1,
+      "kneePain": 2,
+      "workout": "Strength",
+      "duration": 60
+    }
+  ],
+  "trail": "green",
+  "trailDate": "2025-12-15"
+}
 
