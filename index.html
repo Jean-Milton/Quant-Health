@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="QuantHealth">
 <meta name="theme-color" content="#06080b">
-<title>QuantHealth v2.9.2</title>
+<title>QuantHealth v2.9.3</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
@@ -91,6 +91,16 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .rec-body{font-size:0.72rem;color:var(--muted2);line-height:1.65}
 
 .pain-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;margin-bottom:0.65rem}
+/* v2.9.3 — bilateral pain grid (joint-name | L | R) with back as full-width row */
+.pain-bilat-grid{display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.65rem}
+.pain-bilat-row{display:grid;grid-template-columns:75px 1fr 1fr;gap:0.5rem;align-items:stretch}
+.pain-bilat-label{font-family:var(--display);font-size:0.7rem;font-weight:700;letter-spacing:0.04em;color:var(--muted2);display:flex;align-items:center;text-transform:uppercase;padding-left:0.25rem}
+.pain-bilat-cell{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.55rem 0.6rem;text-align:center;position:relative}
+.pain-bilat-cell-wide{grid-column:2 / span 2}
+.bilat-side{font-size:0.5rem;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);margin-bottom:0.2rem;font-weight:700}
+.pain-bilat-cell .pain-score{font-family:var(--display);font-size:1.25rem;font-weight:800;line-height:1}
+.pain-bilat-cell .pain-bar{height:3px;background:var(--surface2);border-radius:2px;margin-top:0.4rem;overflow:hidden}
+.pain-bilat-cell .pain-bar-fill{height:100%;border-radius:2px;transition:width 0.3s}
 .pain-tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0.7rem 0.5rem;text-align:center}
 .pain-joint{font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem}
 .pain-score{font-family:var(--display);font-size:1.5rem;font-weight:800}
@@ -123,6 +133,29 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 
 .pain-inputs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;margin-bottom:0.65rem}
 .pain-input-group{display:flex;flex-direction:column;gap:0.3rem}
+/* v2.9.3 — bilateral pain input rows for Check-In */
+.pain-bilat-input-row{display:grid;grid-template-columns:75px 1fr;gap:0.5rem;align-items:center;padding:0.5rem 0;border-bottom:1px solid var(--border)}
+.pain-bilat-input-row:last-of-type{border-bottom:none}
+.pain-bilat-input-label{font-family:var(--display);font-size:0.7rem;font-weight:700;letter-spacing:0.04em;color:var(--muted2);text-transform:uppercase;padding-left:0.25rem}
+.pain-bilat-input-pair{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem}
+.pain-bilat-input-cell{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:0.45rem 0.55rem;display:flex;flex-direction:column;gap:0.25rem;align-items:center}
+.pain-bilat-input-cell-wide{grid-column:1 / span 2}
+.pain-bilat-input-cell .bilat-side{font-size:0.5rem;letter-spacing:0.13em;color:var(--muted);font-weight:700}
+.pain-bilat-input-cell .pain-slider{width:100%}
+.pain-bilat-input-cell .pain-val-display{font-family:var(--display);font-size:0.95rem;font-weight:800}
+/* Med chips */
+.med-chips{display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.4rem}
+.med-chip{padding:0.45rem 0.7rem;border-radius:18px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted2);font-family:var(--mono);font-size:0.65rem;cursor:pointer;letter-spacing:0.04em;transition:all 0.15s}
+.med-chip.taken{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+.med-chip-empty{font-size:0.65rem;color:var(--muted);padding:0.6rem;text-align:center;background:var(--surface2);border:1px dashed var(--border);border-radius:8px}
+.med-chip-empty a{color:var(--accent);text-decoration:underline}
+/* Med list management (Settings tab) */
+.med-list-row{display:flex;align-items:center;gap:0.6rem;padding:0.55rem 0.7rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:0.35rem}
+.med-list-info{flex:1;min-width:0}
+.med-list-name{font-family:var(--display);font-size:0.78rem;font-weight:700;color:var(--text)}
+.med-list-dose{font-size:0.6rem;color:var(--muted);letter-spacing:0.05em;margin-top:0.1rem}
+.med-delete{width:26px;height:26px;border-radius:50%;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:1rem;cursor:pointer;flex-shrink:0;line-height:1}
+.med-delete:hover{border-color:var(--red);color:var(--red)}
 .pain-input-label{font-size:0.56rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);text-align:center}
 .pain-slider{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;background:var(--surface2);outline:none;cursor:pointer}
 .pain-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--bg)}
@@ -447,7 +480,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
 <header class="app-header">
   <div>
-    <div class="logo">Quant<span>Health</span><sub>v2.9.2</sub></div>
+    <div class="logo">Quant<span>Health</span><sub>v2.9.3</sub></div>
   </div>
   <div class="header-right">
     <div class="date-chip" id="headerDate"></div>
@@ -481,21 +514,52 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   <div id="foodLogToday"></div>
 
   <div class="sl">Joint Status</div>
-  <div class="pain-grid">
-    <div class="pain-tile">
-      <div class="pain-joint">Elbow</div>
-      <div class="pain-score" id="todayElbow">—</div>
-      <div class="pain-bar"><div class="pain-bar-fill" id="barElbow" style="width:0%;background:var(--green)"></div></div>
+  <div class="pain-bilat-grid">
+    <div class="pain-bilat-row">
+      <div class="pain-bilat-label">Elbow</div>
+      <div class="pain-bilat-cell">
+        <div class="bilat-side">L</div>
+        <div class="pain-score" id="todayElbowL">—</div>
+        <div class="pain-bar"><div class="pain-bar-fill" id="barElbowL" style="width:0%;background:var(--green)"></div></div>
+      </div>
+      <div class="pain-bilat-cell">
+        <div class="bilat-side">R</div>
+        <div class="pain-score" id="todayElbowR">—</div>
+        <div class="pain-bar"><div class="pain-bar-fill" id="barElbowR" style="width:0%;background:var(--green)"></div></div>
+      </div>
     </div>
-    <div class="pain-tile">
-      <div class="pain-joint">Shoulder</div>
-      <div class="pain-score" id="todayShoulder">—</div>
-      <div class="pain-bar"><div class="pain-bar-fill" id="barShoulder" style="width:0%;background:var(--green)"></div></div>
+    <div class="pain-bilat-row">
+      <div class="pain-bilat-label">Shoulder</div>
+      <div class="pain-bilat-cell">
+        <div class="bilat-side">L</div>
+        <div class="pain-score" id="todayShoulderL">—</div>
+        <div class="pain-bar"><div class="pain-bar-fill" id="barShoulderL" style="width:0%;background:var(--green)"></div></div>
+      </div>
+      <div class="pain-bilat-cell">
+        <div class="bilat-side">R</div>
+        <div class="pain-score" id="todayShoulderR">—</div>
+        <div class="pain-bar"><div class="pain-bar-fill" id="barShoulderR" style="width:0%;background:var(--green)"></div></div>
+      </div>
     </div>
-    <div class="pain-tile">
-      <div class="pain-joint">Knee</div>
-      <div class="pain-score" id="todayKnee">—</div>
-      <div class="pain-bar"><div class="pain-bar-fill" id="barKnee" style="width:0%;background:var(--green)"></div></div>
+    <div class="pain-bilat-row">
+      <div class="pain-bilat-label">Knee</div>
+      <div class="pain-bilat-cell">
+        <div class="bilat-side">L</div>
+        <div class="pain-score" id="todayKneeL">—</div>
+        <div class="pain-bar"><div class="pain-bar-fill" id="barKneeL" style="width:0%;background:var(--green)"></div></div>
+      </div>
+      <div class="pain-bilat-cell">
+        <div class="bilat-side">R</div>
+        <div class="pain-score" id="todayKneeR">—</div>
+        <div class="pain-bar"><div class="pain-bar-fill" id="barKneeR" style="width:0%;background:var(--green)"></div></div>
+      </div>
+    </div>
+    <div class="pain-bilat-row">
+      <div class="pain-bilat-label">Back</div>
+      <div class="pain-bilat-cell pain-bilat-cell-wide">
+        <div class="pain-score" id="todayBack">—</div>
+        <div class="pain-bar"><div class="pain-bar-fill" id="barBack" style="width:0%;background:var(--green)"></div></div>
+      </div>
     </div>
   </div>
 
@@ -588,23 +652,68 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
   <div class="card">
     <div class="card-title">Joint Pain (1=none · 5=severe)</div>
-    <div class="pain-inputs">
-      <div class="pain-input-group">
-        <div class="pain-input-label">Elbow</div>
-        <input type="range" class="pain-slider" id="sliderElbow" min="1" max="5" value="1" oninput="updatePainDisplay('Elbow',this.value)">
-        <div class="pain-val-display s1" id="dispElbow">1</div>
-      </div>
-      <div class="pain-input-group">
-        <div class="pain-input-label">Shoulder</div>
-        <input type="range" class="pain-slider" id="sliderShoulder" min="1" max="5" value="1" oninput="updatePainDisplay('Shoulder',this.value)">
-        <div class="pain-val-display s1" id="dispShoulder">1</div>
-      </div>
-      <div class="pain-input-group">
-        <div class="pain-input-label">Knee</div>
-        <input type="range" class="pain-slider" id="sliderKnee" min="1" max="5" value="1" oninput="updatePainDisplay('Knee',this.value)">
-        <div class="pain-val-display s1" id="dispKnee">1</div>
+
+    <div class="pain-bilat-input-row">
+      <div class="pain-bilat-input-label">Elbow</div>
+      <div class="pain-bilat-input-pair">
+        <div class="pain-bilat-input-cell">
+          <div class="bilat-side">L</div>
+          <input type="range" class="pain-slider" id="sliderElbowL" min="1" max="5" value="1" oninput="updatePainDisplay('ElbowL',this.value)">
+          <div class="pain-val-display s1" id="dispElbowL">1</div>
+        </div>
+        <div class="pain-bilat-input-cell">
+          <div class="bilat-side">R</div>
+          <input type="range" class="pain-slider" id="sliderElbowR" min="1" max="5" value="1" oninput="updatePainDisplay('ElbowR',this.value)">
+          <div class="pain-val-display s1" id="dispElbowR">1</div>
+        </div>
       </div>
     </div>
+
+    <div class="pain-bilat-input-row">
+      <div class="pain-bilat-input-label">Shoulder</div>
+      <div class="pain-bilat-input-pair">
+        <div class="pain-bilat-input-cell">
+          <div class="bilat-side">L</div>
+          <input type="range" class="pain-slider" id="sliderShoulderL" min="1" max="5" value="1" oninput="updatePainDisplay('ShoulderL',this.value)">
+          <div class="pain-val-display s1" id="dispShoulderL">1</div>
+        </div>
+        <div class="pain-bilat-input-cell">
+          <div class="bilat-side">R</div>
+          <input type="range" class="pain-slider" id="sliderShoulderR" min="1" max="5" value="1" oninput="updatePainDisplay('ShoulderR',this.value)">
+          <div class="pain-val-display s1" id="dispShoulderR">1</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pain-bilat-input-row">
+      <div class="pain-bilat-input-label">Knee</div>
+      <div class="pain-bilat-input-pair">
+        <div class="pain-bilat-input-cell">
+          <div class="bilat-side">L</div>
+          <input type="range" class="pain-slider" id="sliderKneeL" min="1" max="5" value="1" oninput="updatePainDisplay('KneeL',this.value)">
+          <div class="pain-val-display s1" id="dispKneeL">1</div>
+        </div>
+        <div class="pain-bilat-input-cell">
+          <div class="bilat-side">R</div>
+          <input type="range" class="pain-slider" id="sliderKneeR" min="1" max="5" value="1" oninput="updatePainDisplay('KneeR',this.value)">
+          <div class="pain-val-display s1" id="dispKneeR">1</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pain-bilat-input-row">
+      <div class="pain-bilat-input-label">Back</div>
+      <div class="pain-bilat-input-pair">
+        <div class="pain-bilat-input-cell pain-bilat-input-cell-wide">
+          <input type="range" class="pain-slider" id="sliderBack" min="1" max="5" value="1" oninput="updatePainDisplay('Back',this.value)">
+          <div class="pain-val-display s1" id="dispBack">1</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="div">
+    <div class="card-title">Medications Taken Today</div>
+    <div id="medsCheckIn"></div>
 
     <hr class="div">
     <div class="card-title">Vitals</div>
@@ -942,6 +1051,28 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   <div class="sl">Data & Sync</div>
 
   <div class="card">
+    <div class="card-title">Medications</div>
+    <div style="font-size:0.7rem;color:var(--muted2);line-height:1.6;margin-bottom:0.75rem">
+      Define meds you take regularly. Each one becomes a tappable chip in Check-In so you can log compliance daily. Used for correlations with pain, sleep, and HR.
+    </div>
+    <div id="medsListOutput"></div>
+    <div class="form-row" style="margin-top:0.6rem">
+      <div class="form-group">
+        <label class="form-label">Med Name</label>
+        <input type="text" class="form-input" id="inputMedName" placeholder="e.g. ibuprofen" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Dose / Notes (optional)</label>
+        <input type="text" class="form-input" id="inputMedDose" placeholder="e.g. 200mg" autocomplete="off">
+      </div>
+    </div>
+    <button class="btn-secondary" onclick="addMed()" style="margin-top:0.4rem">+ Add Medication</button>
+    <div style="font-size:0.55rem;color:var(--muted);text-align:center;margin-top:0.5rem;line-height:1.6">
+      Stored only on this device. Included in JSON backups.
+    </div>
+  </div>
+
+  <div class="card">
     <div class="card-title">Profile</div>
     <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem">
       <div style="width:44px;height:44px;border-radius:50%;background:var(--accent-dim);border:2px solid rgba(0,200,255,0.3);display:flex;align-items:center;justify-content:center;font-size:1.2rem">👤</div>
@@ -1000,16 +1131,16 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   </div>
 
   <div class="card" style="border-color:rgba(255,179,64,0.2);background:rgba(255,179,64,0.03)">
-    <div class="card-title" style="color:var(--amber)">Build Notes — v2.9.2</div>
+    <div class="card-title" style="color:var(--amber)">Build Notes — v2.9.3</div>
     <div style="font-size:0.72rem;color:var(--muted2);line-height:1.7">
-      <strong style="color:var(--text)">v2.9.2 — Critical fixes:</strong>
+      <strong style="color:var(--text)">v2.9.3 — Bilateral pain + medications:</strong>
       <br><br>
-      <strong style="color:var(--text)">1. Timezone bug fixed.</strong> Previously the app used UTC dates internally, causing entries logged after 8pm Eastern to be saved under tomorrow's date. Now uses local timezone consistently. ~30 call sites updated.<br><br>
-      <strong style="color:var(--text)">2. IndexedDB durable storage.</strong> Storage migrated from localStorage to IndexedDB. localStorage is treated as "cache" by browsers and gets evicted under storage pressure (especially iOS Safari). IndexedDB is treated as durable app storage. We write to both for now; on next load if IndexedDB has more data than localStorage, it auto-restores. This protects against the data loss seen earlier in development.<br><br>
-      <strong style="color:var(--text)">3. Skip indicator on day buttons.</strong> Previously, marking a day as Skip showed no visual change on the day-of-week buttons (only Done showed ✓). Now Skip displays an amber × so the data state is unambiguous.<br><br>
-      <strong style="color:var(--text)">4. Empty chart placeholder.</strong> Previously, charts with no data rendered as a blank graph with 0–1.0 axis (looked broken). Now they show "No data yet · Log entries or import data to populate."<br><br>
-      <strong style="color:var(--text)">Plus:</strong> Test harness adopted (validate.sh + GitHub Action). All builds now auto-validated for JS syntax, handler coverage, fetch count, structural integrity, migration cleanliness.<br><br>
-      <strong style="color:var(--text)">v2.9.1:</strong> Cross-week logging. Compliance strip cells now jump to that week.<br><br>
+      <strong style="color:var(--text)">1. Bilateral joint pain.</strong> Elbow, shoulder, and knee now track left and right independently. Existing single-value pain entries migrated to BOTH sides as a starting point — refine going forward as needed. The Today screen shows a 4-row layout (Elbow / Shoulder / Knee with L/R cells, plus Back as full-width).<br><br>
+      <strong style="color:var(--text)">2. Lower-back tracking.</strong> New single field for back pain (1–5 scale). Joins the bilateral grid as the bottom row.<br><br>
+      <strong style="color:var(--text)">3. Medication tracking.</strong> Predefined list configured in Settings → Medications. Each med becomes a tappable chip in Check-In to log compliance daily. Will feed correlation analysis with pain, sleep, HR over time.<br><br>
+      <strong style="color:var(--text)">4. Food score clarity.</strong> Inflammation pill on Food Log now reads "infl −2" instead of just "−2" so the meaning is obvious on mobile. Same for organ-load pill.<br><br>
+      <strong style="color:var(--text)">v2.9.2:</strong> Timezone bug fixed. IndexedDB durable storage. Skip indicator. Empty chart placeholder. Test harness adopted.<br><br>
+      <strong style="color:var(--text)">v2.9.1:</strong> Cross-week logging. Compliance strip cells jump to that week.<br><br>
       <strong style="color:var(--text)">v2.9:</strong> Program tab is the workout logger. Per-exercise state, per-set logging, compliance strip.<br><br>
       <strong style="color:var(--text)">v2.8c:</strong> Yearly-average bars above Trends charts.<br><br>
       <strong style="color:var(--text)">v2.8b:</strong> Schema aligned with actual Vivoactive 3 export.<br><br>
@@ -1578,12 +1709,28 @@ let D = (() => {
       delete e.sleepScore;
       delete e.bodyBatteryLow;
       delete e.bodyBatteryHigh;
+      // v2.9.3 fields — bilateral joint pain + back + medications
+      // Migration: split existing single elbowPain/shoulderPain/kneePain
+      // into L/R fields. Initial values set equal so no data is lost.
+      if (e.elbowPainL === undefined) e.elbowPainL = e.elbowPain ?? null;
+      if (e.elbowPainR === undefined) e.elbowPainR = e.elbowPain ?? null;
+      if (e.shoulderPainL === undefined) e.shoulderPainL = e.shoulderPain ?? null;
+      if (e.shoulderPainR === undefined) e.shoulderPainR = e.shoulderPain ?? null;
+      if (e.kneePainL === undefined) e.kneePainL = e.kneePain ?? null;
+      if (e.kneePainR === undefined) e.kneePainR = e.kneePain ?? null;
+      if (e.backPain === undefined) e.backPain = null;
+      // Medications taken today — array of med IDs (strings) from the user's predefined list
+      if (!e.meds) e.meds = [];
     });
     if (!data.completedWorkouts) data.completedWorkouts = {};
     if (!data.userFoods) data.userFoods = {};
     if (!data.settings) data.settings = { textSize: 'normal' };
     if (!data.importHistory) data.importHistory = [];  // v2.8
     if (!data.workoutLogs) data.workoutLogs = {};      // v2.9
+    // v2.9.3 — user's predefined medication list
+    // Each med: {id, name, dose, schedule, active, addedAt}
+    // The list itself is empty by default; user fills it in via Settings.
+    if (!data.medsList) data.medsList = [];
     return data;
   };
 
@@ -1920,9 +2067,14 @@ function renderToday() {
     setGarminTile('mSteps','dSteps','steps','', false);
     setGarminTile('mStress','dStress','stressAvg','/100', true); // higher is worse
     setGarminTile('mStravaForm','dStravaForm','strava','', false);
-    setPainTile('todayElbow','barElbow',last.elbowPain);
-    setPainTile('todayShoulder','barShoulder',last.shoulderPain);
-    setPainTile('todayKnee','barKnee',last.kneePain);
+    // v2.9.3 — bilateral joint pain tiles
+    setPainTile('todayElbowL','barElbowL',last.elbowPainL);
+    setPainTile('todayElbowR','barElbowR',last.elbowPainR);
+    setPainTile('todayShoulderL','barShoulderL',last.shoulderPainL);
+    setPainTile('todayShoulderR','barShoulderR',last.shoulderPainR);
+    setPainTile('todayKneeL','barKneeL',last.kneePainL);
+    setPainTile('todayKneeR','barKneeR',last.kneePainR);
+    setPainTile('todayBack','barBack',last.backPain);
   }
 
   // Food log on Today
@@ -2339,7 +2491,17 @@ function saveCheckin() {
     water: waterL,
     drinks: S.drinks || 0,
     sleep: S.sleep, flex: S.flex,
-    elbowPain: geti('sliderElbow'), shoulderPain: geti('sliderShoulder'), kneePain: geti('sliderKnee'),
+    // v2.9.3 — bilateral pain
+    elbowPainL: geti('sliderElbowL'), elbowPainR: geti('sliderElbowR'),
+    shoulderPainL: geti('sliderShoulderL'), shoulderPainR: geti('sliderShoulderR'),
+    kneePainL: geti('sliderKneeL'), kneePainR: geti('sliderKneeR'),
+    backPain: geti('sliderBack'),
+    // Singular fields kept as max(L,R) for backward compatibility with old code
+    elbowPain: Math.max(geti('sliderElbowL')||0, geti('sliderElbowR')||0) || null,
+    shoulderPain: Math.max(geti('sliderShoulderL')||0, geti('sliderShoulderR')||0) || null,
+    kneePain: Math.max(geti('sliderKneeL')||0, geti('sliderKneeR')||0) || null,
+    // Medications taken today
+    meds: S.medsToday || [],
     trail: (entryDate === todayISO()) ? D.trail : (existing?.trail || 'unknown'),
     touchToes: isNaN(tt)?null:tt, shoulderReach: isNaN(sr)?null:sr,
     bodyFat: get('inBodyFat'),
@@ -2365,10 +2527,11 @@ function clearCheckin() {
   ['inHR','inWeight','inVO2','inStrava','inCalIn','inCalOut','inProtein','inCarbs','inWater','inTouchToes','inShoulderReach','inBodyFat','inWaist','inHips','inChest','inThigh','inBicep'].forEach(id=>{
     const el = document.getElementById(id); if (el) el.value = '';
   });
-  ['sliderElbow','sliderShoulder','sliderKnee'].forEach(id=>{
+  ['sliderElbowL','sliderElbowR','sliderShoulderL','sliderShoulderR','sliderKneeL','sliderKneeR','sliderBack'].forEach(id=>{
     const el = document.getElementById(id); if (el) { el.value = 1; updatePainDisplay(id.replace('slider',''),1); }
   });
   S.sleep = null; S.flex = null;
+  S.medsToday = [];
   S.drinks = 0;
   setDrinks(0);
   document.querySelectorAll('.rbtn').forEach(b=>b.classList.remove('active'));
@@ -2458,11 +2621,24 @@ function prefillFromExisting(date) {
     setVal('inChest', existing.chest);
     setVal('inThigh', existing.thigh);
     setVal('inBicep', existing.bicep);
-    ['Elbow','Shoulder','Knee'].forEach(j=>{
-      const v = existing[j.toLowerCase()+'Pain'] || 1;
-      document.getElementById('slider'+j).value = v;
-      updatePainDisplay(j, v);
+    // v2.9.3 — bilateral pain hydration. Falls back to old singular field
+    // if entry was created pre-v2.9.3 and never edited.
+    [
+      ['ElbowL', existing.elbowPainL ?? existing.elbowPain],
+      ['ElbowR', existing.elbowPainR ?? existing.elbowPain],
+      ['ShoulderL', existing.shoulderPainL ?? existing.shoulderPain],
+      ['ShoulderR', existing.shoulderPainR ?? existing.shoulderPain],
+      ['KneeL', existing.kneePainL ?? existing.kneePain],
+      ['KneeR', existing.kneePainR ?? existing.kneePain],
+      ['Back', existing.backPain],
+    ].forEach(([key, val]) => {
+      const v = val || 1;
+      const slider = document.getElementById('slider'+key);
+      if (slider) { slider.value = v; updatePainDisplay(key, v); }
     });
+    // v2.9.3 — meds taken hydration
+    S.medsToday = Array.isArray(existing.meds) ? [...existing.meds] : [];
+    renderMedsCheckIn();
     if (existing.sleep) setSleep(existing.sleep);
     if (existing.flex) setFlex(existing.flex);
     // For fields that exist for THIS entry but are empty, still try carry-over
@@ -2471,6 +2647,9 @@ function prefillFromExisting(date) {
     warn.style.display = isPast ? 'block' : 'none';
     if (isPast) warn.textContent = `📝 New entry for ${formatNiceDate(date)} — fill in what you remember`;
     clearCheckin();
+    // v2.9.3 — render empty meds list
+    S.medsToday = [];
+    renderMedsCheckIn();
     // Carry over last known values for new entries
     applyCarryOver(date, null);
   }
@@ -3866,9 +4045,10 @@ function renderScorePill(scores) {
   const i = scores.inflammation;
   const cls = i <= -1 ? 'anti' : i >= 1 ? 'pro' : 'neu';
   const sign = i > 0 ? '+' : '';
-  let html = `<span class="score-pill score-infl ${cls}" title="Inflammation index">${sign}${i}</span>`;
+  // v2.9.3 — explicit "infl" label so the number isn't mysterious on mobile
+  let html = `<span class="score-pill score-infl ${cls}" title="Inflammation index — negative = anti-inflammatory">infl ${sign}${i}</span>`;
   if (scores.plants > 0) html += `<span class="score-pill score-plants" title="Unique plant species today">🌱 ${scores.plants}</span>`;
-  if (scores.organ > 0) html += `<span class="score-pill score-organ" title="Organ load">⚠ ${scores.organ}</span>`;
+  if (scores.organ > 0) html += `<span class="score-pill score-organ" title="Organ load">⚠ organ ${scores.organ}</span>`;
   return html;
 }
 
@@ -4169,6 +4349,87 @@ function renderSync() {
   });
   // v2.8: Import History
   renderImportHistory();
+  // v2.9.3: Medications list
+  renderMedsList();
+}
+
+// v2.9.3 — render the user's predefined medication list in Settings
+function renderMedsList() {
+  const out = document.getElementById('medsListOutput');
+  if (!out) return;
+  const meds = D.medsList || [];
+  if (!meds.length) {
+    out.innerHTML = '<div style="font-size:0.65rem;color:var(--muted);text-align:center;padding:0.85rem;background:var(--surface2);border:1px dashed var(--border);border-radius:8px">No medications defined yet</div>';
+    return;
+  }
+  out.innerHTML = meds.map(m => `
+    <div class="med-list-row">
+      <div class="med-list-info">
+        <div class="med-list-name">${escapeHtml(m.name)}</div>
+        ${m.dose ? `<div class="med-list-dose">${escapeHtml(m.dose)}</div>` : ''}
+      </div>
+      <button class="med-delete" onclick="deleteMed('${m.id}')" title="Remove">×</button>
+    </div>
+  `).join('');
+}
+
+function addMed() {
+  const nameEl = document.getElementById('inputMedName');
+  const doseEl = document.getElementById('inputMedDose');
+  const name = nameEl.value.trim();
+  if (!name) { toast('⚠ Med name required'); return; }
+  const dose = doseEl.value.trim();
+  if (!D.medsList) D.medsList = [];
+  // Prevent dupes
+  if (D.medsList.some(m => m.name.toLowerCase() === name.toLowerCase())) {
+    toast('⚠ Already in list');
+    return;
+  }
+  D.medsList.push({
+    id: 'med_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    name, dose,
+    active: true,
+    addedAt: new Date().toISOString()
+  });
+  save();
+  nameEl.value = ''; doseEl.value = '';
+  renderMedsList();
+  toast('✓ Med added');
+}
+
+function deleteMed(id) {
+  if (!D.medsList) return;
+  const med = D.medsList.find(m => m.id === id);
+  if (!med) return;
+  if (!confirm(`Remove "${med.name}" from your med list?\n\n(Past compliance entries that referenced this med are preserved.)`)) return;
+  D.medsList = D.medsList.filter(m => m.id !== id);
+  save();
+  renderMedsList();
+  toast('✓ Removed');
+}
+
+// v2.9.3 — render meds chips in Check-In (called when entryDate changes or list changes)
+function renderMedsCheckIn() {
+  const out = document.getElementById('medsCheckIn');
+  if (!out) return;
+  const meds = D.medsList || [];
+  if (!meds.length) {
+    out.innerHTML = '<div class="med-chip-empty">No medications defined. <a onclick="showPage(\'sync\',document.querySelectorAll(\'.nav-item\')[6])" style="cursor:pointer">Add some in Settings →</a></div>';
+    return;
+  }
+  const taken = new Set(S.medsToday || []);
+  out.innerHTML = '<div class="med-chips">' + meds.map(m => {
+    const active = taken.has(m.id);
+    return `<button class="med-chip ${active?'taken':''}" onclick="toggleMedTaken('${m.id}')">${active?'✓ ':''}${escapeHtml(m.name)}${m.dose?` <span style="opacity:0.7">${escapeHtml(m.dose)}</span>`:''}</button>`;
+  }).join('') + '</div>';
+}
+
+function toggleMedTaken(id) {
+  if (!S.medsToday) S.medsToday = [];
+  const i = S.medsToday.indexOf(id);
+  if (i >= 0) S.medsToday.splice(i, 1);
+  else S.medsToday.push(id);
+  renderMedsCheckIn();
 }
 
 function renderImportHistory() {
