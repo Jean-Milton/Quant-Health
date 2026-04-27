@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="QuantHealth">
 <meta name="theme-color" content="#06080b">
-<title>QuantHealth v2.10a</title>
+<title>QuantHealth v2.10b1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -96,10 +96,111 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .tbtn.sel-yellow{background:var(--amber-dim);border-color:var(--amber);color:var(--amber)}
 .tbtn.sel-red{background:var(--red-dim);border-color:var(--red);color:var(--red)}
 
-.rec-card{background:linear-gradient(135deg,rgba(0,200,255,0.07),rgba(0,232,122,0.03));border:1px solid rgba(0,200,255,0.18);border-radius:var(--r);padding:1rem;margin-bottom:0.65rem}
+.rec-card{background:linear-gradient(135deg,rgba(94,200,216,0.07),rgba(93,211,158,0.03));border:1px solid rgba(94,200,216,0.18);border-radius:var(--r);padding:1rem;margin-bottom:0.65rem}
 .rec-eyebrow{font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:0.4rem}
 .rec-headline{font-family:var(--display);font-size:1.35rem;font-weight:800;line-height:1.1;margin-bottom:0.35rem}
 .rec-body{font-size:0.72rem;color:var(--muted2);line-height:1.65}
+
+/* ═════ v2.10b — Today screen redesign ═════ */
+/* Hero block */
+.hero-block{padding:0.4rem 0.2rem 1.1rem}
+.hero-greeting{font-family:var(--body);font-size:0.65rem;color:var(--muted);font-weight:500;letter-spacing:0.02em;margin-bottom:0.45rem}
+.hero-narrative{font-family:var(--display);font-size:1.05rem;font-weight:600;line-height:1.45;color:var(--text);letter-spacing:-0.005em}
+.hero-narrative strong{color:var(--accent);font-weight:700}
+.hero-narrative .good{color:var(--green);font-weight:600}
+.hero-narrative .warn{color:var(--amber);font-weight:600}
+.hero-narrative .alert{color:var(--red);font-weight:600}
+
+/* Three dials row */
+.dials-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.45rem;margin-bottom:0.85rem}
+.dial-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:0.85rem 0.4rem 0.7rem;text-align:center;cursor:pointer;transition:border-color 0.15s,transform 0.1s;display:flex;flex-direction:column;align-items:center}
+.dial-wrap:active{transform:scale(0.98)}
+.dial-wrap:hover{border-color:var(--border2)}
+.dial-svg-wrap{position:relative;width:78px;height:78px;display:flex;align-items:center;justify-content:center;margin-bottom:0.45rem}
+.dial-svg{width:100%;height:100%;transform:rotate(-90deg)}
+.dial-track{fill:none;stroke:var(--surface3);stroke-width:6}
+.dial-fill{fill:none;stroke:var(--accent);stroke-width:6;stroke-linecap:round;stroke-dasharray:213.6;stroke-dashoffset:213.6;transition:stroke-dashoffset 0.6s ease,stroke 0.3s}
+.dial-sleep .dial-fill{stroke:var(--purple)}
+.dial-recovery .dial-fill{stroke:var(--accent)}
+.dial-strain .dial-fill{stroke:var(--green)}
+.dial-recovery.state-poor .dial-fill{stroke:var(--red)}
+.dial-recovery.state-fair .dial-fill{stroke:var(--amber)}
+.dial-recovery.state-good .dial-fill{stroke:var(--green)}
+.dial-strain.state-high .dial-fill{stroke:var(--amber)}
+.dial-strain.state-all-out .dial-fill{stroke:var(--red)}
+.dial-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:row}
+.dial-value{font-family:var(--mono);font-size:1.25rem;font-weight:600;line-height:1;letter-spacing:-0.02em;color:var(--text)}
+.dial-sleep .dial-value{color:var(--purple)}
+.dial-recovery .dial-value{color:var(--accent)}
+.dial-recovery.state-poor .dial-value{color:var(--red)}
+.dial-recovery.state-fair .dial-value{color:var(--amber)}
+.dial-recovery.state-good .dial-value{color:var(--green)}
+.dial-strain .dial-value{color:var(--green)}
+.dial-strain.state-high .dial-value{color:var(--amber)}
+.dial-strain.state-all-out .dial-value{color:var(--red)}
+.dial-empty .dial-value{color:var(--muted)}
+.dial-unit{font-family:var(--mono);font-size:0.6rem;color:var(--muted);font-weight:500;margin-left:0.05rem;align-self:flex-end;margin-bottom:0.2rem}
+.dial-label{font-family:var(--body);font-size:0.66rem;color:var(--muted2);font-weight:500;letter-spacing:0.02em;margin-bottom:0.15rem}
+.dial-trend{font-family:var(--body);font-size:0.55rem;color:var(--muted);font-weight:400;letter-spacing:0.02em;line-height:1.2}
+.dial-trend.stale{color:var(--amber)}
+
+/* Joint pain inline strip */
+.joint-strip{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:0.85rem 0.95rem;margin-bottom:0.55rem}
+.joint-strip-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.65rem}
+.joint-strip-title{font-family:var(--display);font-size:0.85rem;font-weight:700;color:var(--text);letter-spacing:-0.005em}
+.joint-strip-hint{font-family:var(--body);font-size:0.55rem;color:var(--muted);letter-spacing:0.02em}
+.joint-strip-row{display:grid;grid-template-columns:60px 1fr 1fr;gap:0.55rem;align-items:center;padding:0.4rem 0}
+.joint-strip-row+.joint-strip-row{border-top:1px solid var(--border)}
+.joint-strip-row-back{grid-template-columns:60px 1fr}
+.joint-strip-name{font-family:var(--body);font-size:0.72rem;color:var(--text);font-weight:600;letter-spacing:-0.005em}
+.joint-strip-side{display:flex;align-items:center;gap:0.35rem;justify-content:flex-start}
+.bilat-mini{font-family:var(--mono);font-size:0.55rem;color:var(--muted);letter-spacing:0.05em;font-weight:600;width:9px;text-align:center}
+.joint-pills{display:flex;gap:0.22rem;flex:1}
+.joint-pills-wide{justify-content:space-between}
+.jpill{flex:1;min-width:0;height:28px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);font-family:var(--mono);font-size:0.65rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.12s;padding:0;aspect-ratio:1;max-width:32px}
+.jpill:active{transform:scale(0.92)}
+.jpill.active.s1{background:var(--green);color:#0a0d12;border-color:var(--green)}
+.jpill.active.s2{background:#9ddb89;color:#0a0d12;border-color:#9ddb89}
+.jpill.active.s3{background:var(--amber);color:#0a0d12;border-color:var(--amber)}
+.jpill.active.s4{background:#f08c52;color:#fff;border-color:#f08c52}
+.jpill.active.s5{background:var(--red);color:#fff;border-color:var(--red)}
+
+/* Workout card */
+.workout-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:0.95rem 1rem;margin-bottom:0.55rem;position:relative;overflow:hidden}
+.workout-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--accent)}
+.workout-eyebrow{font-family:var(--body);font-size:0.6rem;color:var(--accent);font-weight:500;letter-spacing:0.04em;margin-bottom:0.35rem}
+.workout-title{font-family:var(--display);font-size:1.1rem;font-weight:700;letter-spacing:-0.01em;margin-bottom:0.45rem;color:var(--text)}
+.workout-meta{display:flex;gap:0.4rem;flex-wrap:wrap;font-family:var(--body);font-size:0.62rem;color:var(--muted2);margin-bottom:0.7rem}
+.workout-meta span{background:var(--surface2);padding:0.2rem 0.5rem;border-radius:5px}
+.workout-card .btn-primary{margin-top:0}
+
+/* Quick tiles */
+.quick-tiles{display:grid;grid-template-columns:1fr 1fr;gap:0.45rem;margin-bottom:0.55rem}
+.quick-tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0.7rem 0.85rem;display:flex;align-items:center;gap:0.65rem;cursor:pointer;transition:border-color 0.15s}
+.quick-tile:hover{border-color:var(--border2)}
+.quick-icon{font-size:1.15rem;opacity:0.65;flex-shrink:0}
+.quick-info{flex:1;min-width:0}
+.quick-label{font-family:var(--body);font-size:0.58rem;color:var(--muted);font-weight:500;letter-spacing:0.02em;margin-bottom:0.1rem}
+.quick-value{font-family:var(--mono);font-size:0.95rem;font-weight:600;color:var(--text);line-height:1.1;letter-spacing:-0.01em}
+.quick-delta{font-family:var(--body);font-size:0.55rem;color:var(--muted);margin-top:0.1rem}
+.quick-delta.up{color:var(--green)}
+.quick-delta.dn{color:var(--red)}
+
+/* Program progress card (compact) */
+.program-progress-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0.85rem 1rem;margin-bottom:0.55rem}
+.program-progress-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.5rem}
+.program-phase-label{font-family:var(--body);font-size:0.7rem;color:var(--accent);font-weight:600;letter-spacing:-0.005em}
+.program-week-label{font-family:var(--mono);font-size:0.6rem;color:var(--muted);letter-spacing:0.02em}
+.program-progress-bar{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-bottom:0.55rem}
+.program-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:2px;transition:width 0.5s}
+
+/* v2.10b — Sub-tab bar for Insights and Log pages */
+.sub-tab-bar{display:flex;gap:0.3rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0.25rem;margin-bottom:0.85rem}
+.sub-tab-btn{flex:1;background:transparent;border:none;padding:0.55rem 0.5rem;border-radius:7px;font-family:var(--body);font-size:0.72rem;font-weight:500;color:var(--muted);cursor:pointer;transition:all 0.15s;letter-spacing:0}
+.sub-tab-btn.active{background:var(--surface3);color:var(--text);font-weight:600}
+.sub-tab-btn:hover:not(.active){color:var(--muted2)}
+.sub-tab-content{animation:fadeIn 0.2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 
 .pain-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;margin-bottom:0.65rem}
 /* v2.9.3 — bilateral pain grid (joint-name | L | R) with back as full-width row */
@@ -491,7 +592,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
 <header class="app-header">
   <div>
-    <div class="logo">Quant<span>Health</span><sub>v2.10a</sub></div>
+    <div class="logo">Quant<span>Health</span><sub>v2.10b1</sub></div>
   </div>
   <div class="header-right">
     <div class="date-chip" id="headerDate"></div>
@@ -502,6 +603,151 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 <!-- ════════════════ TODAY ════════════════ -->
 <div class="page active" id="page-today">
 
+  <!-- Hero greeting + narrative -->
+  <div class="hero-block">
+    <div class="hero-greeting" id="heroGreeting">Good morning</div>
+    <div class="hero-narrative" id="heroNarrative">Loading…</div>
+  </div>
+
+  <!-- Three dials -->
+  <div class="dials-row">
+    <div class="dial-wrap dial-sleep" id="dialSleep" onclick="showPage('log',document.querySelectorAll('.nav-item')[1])">
+      <div class="dial-svg-wrap">
+        <svg viewBox="0 0 80 80" class="dial-svg">
+          <circle cx="40" cy="40" r="34" class="dial-track"/>
+          <circle cx="40" cy="40" r="34" class="dial-fill" id="dialSleepArc"/>
+        </svg>
+        <div class="dial-center">
+          <span class="dial-value" id="dialSleepValue">—</span><span class="dial-unit" id="dialSleepUnit"></span>
+        </div>
+      </div>
+      <div class="dial-label">Sleep</div>
+      <div class="dial-trend" id="dialSleepTrend">tap to log</div>
+    </div>
+    <div class="dial-wrap dial-recovery" id="dialRecovery" onclick="showPage('log',document.querySelectorAll('.nav-item')[1])">
+      <div class="dial-svg-wrap">
+        <svg viewBox="0 0 80 80" class="dial-svg">
+          <circle cx="40" cy="40" r="34" class="dial-track"/>
+          <circle cx="40" cy="40" r="34" class="dial-fill" id="dialRecoveryArc"/>
+        </svg>
+        <div class="dial-center">
+          <span class="dial-value" id="dialRecoveryValue">—</span><span class="dial-unit" id="dialRecoveryUnit"></span>
+        </div>
+      </div>
+      <div class="dial-label">Recovery</div>
+      <div class="dial-trend" id="dialRecoveryTrend">composite</div>
+    </div>
+    <div class="dial-wrap dial-strain" id="dialStrain" onclick="showPage('program',document.querySelectorAll('.nav-item')[2])">
+      <div class="dial-svg-wrap">
+        <svg viewBox="0 0 80 80" class="dial-svg">
+          <circle cx="40" cy="40" r="34" class="dial-track"/>
+          <circle cx="40" cy="40" r="34" class="dial-fill" id="dialStrainArc"/>
+        </svg>
+        <div class="dial-center">
+          <span class="dial-value" id="dialStrainValue">0</span><span class="dial-unit" id="dialStrainUnit">/21</span>
+        </div>
+      </div>
+      <div class="dial-label">Strain</div>
+      <div class="dial-trend" id="dialStrainTrend">today</div>
+    </div>
+  </div>
+
+  <!-- Inline joint pain (one-tap log) -->
+  <div class="joint-strip">
+    <div class="joint-strip-header">
+      <div class="joint-strip-title">Joint Pain</div>
+      <div class="joint-strip-hint">tap to log · 1=none · 5=severe</div>
+    </div>
+    <div class="joint-strip-row" id="jrowElbow">
+      <div class="joint-strip-name">Elbow</div>
+      <div class="joint-strip-side">
+        <span class="bilat-mini">L</span>
+        <div class="joint-pills" data-joint="elbowPainL">
+          <button class="jpill" data-v="1" onclick="logJointPain('elbowPainL',1)">1</button>
+          <button class="jpill" data-v="2" onclick="logJointPain('elbowPainL',2)">2</button>
+          <button class="jpill" data-v="3" onclick="logJointPain('elbowPainL',3)">3</button>
+          <button class="jpill" data-v="4" onclick="logJointPain('elbowPainL',4)">4</button>
+          <button class="jpill" data-v="5" onclick="logJointPain('elbowPainL',5)">5</button>
+        </div>
+      </div>
+      <div class="joint-strip-side">
+        <span class="bilat-mini">R</span>
+        <div class="joint-pills" data-joint="elbowPainR">
+          <button class="jpill" data-v="1" onclick="logJointPain('elbowPainR',1)">1</button>
+          <button class="jpill" data-v="2" onclick="logJointPain('elbowPainR',2)">2</button>
+          <button class="jpill" data-v="3" onclick="logJointPain('elbowPainR',3)">3</button>
+          <button class="jpill" data-v="4" onclick="logJointPain('elbowPainR',4)">4</button>
+          <button class="jpill" data-v="5" onclick="logJointPain('elbowPainR',5)">5</button>
+        </div>
+      </div>
+    </div>
+    <div class="joint-strip-row" id="jrowShoulder">
+      <div class="joint-strip-name">Shoulder</div>
+      <div class="joint-strip-side">
+        <span class="bilat-mini">L</span>
+        <div class="joint-pills" data-joint="shoulderPainL">
+          <button class="jpill" data-v="1" onclick="logJointPain('shoulderPainL',1)">1</button>
+          <button class="jpill" data-v="2" onclick="logJointPain('shoulderPainL',2)">2</button>
+          <button class="jpill" data-v="3" onclick="logJointPain('shoulderPainL',3)">3</button>
+          <button class="jpill" data-v="4" onclick="logJointPain('shoulderPainL',4)">4</button>
+          <button class="jpill" data-v="5" onclick="logJointPain('shoulderPainL',5)">5</button>
+        </div>
+      </div>
+      <div class="joint-strip-side">
+        <span class="bilat-mini">R</span>
+        <div class="joint-pills" data-joint="shoulderPainR">
+          <button class="jpill" data-v="1" onclick="logJointPain('shoulderPainR',1)">1</button>
+          <button class="jpill" data-v="2" onclick="logJointPain('shoulderPainR',2)">2</button>
+          <button class="jpill" data-v="3" onclick="logJointPain('shoulderPainR',3)">3</button>
+          <button class="jpill" data-v="4" onclick="logJointPain('shoulderPainR',4)">4</button>
+          <button class="jpill" data-v="5" onclick="logJointPain('shoulderPainR',5)">5</button>
+        </div>
+      </div>
+    </div>
+    <div class="joint-strip-row" id="jrowKnee">
+      <div class="joint-strip-name">Knee</div>
+      <div class="joint-strip-side">
+        <span class="bilat-mini">L</span>
+        <div class="joint-pills" data-joint="kneePainL">
+          <button class="jpill" data-v="1" onclick="logJointPain('kneePainL',1)">1</button>
+          <button class="jpill" data-v="2" onclick="logJointPain('kneePainL',2)">2</button>
+          <button class="jpill" data-v="3" onclick="logJointPain('kneePainL',3)">3</button>
+          <button class="jpill" data-v="4" onclick="logJointPain('kneePainL',4)">4</button>
+          <button class="jpill" data-v="5" onclick="logJointPain('kneePainL',5)">5</button>
+        </div>
+      </div>
+      <div class="joint-strip-side">
+        <span class="bilat-mini">R</span>
+        <div class="joint-pills" data-joint="kneePainR">
+          <button class="jpill" data-v="1" onclick="logJointPain('kneePainR',1)">1</button>
+          <button class="jpill" data-v="2" onclick="logJointPain('kneePainR',2)">2</button>
+          <button class="jpill" data-v="3" onclick="logJointPain('kneePainR',3)">3</button>
+          <button class="jpill" data-v="4" onclick="logJointPain('kneePainR',4)">4</button>
+          <button class="jpill" data-v="5" onclick="logJointPain('kneePainR',5)">5</button>
+        </div>
+      </div>
+    </div>
+    <div class="joint-strip-row joint-strip-row-back" id="jrowBack">
+      <div class="joint-strip-name">Back</div>
+      <div class="joint-pills joint-pills-wide" data-joint="backPain">
+        <button class="jpill" data-v="1" onclick="logJointPain('backPain',1)">1</button>
+        <button class="jpill" data-v="2" onclick="logJointPain('backPain',2)">2</button>
+        <button class="jpill" data-v="3" onclick="logJointPain('backPain',3)">3</button>
+        <button class="jpill" data-v="4" onclick="logJointPain('backPain',4)">4</button>
+        <button class="jpill" data-v="5" onclick="logJointPain('backPain',5)">5</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Today's workout card -->
+  <div class="workout-card" id="todayWorkoutCard">
+    <div class="workout-eyebrow">Today's workout</div>
+    <div class="workout-title" id="todayWorkoutTitle">Loading…</div>
+    <div class="workout-meta" id="todayWorkoutMeta"></div>
+    <button class="btn-primary" onclick="showPage('program',document.querySelectorAll('.nav-item')[2])">Open Workout →</button>
+  </div>
+
+  <!-- Trail status (compact) -->
   <div class="trail-card">
     <div class="trail-header">
       <div class="trail-dot unknown" id="trailDot"></div>
@@ -515,138 +761,58 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
     </div>
   </div>
 
-  <div class="rec-card">
-    <div class="rec-eyebrow" id="recEyebrow">Today's Recommendation</div>
-    <div class="rec-headline" id="recHeadline">Complete morning check-in ↓</div>
-    <div class="rec-body" id="recBody">Log your pain scores, vitals, and trail status to get today's optimized workout call.</div>
-  </div>
-
-  <div class="sl">Food Log</div>
-  <div id="foodLogToday"></div>
-
-  <div class="sl">Joint Status</div>
-  <div class="pain-bilat-grid">
-    <div class="pain-bilat-row">
-      <div class="pain-bilat-label">Elbow</div>
-      <div class="pain-bilat-cell">
-        <div class="bilat-side">L</div>
-        <div class="pain-score" id="todayElbowL">—</div>
-        <div class="pain-bar"><div class="pain-bar-fill" id="barElbowL" style="width:0%;background:var(--green)"></div></div>
-      </div>
-      <div class="pain-bilat-cell">
-        <div class="bilat-side">R</div>
-        <div class="pain-score" id="todayElbowR">—</div>
-        <div class="pain-bar"><div class="pain-bar-fill" id="barElbowR" style="width:0%;background:var(--green)"></div></div>
+  <!-- Quick tiles -->
+  <div class="quick-tiles">
+    <div class="quick-tile" onclick="showPage('log',document.querySelectorAll('.nav-item')[1])">
+      <div class="quick-icon">❤</div>
+      <div class="quick-info">
+        <div class="quick-label">Resting HR</div>
+        <div class="quick-value" id="qHR">—</div>
+        <div class="quick-delta" id="qHRDelta"></div>
       </div>
     </div>
-    <div class="pain-bilat-row">
-      <div class="pain-bilat-label">Shoulder</div>
-      <div class="pain-bilat-cell">
-        <div class="bilat-side">L</div>
-        <div class="pain-score" id="todayShoulderL">—</div>
-        <div class="pain-bar"><div class="pain-bar-fill" id="barShoulderL" style="width:0%;background:var(--green)"></div></div>
-      </div>
-      <div class="pain-bilat-cell">
-        <div class="bilat-side">R</div>
-        <div class="pain-score" id="todayShoulderR">—</div>
-        <div class="pain-bar"><div class="pain-bar-fill" id="barShoulderR" style="width:0%;background:var(--green)"></div></div>
+    <div class="quick-tile" onclick="showPage('log',document.querySelectorAll('.nav-item')[1])">
+      <div class="quick-icon">⚖</div>
+      <div class="quick-info">
+        <div class="quick-label">Weight</div>
+        <div class="quick-value" id="qWeight">—</div>
+        <div class="quick-delta" id="qWeightDelta"></div>
       </div>
     </div>
-    <div class="pain-bilat-row">
-      <div class="pain-bilat-label">Knee</div>
-      <div class="pain-bilat-cell">
-        <div class="bilat-side">L</div>
-        <div class="pain-score" id="todayKneeL">—</div>
-        <div class="pain-bar"><div class="pain-bar-fill" id="barKneeL" style="width:0%;background:var(--green)"></div></div>
-      </div>
-      <div class="pain-bilat-cell">
-        <div class="bilat-side">R</div>
-        <div class="pain-score" id="todayKneeR">—</div>
-        <div class="pain-bar"><div class="pain-bar-fill" id="barKneeR" style="width:0%;background:var(--green)"></div></div>
+    <div class="quick-tile" onclick="showPage('log',document.querySelectorAll('.nav-item')[1])">
+      <div class="quick-icon">🍽</div>
+      <div class="quick-info">
+        <div class="quick-label">Calories</div>
+        <div class="quick-value" id="qCal">—</div>
+        <div class="quick-delta" id="qCalDelta"></div>
       </div>
     </div>
-    <div class="pain-bilat-row">
-      <div class="pain-bilat-label">Back</div>
-      <div class="pain-bilat-cell pain-bilat-cell-wide">
-        <div class="pain-score" id="todayBack">—</div>
-        <div class="pain-bar"><div class="pain-bar-fill" id="barBack" style="width:0%;background:var(--green)"></div></div>
+    <div class="quick-tile" onclick="showPage('insights',document.querySelectorAll('.nav-item')[3])">
+      <div class="quick-icon">📊</div>
+      <div class="quick-info">
+        <div class="quick-label">Strava Form</div>
+        <div class="quick-value" id="qStrava">—</div>
+        <div class="quick-delta" id="qStravaDelta"></div>
       </div>
     </div>
   </div>
 
-  <div class="sl">Last Entry</div>
-  <div class="metric-grid">
-    <div class="metric-tile g">
-      <div class="m-label">Resting HR</div>
-      <div class="m-val" id="mHR">—<span class="m-unit">bpm</span></div>
-      <div class="m-delta" id="dHR">—</div>
+  <!-- Program progress (compact) -->
+  <div class="program-progress-card">
+    <div class="program-progress-header">
+      <span class="program-phase-label" id="progPhaseLabel">Phase 1 — Foundation</span>
+      <span class="program-week-label" id="progWeekLabel">Week 1 of 12</span>
     </div>
-    <div class="metric-tile a">
-      <div class="m-label">Weight</div>
-      <div class="m-val" id="mWeight">—<span class="m-unit">lbs</span></div>
-      <div class="m-delta" id="dWeight">—</div>
-    </div>
-    <div class="metric-tile p">
-      <div class="m-label">Cal Balance</div>
-      <div class="m-val" id="mCal">—</div>
-      <div class="m-delta" id="dCal">—</div>
-    </div>
-    <div class="metric-tile">
-      <div class="m-label">Flexibility</div>
-      <div class="m-val" id="mFlex">—<span class="m-unit">/5</span></div>
-      <div class="m-delta" id="dFlex">—</div>
-    </div>
-    <div class="metric-tile g">
-      <div class="m-label">Hydration</div>
-      <div class="m-val" id="mWater">—<span class="m-unit">L</span></div>
-      <div class="m-delta" id="dWater">—</div>
-    </div>
-    <div class="metric-tile r">
-      <div class="m-label">Body Fat</div>
-      <div class="m-val" id="mBodyFat">—<span class="m-unit">%</span></div>
-      <div class="m-delta" id="dBodyFat">—</div>
-    </div>
-    <div class="metric-tile p">
-      <div class="m-label">Sleep</div>
-      <div class="m-val" id="mSleepHours">—<span class="m-unit">hrs</span></div>
-      <div class="m-delta" id="dSleepHours">—</div>
-    </div>
-    <div class="metric-tile g">
-      <div class="m-label">Steps</div>
-      <div class="m-val" id="mSteps">—</div>
-      <div class="m-delta" id="dSteps">—</div>
-    </div>
-    <div class="metric-tile a">
-      <div class="m-label">Stress (avg)</div>
-      <div class="m-val" id="mStress">—<span class="m-unit">/100</span></div>
-      <div class="m-delta" id="dStress">—</div>
-    </div>
-    <div class="metric-tile">
-      <div class="m-label">Strava Form</div>
-      <div class="m-val" id="mStravaForm">—</div>
-      <div class="m-delta" id="dStravaForm">—</div>
-    </div>
-  </div>
-
-  <div class="sl">12-Week Program</div>
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem">
-      <span style="font-size:0.65rem;color:var(--accent)" id="progPhaseLabel">Phase 1 — Foundation</span>
-      <span style="font-size:0.6rem;color:var(--muted)" id="progWeekLabel">Week 1 of 12</span>
-    </div>
-    <div style="height:3px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-bottom:0.5rem">
-      <div style="height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:2px;transition:width 0.5s" id="progBar"></div>
+    <div class="program-progress-bar">
+      <div class="program-progress-fill" id="progBar"></div>
     </div>
     <div class="week-dots" id="weekDots"></div>
-    <div style="display:flex;gap:0.75rem;font-size:0.58rem;color:var(--muted);flex-wrap:wrap">
-      <span>🟦 Now</span><span>🟩 Done</span><span>🟨 Ireland</span>
-    </div>
   </div>
 </div>
 
 <!-- ════════════════ CHECK-IN ════════════════ -->
 <div class="page" id="page-checkin">
-  <div class="sl">Morning Check-In</div>
+  <div class="sl">Log</div>
 
   <div class="date-banner">
     <div class="date-banner-icon">📅</div>
@@ -1019,6 +1185,17 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   <div class="card"><div class="card-title">Strava Fitness · Fatigue · Form <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(30 days)</span></div><div class="chart-wrap"><canvas id="cStrava"></canvas></div></div>
 </div>
 
+<!-- ════════════════ v2.10b — INSIGHTS (Optimize + Trends merged) ════════════════ -->
+<!-- Note: this page is a thin wrapper. When user taps Insights, we show either
+     page-optimize or page-trends underneath, with the sub-tab bar prepended via JS. -->
+<div class="page" id="page-insights">
+  <div class="sub-tab-bar">
+    <button class="sub-tab-btn active" id="subtab-patterns" onclick="setInsightsTab('patterns')">Patterns</button>
+    <button class="sub-tab-btn" id="subtab-charts" onclick="setInsightsTab('charts')">Charts</button>
+  </div>
+  <div id="insightsBody"></div>
+</div>
+
 <!-- ════════════════ HISTORY ════════════════ -->
 <div class="page" id="page-history">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.65rem">
@@ -1059,7 +1236,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
     <div style="font-size:0.7rem;color:var(--muted);line-height:1.5">Bumps everything app-wide. Try Large if Normal feels small. Saved to this device.</div>
   </div>
 
-  <div class="sl">Data & Sync</div>
+  <div class="sl">Settings</div>
 
   <div class="card">
     <div class="card-title">Medications</div>
@@ -1142,22 +1319,33 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   </div>
 
   <div class="card" style="border-color:rgba(255,179,64,0.2);background:rgba(255,179,64,0.03)">
-    <div class="card-title" style="color:var(--amber)">Build Notes — v2.10a</div>
+    <div class="card-title" style="color:var(--amber)">Build Notes — v2.10b1</div>
     <div style="font-size:0.72rem;color:var(--muted2);line-height:1.7">
-      <strong style="color:var(--text)">v2.10a — Palette B refresh (visual only):</strong>
+      <strong style="color:var(--text)">v2.10b1 — Hotfix:</strong> Fixed crash when IndexedDB-cached data pre-dated the v2.9 schema (Cannot read properties of undefined). Hydration path now re-applies critical defaults after Object.assign. Added defensive guards across all D.workoutLogs and D.completedWorkouts read/write paths.
       <br><br>
-      This is Ship 1 of 2 in the v2.10 redesign. Pure visual change — no functional restructure. All features work identically to v2.9.3.
+      <strong style="color:var(--text)">v2.10b — Today screen redesign + 6-tab nav:</strong>
       <br><br>
-      <strong style="color:var(--text)">Color palette.</strong> Mineral teal accent (#5ec8d8) replaces the previous electric cyan (#33d6ff). Calmer green for "good" states (#5dd39e), warmer amber for caution (#f5b54a), slightly desaturated red for alerts (#e8645e), muted purple for sleep/recovery (#9d7ddb). Background shifted to #0a0d12 (slight blue undertone vs the previous near-black).
+      Ship 2 of 2 in the v2.10 redesign. Major structural changes to the Today screen and overall navigation.
       <br><br>
-      <strong style="color:var(--text)">Typography.</strong> Three-font system replacing all-mono:
-      <br>• <strong>Schibsted Grotesk</strong> for display headers
-      <br>• <strong>Inter</strong> for body text, labels, buttons
-      <br>• <strong>Geist Mono</strong> for numeric data only (HR, weight, scores, set-input fields)
+      <strong style="color:var(--text)">1. Hero narrative.</strong> Top of Today now shows a generated summary paragraph that reads your latest data. "You slept 7.9h. Recovery is moderate — stress was elevated. Today: Strength A." Updates whenever new data is logged.
       <br><br>
-      <strong style="color:var(--text)">Why.</strong> The previous all-mono "Bloomberg terminal" aesthetic was distinctive but fatiguing for daily use. The new system reads as professional and trustworthy without being clinical. WCAG-AA contrast throughout.
+      <strong style="color:var(--text)">2. Three dials.</strong> Sleep / Recovery / Strain shown as ring dials at the top of Today.
+      <br>• <strong>Sleep</strong> — hours from Garmin <code>sleepHours</code>, falls back to sleep quality 1-5 mapped to hours (4 / 5.5 / 7 / 8 / 8.5)
+      <br>• <strong>Recovery</strong> — composite 0-100% of sleep (40%) + inverse stress (25%) + inverse pain (35%). Auto-redistributes weight if components are missing.
+      <br>• <strong>Strain</strong> — TSS-style training load from today's logged workouts. Uses (duration × intensity²) where intensity = avgHR / LTHR (LTHR=144). Mapped to 0-21 scale. Falls back to active minutes if HR data missing.
       <br><br>
-      <strong style="color:var(--text)">Next:</strong> v2.10b ships the structural changes — Today screen redesign with hero narrative + 3 dials, inline joint pain, 6-tab nav (Today · Log · Program · Insights · History · Settings).
+      <strong style="color:var(--text)">3. Hybrid freshness.</strong> Each dial shows "today" / "yesterday" / "Nd ago" / "Nd ago — stale" so you know how fresh the data is. Slots stay fixed; freshness is a small text indicator.
+      <br><br>
+      <strong style="color:var(--text)">4. Inline joint pain.</strong> The bilateral pain grid now uses pill buttons (1-5) instead of just display tiles. Tap a pill to log/toggle pain for today directly from Today screen — no need to open the full Log form for quick updates.
+      <br><br>
+      <strong style="color:var(--text)">5. 6-tab nav.</strong> Today · Log · Program · Insights · History · Settings.
+      <br>• <strong>Log</strong> = Check-In renamed (sub-tabs deferred to v2.10.5)
+      <br>• <strong>Insights</strong> = Optimize + Trends merged. Sub-tab bar at top toggles "Patterns" (Optimize) ↔ "Charts" (Trends).
+      <br>• <strong>Settings</strong> = Sync renamed.
+      <br><br>
+      <strong style="color:var(--text)">6. Quick tiles.</strong> Bottom of Today shows 4 condensed tiles (HR, Weight, Calories, Strava Form) with deltas. Each tap navigates to the relevant page for full context.
+      <br><br>
+      <strong style="color:var(--text)">v2.10a:</strong> Palette B refresh — mineral teal accent, Schibsted Grotesk + Inter + Geist Mono typography, WCAG-AA contrast.
       <br><br>
       <strong style="color:var(--text)">v2.9.3:</strong> Bilateral pain (L/R for elbow/shoulder/knee), back pain, medication tracking, food score clarity.<br><br>
       <strong style="color:var(--text)">v2.9.2:</strong> Timezone bug fixed. IndexedDB durable storage. Skip indicator. Empty chart placeholder. Test harness adopted.<br><br>
@@ -1181,23 +1369,20 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   <button class="nav-item active" onclick="showPage('today',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Today
   </button>
-  <button class="nav-item" onclick="showPage('checkin',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Check-In
-  </button>
-  <button class="nav-item" onclick="showPage('optimize',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Optimize
+  <button class="nav-item" onclick="showPage('log',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Log
   </button>
   <button class="nav-item" onclick="showPage('program',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Program
   </button>
-  <button class="nav-item" onclick="showPage('trends',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Trends
+  <button class="nav-item" onclick="showPage('insights',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Insights
   </button>
   <button class="nav-item" onclick="showPage('history',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>History
   </button>
-  <button class="nav-item" onclick="showPage('sync',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>Sync
+  <button class="nav-item" onclick="showPage('settings',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings
   </button>
 </nav>
 
@@ -1885,6 +2070,22 @@ async function hydrateFromIDB() {
   if (idbEntries > memEntries) {
     console.log(`Hydrating from IndexedDB: ${idbEntries} entries (vs ${memEntries} in localStorage)`);
     Object.assign(D, idbData);
+    // v2.10b — IDB data may pre-date some schema versions. Re-apply critical defaults
+    // so renderers don't crash on undefined nested objects.
+    if (!D.entries) D.entries = [];
+    if (!D.completedWorkouts) D.completedWorkouts = {};
+    if (!D.workoutLogs) D.workoutLogs = {};
+    if (!D.userFoods) D.userFoods = {};
+    if (!D.settings) D.settings = {};
+    if (!D.importHistory) D.importHistory = [];
+    if (!D.medsList) D.medsList = [];
+    // Per-entry critical defaults
+    D.entries.forEach(e => {
+      if (!e.activities) e.activities = [];
+      if (!e.foodEntries) e.foodEntries = [];
+      if (e.water === undefined) e.water = null;
+      if (!e.meds) e.meds = [];
+    });
     // Re-render the current page so the hydrated data shows immediately
     const activePage = document.querySelector('.page.active');
     const pageId = activePage?.id?.replace('page-', '');
@@ -1933,15 +2134,353 @@ function todayDayIdx() {
 }
 
 // ═══════════════════════════════
+// v2.10b — DIAL ENGINE
+// Three composite metrics derived from logged data:
+//   Sleep    — hours slept (Garmin sleepHours preferred, else sleep 1-5 mapped to hrs)
+//   Recovery — composite of (sleep, stress, pain) → 0-100%
+//   Strain   — TSS-style training load from workout HR zones → 0-21 scale
+// Each dial returns: { value, displayValue, displayUnit, percent, state, freshness, sourceDate }
+// ═══════════════════════════════
+
+// Find most recent entry with non-null value for any of the listed fields.
+// Returns { entry, daysAgo } or null.
+function findFreshEntry(fieldNames, maxDaysBack = 14) {
+  const today = todayISO();
+  for (let i = D.entries.length - 1; i >= 0; i--) {
+    const e = D.entries[i];
+    if (!e || !e.date) continue;
+    const hasAny = fieldNames.some(f => e[f] != null && e[f] !== '');
+    if (hasAny) {
+      const days = Math.floor((new Date(today) - new Date(e.date)) / 86400000);
+      if (days > maxDaysBack) return null;
+      return { entry: e, daysAgo: days };
+    }
+  }
+  return null;
+}
+
+// Map sleep quality 1-5 to approximate hours when sleepHours is missing.
+// Heuristic: 1=4hr, 2=5.5hr, 3=7hr, 4=8hr, 5=8.5hr.
+function sleepRatingToHours(rating) {
+  const map = { 1: 4, 2: 5.5, 3: 7, 4: 8, 5: 8.5 };
+  return map[rating] || null;
+}
+
+// Compute Sleep dial — hours of sleep, percent against 8h target.
+function computeSleepDial() {
+  const fresh = findFreshEntry(['sleepHours', 'sleep']);
+  if (!fresh) return { state: 'empty' };
+
+  const e = fresh.entry;
+  let hours = null;
+  let source = null;
+
+  if (e.sleepHours != null && !isNaN(e.sleepHours)) {
+    hours = parseFloat(e.sleepHours);
+    source = 'garmin';
+  } else if (e.sleep != null) {
+    hours = sleepRatingToHours(e.sleep);
+    source = 'rating';
+  }
+  if (hours == null) return { state: 'empty' };
+
+  // 8h target. < 6h is poor, 6-7 fair, 7-8.5 good, >8.5 over (still good)
+  const pct = Math.min(100, Math.round((hours / 8) * 100));
+  let state = 'good';
+  if (hours < 6) state = 'poor';
+  else if (hours < 7) state = 'fair';
+  else if (hours <= 9) state = 'good';
+  else state = 'over';
+
+  return {
+    value: hours,
+    displayValue: hours.toFixed(1),
+    displayUnit: 'h',
+    percent: pct,
+    state,
+    freshness: fresh.daysAgo,
+    sourceDate: e.date,
+    source
+  };
+}
+
+// Compute Recovery dial — composite of sleep, stress, pain.
+// Each component contributes 0-100, weighted average.
+function computeRecoveryDial() {
+  const fresh = findFreshEntry([
+    'sleepHours','sleep','stressAvg',
+    'elbowPainL','elbowPainR','shoulderPainL','shoulderPainR','kneePainL','kneePainR','backPain',
+    'elbowPain','shoulderPain','kneePain'  // legacy fields
+  ]);
+  if (!fresh) return { state: 'empty' };
+
+  const e = fresh.entry;
+  const components = [];
+
+  // Sleep component (0-100): 8h = 100%, scaled
+  let sleepHours = null;
+  if (e.sleepHours != null && !isNaN(e.sleepHours)) sleepHours = parseFloat(e.sleepHours);
+  else if (e.sleep != null) sleepHours = sleepRatingToHours(e.sleep);
+  if (sleepHours != null) {
+    const sleepScore = Math.max(0, Math.min(100, (sleepHours / 8) * 100));
+    components.push({ name: 'sleep', value: sleepScore, weight: 0.40 });
+  }
+
+  // Stress component (0-100): inverse of Garmin stress (0-100, higher=worse)
+  if (e.stressAvg != null && !isNaN(e.stressAvg)) {
+    const stressScore = Math.max(0, 100 - parseFloat(e.stressAvg));
+    components.push({ name: 'stress', value: stressScore, weight: 0.25 });
+  }
+
+  // Pain component (0-100): inverse of average pain across joints (1-5 scale, 1=best)
+  const painVals = [
+    e.elbowPainL, e.elbowPainR, e.shoulderPainL, e.shoulderPainR,
+    e.kneePainL, e.kneePainR, e.backPain
+  ].filter(v => v != null && !isNaN(v));
+  // Fall back to legacy single-value pain if no bilateral data
+  const legacyPainVals = painVals.length === 0
+    ? [e.elbowPain, e.shoulderPain, e.kneePain].filter(v => v != null && !isNaN(v))
+    : [];
+  const allPainVals = painVals.length ? painVals : legacyPainVals;
+  if (allPainVals.length) {
+    const avgPain = allPainVals.reduce((a,b) => a+b, 0) / allPainVals.length;
+    // 1=100%, 2=80%, 3=60%, 4=40%, 5=20%
+    const painScore = Math.max(0, 100 - ((avgPain - 1) * 20));
+    components.push({ name: 'pain', value: painScore, weight: 0.35 });
+  }
+
+  if (components.length === 0) return { state: 'empty' };
+
+  // Weighted average. If some components are missing, redistribute their weight.
+  const totalWeight = components.reduce((s,c) => s + c.weight, 0);
+  const weighted = components.reduce((s,c) => s + (c.value * c.weight), 0);
+  const recovery = Math.round(weighted / totalWeight);
+
+  let state = 'good';
+  if (recovery < 33) state = 'poor';
+  else if (recovery < 66) state = 'fair';
+  else state = 'good';
+
+  return {
+    value: recovery,
+    displayValue: recovery.toString(),
+    displayUnit: '%',
+    percent: recovery,
+    state,
+    freshness: fresh.daysAgo,
+    sourceDate: e.date,
+    components: components.map(c => c.name)
+  };
+}
+
+// Compute Strain dial — TrainingPeaks-style TSS for the day.
+// Uses workoutHR + duration if available, else activeMinutes from Garmin.
+// TSS = (duration_sec * NP * IF) / (FTHR * 3600) * 100
+// Simplified for HR: TSS ≈ (duration_min * (avgHR / LTHR)^2) / 60 * 100
+// LTHR estimate: 144 (user's). Max scale to 0-21 (WHOOP Strain scale equivalent).
+function computeStrainDial() {
+  const today = todayISO();
+  // Look at TODAY's entry first — strain is "today's accumulated load"
+  const todayEntry = D.entries.find(e => e.date === today);
+
+  let totalMin = 0;
+  let weightedHR = 0;
+  let totalActiveMin = 0;
+
+  if (todayEntry) {
+    // Sum across all activities
+    if (Array.isArray(todayEntry.activities)) {
+      for (const a of todayEntry.activities) {
+        if (a.duration && a.avgHR) {
+          totalMin += a.duration;
+          weightedHR += a.duration * a.avgHR;
+        }
+      }
+    }
+    // Garmin activeMinutes (moderate + vigorous)
+    if (todayEntry.moderateMin != null) totalActiveMin += parseFloat(todayEntry.moderateMin) || 0;
+    if (todayEntry.vigorousMin != null) totalActiveMin += parseFloat(todayEntry.vigorousMin) || 0;
+  }
+
+  // No workout data today → strain is 0
+  if (totalMin === 0 && totalActiveMin === 0) {
+    return {
+      value: 0, displayValue: '0', displayUnit: '/21',
+      percent: 0, state: 'rest', freshness: 0,
+      sourceDate: today, note: 'no workout today'
+    };
+  }
+
+  let strainScore;
+  if (totalMin > 0 && weightedHR > 0) {
+    // HR-based TSS estimate
+    const avgHR = weightedHR / totalMin;
+    const LTHR = 144;
+    const intensityFactor = avgHR / LTHR;  // typically 0.6 - 1.1
+    const tss = (totalMin * intensityFactor * intensityFactor);
+    // Map TSS to 0-21 strain scale: ~150 TSS = 21 (max), ~50 TSS = 10
+    strainScore = Math.min(21, (tss / 150) * 21);
+  } else {
+    // Fallback: just use active minutes (rough estimate)
+    strainScore = Math.min(21, (totalActiveMin / 90) * 21);
+  }
+
+  const display = strainScore.toFixed(1);
+  let state = 'rest';
+  if (strainScore < 8) state = 'easy';
+  else if (strainScore < 14) state = 'moderate';
+  else if (strainScore < 18) state = 'high';
+  else state = 'all-out';
+
+  return {
+    value: strainScore,
+    displayValue: display,
+    displayUnit: '/21',
+    percent: Math.round((strainScore / 21) * 100),
+    state,
+    freshness: 0,
+    sourceDate: today
+  };
+}
+
+// Generate hero narrative paragraph based on dial states.
+function generateHeroNarrative() {
+  const sleep = computeSleepDial();
+  const recovery = computeRecoveryDial();
+  const strain = computeStrainDial();
+
+  const profile = D.profile?.name || '';
+  const greeting = `Good morning${profile ? ', ' + profile : ''}.`;
+
+  // Build narrative parts
+  const parts = [];
+
+  if (sleep.state === 'empty') {
+    parts.push(`Log this morning's <strong>check-in</strong> to see your daily picture.`);
+  } else {
+    // Sleep call-out
+    if (sleep.freshness > 1) {
+      parts.push(`Last logged sleep: <strong>${sleep.displayValue}h</strong> (${sleep.freshness}d ago).`);
+    } else {
+      let sleepText = `You slept <strong>${sleep.displayValue}h</strong>`;
+      if (sleep.state === 'poor') sleepText += ` — <span class="warn">below recovery threshold</span>`;
+      else if (sleep.state === 'good') sleepText += ` — <span class="good">solid recovery base</span>`;
+      sleepText += '.';
+      parts.push(sleepText);
+    }
+
+    // Recovery state
+    if (recovery.state !== 'empty') {
+      let recText = `Recovery is `;
+      if (recovery.state === 'good') recText += `<span class="good">${recovery.value}% — green for training</span>`;
+      else if (recovery.state === 'fair') recText += `<span class="warn">${recovery.value}% — moderate, watch intensity</span>`;
+      else recText += `<span class="alert">${recovery.value}% — compromised, consider easy/rest</span>`;
+      recText += '.';
+      parts.push(recText);
+    }
+  }
+
+  // Today's workout context
+  const prog = getProgramInfo();
+  if (prog.week >= 1) {
+    const days = ['Strength A','Cardio Z2','Strength B','Cardio Z2','Strength A','Long ride','Rest'];
+    const todayPlan = days[todayDayIdx()] || 'Active recovery';
+    parts.push(`Today: <strong>${todayPlan}</strong>.`);
+  }
+
+  return { greeting, narrative: parts.join(' ') };
+}
+
+// ═══════════════════════════════
 // NAV
 // ═══════════════════════════════
+function renderInsights() {
+  // Default to patterns tab if not yet set
+  if (!S.insightsTab) S.insightsTab = 'patterns';
+  setInsightsTab(S.insightsTab);
+}
+
+// v2.10b — Switch between Patterns (optimize) and Charts (trends) sub-views.
+// Strategy: hide page-insights wrapper, show the underlying page (optimize or trends),
+// and prepend a sub-tab bar to that page so the user can toggle between them.
+function setInsightsTab(which) {
+  S.insightsTab = which;
+  // Hide insights wrapper itself; we show optimize/trends directly with sub-tabs prepended
+  const wrap = document.getElementById('page-insights');
+  if (wrap) wrap.classList.remove('active');
+
+  const targetId = (which === 'charts') ? 'page-trends' : 'page-optimize';
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById(targetId);
+  if (!target) return;
+  target.classList.add('active');
+
+  // Inject/refresh the sub-tab bar at the top of the target page
+  let existing = target.querySelector('.sub-tab-bar.injected');
+  if (!existing) {
+    const bar = document.createElement('div');
+    bar.className = 'sub-tab-bar injected';
+    bar.innerHTML = `
+      <button class="sub-tab-btn ${which==='patterns'?'active':''}" onclick="setInsightsTab('patterns')">Patterns</button>
+      <button class="sub-tab-btn ${which==='charts'?'active':''}" onclick="setInsightsTab('charts')">Charts</button>
+    `;
+    target.insertBefore(bar, target.firstChild);
+  } else {
+    // Update active state on existing bar
+    existing.querySelectorAll('.sub-tab-btn').forEach((btn,i) => {
+      btn.classList.toggle('active', (i === 0 && which === 'patterns') || (i === 1 && which === 'charts'));
+    });
+  }
+  // Make sure the OTHER page's sub-tab bar matches state too (so both pages share state on toggle)
+  const other = document.getElementById((which === 'charts') ? 'page-optimize' : 'page-trends');
+  if (other) {
+    const otherBar = other.querySelector('.sub-tab-bar.injected');
+    if (otherBar) {
+      otherBar.querySelectorAll('.sub-tab-btn').forEach((btn,i) => {
+        btn.classList.toggle('active', (i === 0 && which === 'patterns') || (i === 1 && which === 'charts'));
+      });
+    }
+  }
+
+  // Render the target's content
+  if (which === 'charts') renderTrends();
+  else renderOptimize();
+  window.scrollTo(0,0);
+}
+
 function showPage(name, btn) {
+  // v2.10b — alias new tab names to existing page IDs
+  // log → checkin (with sub-tabs), insights → composite (optimize+trends), settings → sync
+  const aliases = { log: 'checkin', settings: 'sync' };
+  const realPageId = aliases[name] || name;
+
+  // Special case: Insights routes through a custom handler that picks optimize or trends
+  if (name === 'insights') {
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderInsights();
+    return;
+  }
+
+  // When navigating AWAY from Insights, remove any sub-tab bars we injected
+  document.querySelectorAll('.sub-tab-bar.injected').forEach(b => b.remove());
+
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
+  const pageEl = document.getElementById('page-' + realPageId);
+  if (pageEl) pageEl.classList.add('active');
   if (btn) btn.classList.add('active');
-  const r = { today:renderToday, checkin:renderCheckin, optimize:renderOptimize, trends:renderTrends, history:renderHistory, program:renderProgram, sync:renderSync };
-  if (r[name]) r[name]();
+
+  const r = {
+    today:    renderToday,
+    checkin:  renderCheckin,
+    optimize: renderOptimize,
+    trends:   renderTrends,
+    history:  renderHistory,
+    program:  renderProgram,
+    sync:     renderSync
+  };
+  if (r[realPageId]) r[realPageId]();
   window.scrollTo(0,0);
 }
 
@@ -2028,8 +2567,26 @@ function renderToday() {
   document.getElementById('headerPhase').textContent = `Phase ${prog.phase} · ${prog.phaseName}`;
 
   updateTrailUI();
-  updateRec();
 
+  // ─── Hero narrative ───
+  const hero = generateHeroNarrative();
+  const greetEl = document.getElementById('heroGreeting');
+  const narrEl = document.getElementById('heroNarrative');
+  if (greetEl) greetEl.textContent = hero.greeting;
+  if (narrEl) narrEl.innerHTML = hero.narrative;
+
+  // ─── Dials ───
+  renderDial('dialSleep', computeSleepDial());
+  renderDial('dialRecovery', computeRecoveryDial());
+  renderDial('dialStrain', computeStrainDial());
+
+  // ─── Joint pain pills ───
+  renderJointPills();
+
+  // ─── Today's workout card ───
+  renderTodayWorkoutCard();
+
+  // ─── Program progress ───
   document.getElementById('progPhaseLabel').textContent = `Phase ${prog.phase} — ${prog.phaseName}`;
   document.getElementById('progWeekLabel').textContent = `Week ${Math.max(prog.week,1)} of 12`;
   document.getElementById('progBar').style.width = prog.pct+'%';
@@ -2045,61 +2602,219 @@ function renderToday() {
     dotEl.appendChild(d);
   }
 
-  const last = D.entries[D.entries.length-1];
-  const prev = D.entries.length>1 ? D.entries[D.entries.length-2] : null;
-  if (last) {
-    setMetric('mHR','dHR',last.hr,prev?.hr,'bpm','lower');
-    setMetric('mWeight','dWeight',last.weight,prev?.weight,'lbs','lower');
-    if (last.calIn && last.calOut) {
-      const bal = last.calIn - last.calOut;
-      document.getElementById('mCal').innerHTML = `${bal>0?'+':''}${bal}`;
-      document.getElementById('dCal').textContent = `${last.calIn} in · ${last.calOut} out`;
+  // ─── Quick tiles ───
+  renderQuickTiles();
+}
+
+// v2.10b — Render a single dial with arc fill and freshness indicator.
+function renderDial(domPrefix, data) {
+  const wrap = document.getElementById(domPrefix);
+  const valEl = document.getElementById(domPrefix + 'Value');
+  const unitEl = document.getElementById(domPrefix + 'Unit');
+  const arcEl = document.getElementById(domPrefix + 'Arc');
+  const trendEl = document.getElementById(domPrefix + 'Trend');
+  if (!wrap || !valEl || !arcEl) return;
+
+  // Reset state classes
+  wrap.classList.remove('state-poor','state-fair','state-good','state-rest','state-easy','state-moderate','state-high','state-all-out','state-over','dial-empty');
+
+  if (data.state === 'empty') {
+    valEl.textContent = '—';
+    if (unitEl) unitEl.textContent = '';
+    arcEl.style.strokeDashoffset = '213.6'; // empty arc
+    if (trendEl) {
+      trendEl.textContent = 'no data';
+      trendEl.classList.remove('stale');
     }
-    if (last.flex) {
-      document.getElementById('mFlex').innerHTML = `${last.flex}<span class="m-unit">/5</span>`;
-      document.getElementById('dFlex').textContent = ['','Stiff','Fairly Stiff','Moderate','Good','Excellent'][last.flex] || '';
-    }
-    // Hydration tile — show in user's preferred unit
-    if (last.water != null) {
-      const unit = S.waterUnit || 'L';
-      const display = unit === 'L' ? last.water.toFixed(1) : Math.round(last.water * 4);
-      document.getElementById('mWater').innerHTML = `${display}<span class="m-unit">${unit==='L'?'L':'gl'}</span>`;
-      const drinkText = (last.drinks > 0) ? `${last.drinks} drink${last.drinks>1?'s':''}` : 'no alcohol';
-      document.getElementById('dWater').textContent = drinkText;
-      const dEl = document.getElementById('dWater');
-      dEl.className = 'm-delta' + (last.drinks > 2 ? ' dd' : '');
-    }
-    // Body fat tile — only updates from latest entry that has it (weekly)
-    const lastBF = [...D.entries].reverse().find(e=>e.bodyFat!=null);
-    if (lastBF) {
-      document.getElementById('mBodyFat').innerHTML = `${lastBF.bodyFat}<span class="m-unit">%</span>`;
-      // Find prev body fat for delta
-      const prevBF = [...D.entries].reverse().find(e=>e.date<lastBF.date && e.bodyFat!=null);
-      if (prevBF) {
-        const d = (lastBF.bodyFat - prevBF.bodyFat).toFixed(1);
-        const cls = d == 0 ? '' : (d < 0 ? 'du' : 'dd');
-        document.getElementById('dBodyFat').innerHTML = `<span class="${cls}">${d>0?'+':''}${d} since ${formatNiceDate(prevBF.date)}</span>`;
-      } else {
-        document.getElementById('dBodyFat').textContent = `as of ${formatNiceDate(lastBF.date)}`;
-      }
-    }
-    // v2.8 Garmin + Strava tiles — render last available value with date age
-    setGarminTile('mSleepHours','dSleepHours','sleepHours','hrs', false);
-    setGarminTile('mSteps','dSteps','steps','', false);
-    setGarminTile('mStress','dStress','stressAvg','/100', true); // higher is worse
-    setGarminTile('mStravaForm','dStravaForm','strava','', false);
-    // v2.9.3 — bilateral joint pain tiles
-    setPainTile('todayElbowL','barElbowL',last.elbowPainL);
-    setPainTile('todayElbowR','barElbowR',last.elbowPainR);
-    setPainTile('todayShoulderL','barShoulderL',last.shoulderPainL);
-    setPainTile('todayShoulderR','barShoulderR',last.shoulderPainR);
-    setPainTile('todayKneeL','barKneeL',last.kneePainL);
-    setPainTile('todayKneeR','barKneeR',last.kneePainR);
-    setPainTile('todayBack','barBack',last.backPain);
+    wrap.classList.add('dial-empty');
+    return;
   }
 
-  // Food log on Today
-  renderFoodLog('foodLogToday', todayISO());
+  valEl.textContent = data.displayValue;
+  if (unitEl) unitEl.textContent = data.displayUnit || '';
+  // Arc circumference at r=34 is 2*PI*34 = 213.628
+  const circ = 213.6;
+  const offset = circ - (circ * (data.percent / 100));
+  arcEl.style.strokeDashoffset = offset;
+
+  wrap.classList.add('state-' + data.state);
+
+  // Freshness indicator
+  if (trendEl) {
+    if (data.freshness === 0) {
+      trendEl.textContent = data.note || 'today';
+      trendEl.classList.remove('stale');
+    } else if (data.freshness === 1) {
+      trendEl.textContent = 'yesterday';
+      trendEl.classList.remove('stale');
+    } else if (data.freshness >= 2 && data.freshness <= 3) {
+      trendEl.textContent = `${data.freshness}d ago`;
+      trendEl.classList.remove('stale');
+    } else {
+      trendEl.textContent = `${data.freshness}d ago — stale`;
+      trendEl.classList.add('stale');
+    }
+  }
+}
+
+// v2.10b — Render joint pain pill rows from latest entry's bilateral values.
+function renderJointPills() {
+  const today = todayISO();
+  const todayEntry = D.entries.find(e => e.date === today);
+  // Show today's values if logged, else last known
+  const e = todayEntry || (D.entries.length ? D.entries[D.entries.length-1] : null);
+
+  const fields = ['elbowPainL','elbowPainR','shoulderPainL','shoulderPainR','kneePainL','kneePainR','backPain'];
+  fields.forEach(field => {
+    const val = e ? e[field] : null;
+    document.querySelectorAll(`.joint-pills[data-joint="${field}"] .jpill`).forEach(btn => {
+      btn.classList.remove('active','s1','s2','s3','s4','s5');
+      const v = parseInt(btn.dataset.v);
+      if (val != null && v === val) {
+        btn.classList.add('active', 's' + val);
+      }
+    });
+  });
+}
+
+// v2.10b — Tap a pill to log pain for today (creates/updates today's entry).
+function logJointPain(field, value) {
+  const today = todayISO();
+  let entry = D.entries.find(e => e.date === today);
+  const isNew = !entry;
+  if (isNew) {
+    // Create minimal entry for today
+    entry = {
+      date: today,
+      hr: null, weight: null, vo2: null, strava: null,
+      calIn: null, calOut: null, calBal: null,
+      protein: null, carbs: null, water: null, drinks: 0,
+      sleep: null, flex: null,
+      elbowPainL: null, elbowPainR: null,
+      shoulderPainL: null, shoulderPainR: null,
+      kneePainL: null, kneePainR: null,
+      backPain: null,
+      meds: [],
+      activities: []
+    };
+    D.entries.push(entry);
+    D.entries.sort((a,b) => a.date.localeCompare(b.date));
+  }
+  // Toggle: if already at this value, clear it
+  if (entry[field] === value) {
+    entry[field] = null;
+  } else {
+    entry[field] = value;
+  }
+  // Update legacy singular fields as max(L,R) for backward compat
+  if (field.includes('elbow')) entry.elbowPain = Math.max(entry.elbowPainL||0, entry.elbowPainR||0) || null;
+  if (field.includes('shoulder')) entry.shoulderPain = Math.max(entry.shoulderPainL||0, entry.shoulderPainR||0) || null;
+  if (field.includes('knee')) entry.kneePain = Math.max(entry.kneePainL||0, entry.kneePainR||0) || null;
+  save();
+  renderJointPills();
+  // Refresh narrative + recovery dial since pain affects both
+  const hero = generateHeroNarrative();
+  const narrEl = document.getElementById('heroNarrative');
+  if (narrEl) narrEl.innerHTML = hero.narrative;
+  renderDial('dialRecovery', computeRecoveryDial());
+}
+
+// v2.10b — Render the workout card on Today, pointing to current day's program slot.
+function renderTodayWorkoutCard() {
+  const titleEl = document.getElementById('todayWorkoutTitle');
+  const metaEl = document.getElementById('todayWorkoutMeta');
+  if (!titleEl) return;
+
+  const prog = getProgramInfo();
+  const dayIdx = todayDayIdx();
+  // Simple program template — phase determines workout flavor
+  const templates = {
+    1: ['Strength A — Upper','Cardio Z2','Strength B — Lower','Cardio Z2','Strength A — Upper','Long ride','Rest'],
+    2: ['Strength A — Upper+','Tempo','Strength B — Lower+','Tempo','Strength A — Upper+','Long ride','Rest'],
+    3: ['Power A','Intervals','Power B','Intervals','Power A','Race-pace','Rest'],
+  };
+  const today = templates[prog.phase]?.[dayIdx] || 'Active recovery';
+  titleEl.textContent = today;
+
+  const todayKey = todayISO();
+  const todayEntry = D.entries.find(e => e.date === todayKey);
+  const totalMin = (todayEntry?.activities || []).reduce((s,a) => s + (a.duration || 0), 0);
+
+  const meta = [];
+  if (today === 'Rest') {
+    meta.push('Recovery');
+  } else if (today === 'Long ride') {
+    meta.push('60–120 min');
+    meta.push('Zone 2');
+  } else if (today.includes('Strength')) {
+    meta.push('45–60 min');
+    meta.push('See Program tab');
+  } else if (today.includes('Cardio') || today.includes('Tempo') || today.includes('Intervals')) {
+    meta.push('30–45 min');
+    meta.push('HR-based');
+  }
+  if (totalMin > 0) meta.push(`${totalMin} min logged`);
+  metaEl.innerHTML = meta.map(m => `<span>${m}</span>`).join('');
+}
+
+// v2.10b — Render the 4 quick tiles at bottom of Today.
+function renderQuickTiles() {
+  // Resting HR — last entry with non-null hr
+  const lastHR = [...D.entries].reverse().find(e => e.hr != null);
+  if (lastHR) {
+    document.getElementById('qHR').innerHTML = `${lastHR.hr}<span class="dial-unit"> bpm</span>`;
+    const prevHR = [...D.entries].reverse().find(e => e.date < lastHR.date && e.hr != null);
+    if (prevHR) {
+      const d = (lastHR.hr - prevHR.hr);
+      document.getElementById('qHRDelta').textContent = `${d>0?'+':''}${d} vs prior`;
+      document.getElementById('qHRDelta').className = 'quick-delta ' + (d > 0 ? 'dn' : (d < 0 ? 'up' : ''));
+    }
+  } else {
+    document.getElementById('qHR').textContent = '—';
+    document.getElementById('qHRDelta').textContent = 'no data';
+  }
+
+  // Weight
+  const lastW = [...D.entries].reverse().find(e => e.weight != null);
+  if (lastW) {
+    document.getElementById('qWeight').innerHTML = `${lastW.weight}<span class="dial-unit"> lb</span>`;
+    const prevW = [...D.entries].reverse().find(e => e.date < lastW.date && e.weight != null);
+    if (prevW) {
+      const d = (lastW.weight - prevW.weight).toFixed(1);
+      document.getElementById('qWeightDelta').textContent = `${d>0?'+':''}${d} vs prior`;
+      document.getElementById('qWeightDelta').className = 'quick-delta';
+    }
+  } else {
+    document.getElementById('qWeight').textContent = '—';
+    document.getElementById('qWeightDelta').textContent = 'no data';
+  }
+
+  // Calories — today's balance
+  const todayKey = todayISO();
+  const todayE = D.entries.find(e => e.date === todayKey);
+  if (todayE && todayE.calIn != null && todayE.calOut != null) {
+    const bal = todayE.calIn - todayE.calOut;
+    document.getElementById('qCal').textContent = `${bal>0?'+':''}${bal}`;
+    document.getElementById('qCalDelta').textContent = `${todayE.calIn} in · ${todayE.calOut} out`;
+  } else if (todayE && todayE.calIn != null) {
+    document.getElementById('qCal').textContent = todayE.calIn;
+    document.getElementById('qCalDelta').textContent = 'kcal in';
+  } else {
+    document.getElementById('qCal').textContent = '—';
+    document.getElementById('qCalDelta').textContent = 'log today';
+  }
+
+  // Strava form
+  const lastSF = [...D.entries].reverse().find(e => e.strava != null);
+  if (lastSF) {
+    document.getElementById('qStrava').textContent = lastSF.strava;
+    const days = Math.floor((new Date(todayISO()) - new Date(lastSF.date)) / 86400000);
+    document.getElementById('qStravaDelta').textContent = days === 0 ? 'today' : `${days}d ago`;
+    document.getElementById('qStravaDelta').className = 'quick-delta' + (days > 7 ? ' stale' : '');
+  } else {
+    document.getElementById('qStrava').textContent = '—';
+    document.getElementById('qStravaDelta').textContent = 'no data';
+  }
 }
 
 // v2.8 helper: render a Garmin/Strava tile from latest non-null value
@@ -3039,6 +3754,9 @@ function renderComplianceStrip(prog) {
   const todayIdx = todayDayIdx();
 
   // Build per-week status across all 12 weeks
+  // v2.10b — defensive: ensure these top-level objects exist before iterating
+  if (!D.workoutLogs) D.workoutLogs = {};
+  if (!D.completedWorkouts) D.completedWorkouts = {};
   const weekHTML = [];
   for (let w = 1; w <= 12; w++) {
     const phaseN = w <= 4 ? 1 : w <= 8 ? 2 : 3;
@@ -3138,8 +3856,9 @@ function renderProgramDay(phase, dayIdx, completed) {
   const status = completed[dayIdx]; // 'done' | 'skip' | undefined
 
   // v2.9.1 — use viewing week, not current week, for log lookup
+  // v2.10b — defensive: D.workoutLogs may be undefined post-IDB hydrate
   const weekKey = `phase${S.viewPhase}-week${S.viewWeek}`;
-  const log = (D.workoutLogs[weekKey] && D.workoutLogs[weekKey][dayIdx]) || null;
+  const log = (D.workoutLogs && D.workoutLogs[weekKey] && D.workoutLogs[weekKey][dayIdx]) || null;
 
   // Detect workout type — cardio days use a simpler form
   const isCardio = !day.exercises.some(ex => ex.s && /×|x|set/i.test(ex.s));
@@ -3252,6 +3971,9 @@ function parseSetsFromSpec(spec) {
 
 // v2.9 — Workout log mutation helpers
 function ensureLog(weekKey, dayIdx) {
+  // v2.10b — defensive: ensure top-level objects exist (covers IDB hydrate edge cases)
+  if (!D.workoutLogs) D.workoutLogs = {};
+  if (!D.completedWorkouts) D.completedWorkouts = {};
   if (!D.workoutLogs[weekKey]) D.workoutLogs[weekKey] = {};
   if (!D.workoutLogs[weekKey][dayIdx]) D.workoutLogs[weekKey][dayIdx] = { exercises: {}, cardio: {} };
   return D.workoutLogs[weekKey][dayIdx];
@@ -3332,6 +4054,8 @@ function updateCardio(weekKey, dayIdx, field, val) {
 // v2.9 — REWRITTEN markWorkout: no longer dumps into Check-In activities.
 // v2.9.1 — uses S.viewWeek/viewPhase so you can mark past weeks
 function markWorkout(dayIdx, status) {
+  // v2.10b — defensive
+  if (!D.completedWorkouts) D.completedWorkouts = {};
   const weekKey = `phase${S.viewPhase}-week${S.viewWeek}`;
   if (!D.completedWorkouts[weekKey]) D.completedWorkouts[weekKey] = {};
 
