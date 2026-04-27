@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="QuantHealth">
 <meta name="theme-color" content="#06080b">
-<title>QuantHealth v2.10b1</title>
+<title>QuantHealth v2.10b2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -144,20 +144,19 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .dial-trend{font-family:var(--body);font-size:0.55rem;color:var(--muted);font-weight:400;letter-spacing:0.02em;line-height:1.2}
 .dial-trend.stale{color:var(--amber)}
 
-/* Joint pain inline strip */
+/* Joint pain inline strip — stacked L/R per joint, full width per row */
 .joint-strip{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:0.85rem 0.95rem;margin-bottom:0.55rem}
-.joint-strip-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.65rem}
+.joint-strip-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.7rem}
 .joint-strip-title{font-family:var(--display);font-size:0.85rem;font-weight:700;color:var(--text);letter-spacing:-0.005em}
 .joint-strip-hint{font-family:var(--body);font-size:0.55rem;color:var(--muted);letter-spacing:0.02em}
-.joint-strip-row{display:grid;grid-template-columns:60px 1fr 1fr;gap:0.55rem;align-items:center;padding:0.4rem 0}
-.joint-strip-row+.joint-strip-row{border-top:1px solid var(--border)}
-.joint-strip-row-back{grid-template-columns:60px 1fr}
-.joint-strip-name{font-family:var(--body);font-size:0.72rem;color:var(--text);font-weight:600;letter-spacing:-0.005em}
-.joint-strip-side{display:flex;align-items:center;gap:0.35rem;justify-content:flex-start}
-.bilat-mini{font-family:var(--mono);font-size:0.55rem;color:var(--muted);letter-spacing:0.05em;font-weight:600;width:9px;text-align:center}
-.joint-pills{display:flex;gap:0.22rem;flex:1}
-.joint-pills-wide{justify-content:space-between}
-.jpill{flex:1;min-width:0;height:28px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);font-family:var(--mono);font-size:0.65rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.12s;padding:0;aspect-ratio:1;max-width:32px}
+.joint-block{padding:0.5rem 0}
+.joint-block+.joint-block{border-top:1px solid var(--border)}
+.joint-block-name{font-family:var(--body);font-size:0.7rem;color:var(--text);font-weight:600;margin-bottom:0.3rem;letter-spacing:-0.005em}
+.joint-side-row{display:grid;grid-template-columns:14px 1fr;gap:0.5rem;align-items:center;padding:0.18rem 0}
+.joint-side-row-solo{grid-template-columns:1fr}
+.bilat-mini{font-family:var(--mono);font-size:0.6rem;color:var(--muted);letter-spacing:0.05em;font-weight:600;text-align:center}
+.joint-pills{display:flex;gap:0.4rem;flex:1;justify-content:space-between}
+.jpill{flex:1;height:32px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);font-family:var(--mono);font-size:0.7rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.12s;padding:0;aspect-ratio:1;max-width:36px}
 .jpill:active{transform:scale(0.92)}
 .jpill.active.s1{background:var(--green);color:#0a0d12;border-color:var(--green)}
 .jpill.active.s2{background:#9ddb89;color:#0a0d12;border-color:#9ddb89}
@@ -592,7 +591,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
 <header class="app-header">
   <div>
-    <div class="logo">Quant<span>Health</span><sub>v2.10b1</sub></div>
+    <div class="logo">Quant<span>Health</span><sub>v2.10b2</sub></div>
   </div>
   <div class="header-right">
     <div class="date-chip" id="headerDate"></div>
@@ -658,9 +657,10 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
       <div class="joint-strip-title">Joint Pain</div>
       <div class="joint-strip-hint">tap to log · 1=none · 5=severe</div>
     </div>
-    <div class="joint-strip-row" id="jrowElbow">
-      <div class="joint-strip-name">Elbow</div>
-      <div class="joint-strip-side">
+
+    <div class="joint-block">
+      <div class="joint-block-name">Elbow</div>
+      <div class="joint-side-row">
         <span class="bilat-mini">L</span>
         <div class="joint-pills" data-joint="elbowPainL">
           <button class="jpill" data-v="1" onclick="logJointPain('elbowPainL',1)">1</button>
@@ -670,7 +670,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
           <button class="jpill" data-v="5" onclick="logJointPain('elbowPainL',5)">5</button>
         </div>
       </div>
-      <div class="joint-strip-side">
+      <div class="joint-side-row">
         <span class="bilat-mini">R</span>
         <div class="joint-pills" data-joint="elbowPainR">
           <button class="jpill" data-v="1" onclick="logJointPain('elbowPainR',1)">1</button>
@@ -681,9 +681,10 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
         </div>
       </div>
     </div>
-    <div class="joint-strip-row" id="jrowShoulder">
-      <div class="joint-strip-name">Shoulder</div>
-      <div class="joint-strip-side">
+
+    <div class="joint-block">
+      <div class="joint-block-name">Shoulder</div>
+      <div class="joint-side-row">
         <span class="bilat-mini">L</span>
         <div class="joint-pills" data-joint="shoulderPainL">
           <button class="jpill" data-v="1" onclick="logJointPain('shoulderPainL',1)">1</button>
@@ -693,7 +694,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
           <button class="jpill" data-v="5" onclick="logJointPain('shoulderPainL',5)">5</button>
         </div>
       </div>
-      <div class="joint-strip-side">
+      <div class="joint-side-row">
         <span class="bilat-mini">R</span>
         <div class="joint-pills" data-joint="shoulderPainR">
           <button class="jpill" data-v="1" onclick="logJointPain('shoulderPainR',1)">1</button>
@@ -704,9 +705,10 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
         </div>
       </div>
     </div>
-    <div class="joint-strip-row" id="jrowKnee">
-      <div class="joint-strip-name">Knee</div>
-      <div class="joint-strip-side">
+
+    <div class="joint-block">
+      <div class="joint-block-name">Knee</div>
+      <div class="joint-side-row">
         <span class="bilat-mini">L</span>
         <div class="joint-pills" data-joint="kneePainL">
           <button class="jpill" data-v="1" onclick="logJointPain('kneePainL',1)">1</button>
@@ -716,7 +718,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
           <button class="jpill" data-v="5" onclick="logJointPain('kneePainL',5)">5</button>
         </div>
       </div>
-      <div class="joint-strip-side">
+      <div class="joint-side-row">
         <span class="bilat-mini">R</span>
         <div class="joint-pills" data-joint="kneePainR">
           <button class="jpill" data-v="1" onclick="logJointPain('kneePainR',1)">1</button>
@@ -727,14 +729,17 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
         </div>
       </div>
     </div>
-    <div class="joint-strip-row joint-strip-row-back" id="jrowBack">
-      <div class="joint-strip-name">Back</div>
-      <div class="joint-pills joint-pills-wide" data-joint="backPain">
-        <button class="jpill" data-v="1" onclick="logJointPain('backPain',1)">1</button>
-        <button class="jpill" data-v="2" onclick="logJointPain('backPain',2)">2</button>
-        <button class="jpill" data-v="3" onclick="logJointPain('backPain',3)">3</button>
-        <button class="jpill" data-v="4" onclick="logJointPain('backPain',4)">4</button>
-        <button class="jpill" data-v="5" onclick="logJointPain('backPain',5)">5</button>
+
+    <div class="joint-block joint-block-back">
+      <div class="joint-block-name">Back</div>
+      <div class="joint-side-row joint-side-row-solo">
+        <div class="joint-pills" data-joint="backPain">
+          <button class="jpill" data-v="1" onclick="logJointPain('backPain',1)">1</button>
+          <button class="jpill" data-v="2" onclick="logJointPain('backPain',2)">2</button>
+          <button class="jpill" data-v="3" onclick="logJointPain('backPain',3)">3</button>
+          <button class="jpill" data-v="4" onclick="logJointPain('backPain',4)">4</button>
+          <button class="jpill" data-v="5" onclick="logJointPain('backPain',5)">5</button>
+        </div>
       </div>
     </div>
   </div>
