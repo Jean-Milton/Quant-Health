@@ -7,20 +7,31 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="QuantHealth">
 <meta name="theme-color" content="#06080b">
-<title>QuantHealth v2.9.3</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>QuantHealth v2.10a</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
 :root {
-  --bg:#06080b; --surface:#0e141b; --surface2:#161e28; --surface3:#1d2733;
-  --border:rgba(255,255,255,0.12); --border2:rgba(255,255,255,0.18);
-  --text:#eef3f8; --muted:#8a9ba9; --muted2:#aab8c4;
-  --accent:#33d6ff; --accent-dim:rgba(51,214,255,0.18);
-  --green:#33ee8a; --green-dim:rgba(51,238,138,0.16);
-  --amber:#ffc060; --amber-dim:rgba(255,192,96,0.16);
-  --red:#ff6080; --red-dim:rgba(255,96,128,0.16);
-  --purple:#c66bff; --purple-dim:rgba(198,107,255,0.16);
-  --mono:'DM Mono',monospace; --display:'Syne',sans-serif;
+  /* === Palette B — mineral teal, refined sans, WCAG-AA contrast === */
+  --bg:#0a0d12; --surface:#11151c; --surface2:#171c25; --surface3:#1f2530;
+  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
+  --text:#e8edf2; --muted:#8a9ba9; --muted2:#aab8c4;
+  /* Primary accent — mineral teal, less electric than v2.9.3's cyan */
+  --accent:#5ec8d8; --accent-dim:rgba(94,200,216,0.16);
+  /* Calmer green for "good" states */
+  --green:#5dd39e; --green-dim:rgba(93,211,158,0.16);
+  /* Single warm amber for caution / skip */
+  --amber:#f5b54a; --amber-dim:rgba(245,181,74,0.16);
+  /* Slightly desaturated red for alert / pain */
+  --red:#e8645e; --red-dim:rgba(232,100,94,0.16);
+  /* Recovery/sleep purple, more muted */
+  --purple:#9d7ddb; --purple-dim:rgba(157,125,219,0.16);
+  /* === Type system (was: --mono everywhere; now mixed) === */
+  --display:'Schibsted Grotesk',sans-serif;   /* headers, titles */
+  --body:'Inter',sans-serif;                  /* paragraphs, labels, UI */
+  --mono:'Geist Mono',monospace;              /* numeric data, code, IDs */
   --r:12px; --safe-top:env(safe-area-inset-top,0px); --safe-bottom:env(safe-area-inset-bottom,0px);
   --scale: 1.2;  /* default bumped 20% from prior baseline */
 }
@@ -29,7 +40,7 @@ body.size-normal  { --scale: 1.2; }
 body.size-large   { --scale: 1.4; }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{font-size:calc(16px * var(--scale))}
-html,body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;overflow-x:hidden;-webkit-text-size-adjust:100%}
+html,body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;overflow-x:hidden;-webkit-text-size-adjust:100%}
 /* Floor for micro-labels: nothing rendered text smaller than ~12px regardless of scale */
 .sl, .m-label, .form-label, .pain-joint, .pain-input-label, .h-date, .h-metrics,
 .activity-source, .activity-meta, .meta, .recent-label, .activities-title, .food-title,
@@ -59,7 +70,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
 .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(6,8,11,0.96);backdrop-filter:blur(24px);border-top:1px solid var(--border);display:flex;padding:0.5rem 0 calc(0.5rem + var(--safe-bottom));z-index:200}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.2rem;padding:0.35rem 0;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;transition:color 0.15s}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.2rem;padding:0.35rem 0;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--body);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;transition:color 0.15s}
 .nav-item.active{color:var(--accent)}
 .nav-item svg{width:18px;height:18px}
 
@@ -80,7 +91,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .trail-label{font-family:var(--display);font-size:0.8rem;font-weight:700;flex:1}
 .trail-link{font-size:0.6rem;color:var(--muted);text-decoration:none;letter-spacing:0.08em}
 .trail-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.4rem}
-.tbtn{padding:0.45rem;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted2);font-family:var(--mono);font-size:0.62rem;letter-spacing:0.06em;cursor:pointer;text-align:center;transition:all 0.15s;text-transform:uppercase}
+.tbtn{padding:0.45rem;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted2);font-family:var(--body);font-size:0.62rem;letter-spacing:0.06em;cursor:pointer;text-align:center;transition:all 0.15s;text-transform:uppercase}
 .tbtn.sel-green{background:var(--green-dim);border-color:var(--green);color:var(--green)}
 .tbtn.sel-yellow{background:var(--amber-dim);border-color:var(--amber);color:var(--amber)}
 .tbtn.sel-red{background:var(--red-dim);border-color:var(--red);color:var(--red)}
@@ -145,7 +156,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .pain-bilat-input-cell .pain-val-display{font-family:var(--display);font-size:0.95rem;font-weight:800}
 /* Med chips */
 .med-chips{display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.4rem}
-.med-chip{padding:0.45rem 0.7rem;border-radius:18px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted2);font-family:var(--mono);font-size:0.65rem;cursor:pointer;letter-spacing:0.04em;transition:all 0.15s}
+.med-chip{padding:0.45rem 0.7rem;border-radius:18px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted2);font-family:var(--body);font-size:0.65rem;cursor:pointer;letter-spacing:0.04em;transition:all 0.15s}
 .med-chip.taken{background:var(--green-dim);border-color:var(--green);color:var(--green)}
 .med-chip-empty{font-size:0.65rem;color:var(--muted);padding:0.6rem;text-align:center;background:var(--surface2);border:1px dashed var(--border);border-radius:8px}
 .med-chip-empty a{color:var(--accent);text-decoration:underline}
@@ -162,17 +173,17 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .pain-val-display{font-family:var(--display);font-size:1.1rem;font-weight:800;text-align:center}
 
 .rating-btns{display:flex;gap:0.35rem}
-.rbtn{flex:1;padding:0.5rem 0.2rem;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--mono);font-size:0.65rem;cursor:pointer;text-align:center;transition:all 0.15s}
+.rbtn{flex:1;padding:0.5rem 0.2rem;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--body);font-size:0.65rem;cursor:pointer;text-align:center;transition:all 0.15s}
 .rbtn.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
 
 .chip-btns{display:flex;gap:0.35rem;flex-wrap:wrap}
-.chip{padding:0.4rem 0.75rem;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--muted2);font-family:var(--mono);font-size:0.62rem;letter-spacing:0.05em;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.chip{padding:0.4rem 0.75rem;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--muted2);font-family:var(--body);font-size:0.62rem;letter-spacing:0.05em;cursor:pointer;transition:all 0.15s;white-space:nowrap}
 .chip.active{background:var(--green-dim);border-color:var(--green);color:var(--green)}
 
-.btn-primary{width:100%;padding:0.85rem;background:var(--accent);color:#000;border:none;border-radius:10px;font-family:var(--display);font-size:0.82rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:opacity 0.15s,transform 0.1s;margin-top:0.4rem}
+.btn-primary{width:100%;padding:0.85rem;background:var(--accent);color:#000;border:none;border-radius:10px;font-family:var(--display);font-size:0.85rem;font-weight:700;letter-spacing:-0.005em;cursor:pointer;transition:opacity 0.15s,transform 0.1s;margin-top:0.4rem}
 .btn-primary:active{opacity:0.85;transform:scale(0.98)}
-.btn-secondary{width:100%;padding:0.7rem;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:10px;font-family:var(--mono);font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;margin-top:0.4rem}
-.btn-sm{padding:0.45rem 0.9rem;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted2);font-family:var(--mono);font-size:0.65rem;cursor:pointer;transition:all 0.15s;letter-spacing:0.06em;text-transform:uppercase}
+.btn-secondary{width:100%;padding:0.7rem;background:transparent;color:var(--muted2);border:1px solid var(--border2);border-radius:10px;font-family:var(--body);font-size:0.78rem;font-weight:500;letter-spacing:0;cursor:pointer;margin-top:0.4rem}
+.btn-sm{padding:0.45rem 0.9rem;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted2);font-family:var(--body);font-size:0.65rem;cursor:pointer;transition:all 0.15s;letter-spacing:0.06em;text-transform:uppercase}
 .btn-sm:hover{border-color:var(--accent);color:var(--accent)}
 
 /* OPTIMIZE / CORR */
@@ -221,7 +232,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 
 .day-nav{display:flex;gap:0.3rem;overflow-x:auto;margin-bottom:0.65rem;padding-bottom:0.25rem}
 .day-nav::-webkit-scrollbar{display:none}
-.day-btn{flex-shrink:0;padding:0.55rem 0.7rem;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted2);font-family:var(--mono);font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;text-align:center;min-width:50px;transition:all 0.15s}
+.day-btn{flex-shrink:0;padding:0.55rem 0.7rem;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted2);font-family:var(--body);font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;text-align:center;min-width:50px;transition:all 0.15s}
 .day-btn.active{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
 .day-btn.done{border-color:rgba(0,232,122,0.35);background:rgba(0,232,122,0.06)}
 .day-btn.done .day-num{color:var(--green)}
@@ -244,16 +255,16 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .cue-chip{font-size:0.55rem;padding:0.15rem 0.45rem;border-radius:4px;background:var(--surface2);color:var(--muted2);letter-spacing:0.05em}
 
 .complete-toggle{display:flex;gap:0.4rem;margin-top:0.5rem}
-.toggle-btn{flex:1;padding:0.55rem;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;cursor:pointer}
+.toggle-btn{flex:1;padding:0.55rem;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--body);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;cursor:pointer}
 .toggle-btn.done{background:var(--green-dim);border-color:var(--green);color:var(--green)}
 .toggle-btn.skip{background:var(--surface3);color:var(--muted)}
 .toggle-btn.skip.active{background:var(--amber-dim);border-color:var(--amber);color:var(--amber)}
 
 /* v2.9 — Workout logger UI */
-.ex-expand{background:transparent;border:none;color:var(--muted);font-family:var(--mono);font-size:0.6rem;cursor:pointer;margin-left:0.4rem;padding:0.1rem 0.3rem;border-radius:4px;letter-spacing:0.05em}
+.ex-expand{background:transparent;border:none;color:var(--muted);font-family:var(--body);font-size:0.6rem;cursor:pointer;margin-left:0.4rem;padding:0.1rem 0.3rem;border-radius:4px;letter-spacing:0.05em}
 .ex-expand:active{background:var(--surface3)}
 .state-chips{display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.5rem}
-.state-chip{padding:0.3rem 0.55rem;border-radius:14px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--mono);font-size:0.6rem;cursor:pointer;letter-spacing:0.04em}
+.state-chip{padding:0.3rem 0.55rem;border-radius:14px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--body);font-size:0.6rem;cursor:pointer;letter-spacing:0.04em}
 .state-chip.active.s-easy{background:rgba(0,232,122,0.12);border-color:var(--green);color:var(--green)}
 .state-chip.active.s-prescribed{background:rgba(0,200,255,0.12);border-color:var(--accent);color:var(--accent)}
 .state-chip.active.s-failed{background:rgba(255,179,64,0.12);border-color:var(--amber);color:var(--amber)}
@@ -266,9 +277,9 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .set-input{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.4rem 0.5rem;color:var(--text);font-family:var(--mono);font-size:0.75rem;width:100%;-webkit-appearance:none}
 .set-input:focus{outline:none;border-color:var(--accent)}
 .set-input::placeholder{color:var(--muted)}
-.add-set-btn{margin-top:0.3rem;width:100%;padding:0.4rem;background:transparent;border:1px dashed var(--border);border-radius:5px;color:var(--muted);font-family:var(--mono);font-size:0.6rem;cursor:pointer;letter-spacing:0.05em;text-transform:uppercase}
+.add-set-btn{margin-top:0.3rem;width:100%;padding:0.4rem;background:transparent;border:1px dashed var(--border);border-radius:5px;color:var(--muted);font-family:var(--body);font-size:0.6rem;cursor:pointer;letter-spacing:0.05em;text-transform:uppercase}
 .add-set-btn:hover{border-color:var(--accent);color:var(--accent)}
-.ex-note-input{margin-top:0.45rem;width:100%;padding:0.45rem 0.6rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:0.7rem;-webkit-appearance:none}
+.ex-note-input{margin-top:0.45rem;width:100%;padding:0.45rem 0.6rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--body);font-size:0.7rem;-webkit-appearance:none}
 .ex-note-input:focus{outline:none;border-color:var(--accent)}
 .cardio-log{margin-top:0.65rem;padding:0.65rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
 .cardio-row{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.6rem}
@@ -286,7 +297,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .compliance-title{font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.45rem;display:flex;justify-content:space-between;align-items:center}
 .compliance-title strong{color:var(--text);font-weight:700}
 .compliance-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:0.25rem}
-.compliance-cell{aspect-ratio:1;border-radius:3px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.55rem;color:var(--muted);font-family:var(--mono);cursor:pointer}
+.compliance-cell{aspect-ratio:1;border-radius:3px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:var(--muted);font-family:var(--mono);cursor:pointer}
 .compliance-cell.done{background:var(--green-dim);border-color:var(--green);color:var(--green)}
 .compliance-cell.skip{background:var(--amber-dim);border-color:var(--amber);color:var(--amber)}
 .compliance-cell.future{opacity:0.4}
@@ -294,11 +305,11 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .compliance-cell.partial{background:rgba(180,79,255,0.12);border-color:var(--purple);color:var(--purple)}
 .compliance-cell.viewing{box-shadow:0 0 0 1.5px var(--purple)}
 .compliance-week-row{margin-bottom:0.4rem}
-.compliance-week-label{font-size:0.55rem;color:var(--muted);font-family:var(--mono);letter-spacing:0.08em;display:flex;justify-content:space-between;margin-bottom:0.2rem}
+.compliance-week-label{font-size:0.55rem;color:var(--muted);font-family:var(--body);letter-spacing:0.08em;display:flex;justify-content:space-between;margin-bottom:0.2rem}
 
 /* v2.9.1 — banner shown when viewing a non-current week */
-.view-week-banner{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding:0.55rem 0.75rem;background:rgba(180,79,255,0.08);border:1px solid var(--purple);border-radius:8px;margin-bottom:0.55rem;font-size:0.7rem;color:var(--purple);font-family:var(--mono);letter-spacing:0.04em}
-.back-current-btn{background:transparent;border:1px solid var(--purple);color:var(--purple);padding:0.3rem 0.6rem;border-radius:14px;font-family:var(--mono);font-size:0.6rem;letter-spacing:0.05em;cursor:pointer}
+.view-week-banner{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding:0.55rem 0.75rem;background:rgba(180,79,255,0.08);border:1px solid var(--purple);border-radius:8px;margin-bottom:0.55rem;font-size:0.7rem;color:var(--purple);font-family:var(--body);letter-spacing:0.04em}
+.back-current-btn{background:transparent;border:1px solid var(--purple);color:var(--purple);padding:0.3rem 0.6rem;border-radius:14px;font-family:var(--body);font-size:0.6rem;letter-spacing:0.05em;cursor:pointer}
 .back-current-btn:active{background:rgba(180,79,255,0.15)}
 
 hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
@@ -320,13 +331,13 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 .date-banner-value.past{color:var(--amber)}
 .date-banner input[type="date"]{background:transparent;border:none;color:var(--text);font-family:var(--mono);font-size:0.78rem;padding:0;width:100%;color-scheme:dark}
 .date-banner input[type="date"]:focus{outline:none}
-.date-banner-reset{background:none;border:1px solid var(--border2);color:var(--muted);font-family:var(--mono);font-size:0.55rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.3rem 0.55rem;border-radius:6px;cursor:pointer}
+.date-banner-reset{background:none;border:1px solid var(--border2);color:var(--muted);font-family:var(--body);font-size:0.55rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.3rem 0.55rem;border-radius:6px;cursor:pointer}
 .date-banner-reset:hover{border-color:var(--accent);color:var(--accent)}
 .editing-warning{background:var(--amber-dim);border:1px solid rgba(255,179,64,0.3);color:var(--amber);font-size:0.65rem;padding:0.5rem 0.75rem;border-radius:8px;margin-bottom:0.65rem;letter-spacing:0.05em}
 
 /* HISTORY VIEW TOGGLE */
 .view-toggle{display:flex;gap:0.3rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.2rem;margin-bottom:0.65rem}
-.view-toggle button{flex:1;background:transparent;border:none;color:var(--muted);font-family:var(--mono);font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.5rem;border-radius:6px;cursor:pointer;transition:all 0.15s}
+.view-toggle button{flex:1;background:transparent;border:none;color:var(--muted);font-family:var(--body);font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.5rem;border-radius:6px;cursor:pointer;transition:all 0.15s}
 .view-toggle button.active{background:var(--accent-dim);color:var(--accent)}
 
 /* EDITABLE TABLE */
@@ -348,7 +359,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 .qtable .del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.85rem;padding:0.2rem 0.4rem;border-radius:4px}
 .qtable .del-btn:hover{color:var(--red);background:var(--red-dim)}
 .table-help{font-size:0.6rem;color:var(--muted);text-align:center;line-height:1.6;padding:0.5rem 0;margin-bottom:0.5rem;letter-spacing:0.03em}
-.add-row-btn{width:100%;padding:0.7rem;background:var(--surface);border:1px dashed var(--border2);border-radius:10px;color:var(--accent);font-family:var(--mono);font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;margin-bottom:0.65rem;transition:all 0.15s}
+.add-row-btn{width:100%;padding:0.7rem;background:var(--surface);border:1px dashed var(--border2);border-radius:10px;color:var(--accent);font-family:var(--body);font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;margin-bottom:0.65rem;transition:all 0.15s}
 .add-row-btn:hover{border-color:var(--accent);background:var(--accent-dim)}
 
 /* ACTIVITIES PANEL */
@@ -364,7 +375,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 .activity-meta{font-size:0.62rem;color:var(--muted2);line-height:1.5}
 .activity-notes{font-size:0.62rem;color:var(--muted);font-style:italic;margin-top:0.2rem;line-height:1.4}
 .activity-source{display:inline-block;font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.1rem 0.35rem;border-radius:3px;background:rgba(0,200,255,0.1);color:var(--accent);margin-left:0.4rem;vertical-align:middle}
-.activity-del{position:relative;width:32px;height:32px;border-radius:8px;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:0.95rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:border-color 0.15s,color 0.15s;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.activity-del{position:relative;width:32px;height:32px;border-radius:8px;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:var(--body);font-size:0.95rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:border-color 0.15s,color 0.15s;-webkit-user-select:none;user-select:none;touch-action:manipulation}
 .activity-del:active{background:var(--surface3)}
 .activity-del.holding{border-color:var(--red);color:var(--red)}
 .activity-del-progress{position:absolute;inset:0;border-radius:8px;background:conic-gradient(var(--red) calc(var(--p,0)*1%), transparent 0);opacity:0.3;pointer-events:none;transition:opacity 0.1s}
@@ -374,12 +385,12 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 .add-activity-form{background:var(--surface);border:1px dashed var(--border2);border-radius:10px;padding:0.75rem;margin-bottom:0.65rem}
 .add-activity-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem}
 .add-activity-title{font-family:var(--display);font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2)}
-.add-activity-toggle{background:none;border:none;color:var(--accent);font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;padding:0.3rem 0.55rem;border-radius:6px;border:1px solid rgba(0,200,255,0.2)}
+.add-activity-toggle{background:none;border:none;color:var(--accent);font-family:var(--body);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;padding:0.3rem 0.55rem;border-radius:6px;border:1px solid rgba(0,200,255,0.2)}
 .add-activity-toggle:hover{background:var(--accent-dim)}
 .add-activity-body{display:none;padding-top:0.5rem;border-top:1px solid var(--border)}
 .add-activity-body.open{display:block;animation:fadeUp 0.15s ease}
 .felt-btns{display:flex;gap:0.3rem;margin-bottom:0.5rem}
-.felt-btn{flex:1;padding:0.45rem 0.2rem;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--mono);font-size:0.68rem;cursor:pointer;text-align:center;transition:all 0.15s}
+.felt-btn{flex:1;padding:0.45rem 0.2rem;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--body);font-size:0.68rem;cursor:pointer;text-align:center;transition:all 0.15s}
 .felt-btn.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
 .felt-btn .felt-emoji{display:block;font-size:0.85rem;margin-bottom:0.1rem}
 .felt-btn .felt-num{font-family:var(--display);font-weight:700}
@@ -387,12 +398,12 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 /* UNDO TOAST */
 /* WATER UNIT TOGGLE */
 .unit-toggle{display:inline-flex;gap:0;background:var(--surface3);border:1px solid var(--border2);border-radius:6px;padding:2px;margin-left:0.4rem;vertical-align:middle}
-.unit-toggle button{background:transparent;border:none;color:var(--muted);font-family:var(--mono);font-size:0.55rem;letter-spacing:0.06em;text-transform:uppercase;padding:0.25rem 0.55rem;border-radius:4px;cursor:pointer;transition:all 0.12s}
+.unit-toggle button{background:transparent;border:none;color:var(--muted);font-family:var(--body);font-size:0.55rem;letter-spacing:0.06em;text-transform:uppercase;padding:0.25rem 0.55rem;border-radius:4px;cursor:pointer;transition:all 0.12s}
 .unit-toggle button.active{background:var(--accent-dim);color:var(--accent)}
 
 /* TOAST UNDO */
 .toast.with-action{padding:0.55rem 0.5rem 0.55rem 1.1rem;display:flex;align-items:center;gap:0.5rem}
-.toast-undo{background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.25);color:#000;font-family:var(--mono);font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.25rem 0.65rem;border-radius:14px;cursor:pointer;font-weight:700}
+.toast-undo{background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.25);color:#000;font-family:var(--body);font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.25rem 0.65rem;border-radius:14px;cursor:pointer;font-weight:700}
 
 /* BODY MEASUREMENTS GRID */
 .body-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.45rem;margin-bottom:0.5rem}
@@ -422,7 +433,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 .score-organ{background:rgba(255,179,64,0.08);color:var(--amber);border:1px solid rgba(255,179,64,0.2)}
 
 .food-input-wrap{display:flex;gap:0.4rem;margin-bottom:0.55rem}
-.food-input{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:0.65rem 0.85rem;color:var(--text);font-family:var(--mono);font-size:0.85rem;-webkit-appearance:none}
+.food-input{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:0.65rem 0.85rem;color:var(--text);font-family:var(--body);font-size:0.85rem;-webkit-appearance:none}
 .food-input:focus{outline:none;border-color:var(--accent)}
 .food-add-btn{width:44px;height:auto;background:var(--accent);color:#000;border:none;border-radius:8px;font-family:var(--display);font-size:1.3rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity 0.15s}
 .food-add-btn:active{opacity:0.85}
@@ -430,7 +441,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
 .recent-row{display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.65rem;padding-bottom:0.6rem;border-bottom:1px solid var(--border)}
 .recent-label{font-size:0.55rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);width:100%;margin-bottom:0.2rem}
-.recent-chip{padding:0.32rem 0.6rem;border-radius:14px;border:1px solid var(--border);background:var(--surface2);color:var(--muted2);font-family:var(--mono);font-size:0.62rem;cursor:pointer;transition:all 0.12s;letter-spacing:0.03em;-webkit-user-select:none;user-select:none}
+.recent-chip{padding:0.32rem 0.6rem;border-radius:14px;border:1px solid var(--border);background:var(--surface2);color:var(--muted2);font-family:var(--body);font-size:0.62rem;cursor:pointer;transition:all 0.12s;letter-spacing:0.03em;-webkit-user-select:none;user-select:none}
 .recent-chip:active{background:var(--accent-dim);color:var(--accent);border-color:var(--accent)}
 
 .food-entry{padding:0.55rem 0;border-bottom:1px solid var(--border)}
@@ -459,7 +470,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 .modal-title{font-family:var(--display);font-size:0.85rem;font-weight:800;margin-bottom:0.2rem}
 .modal-sub{font-size:0.6rem;color:var(--muted);margin-bottom:0.85rem;line-height:1.4}
 .portion-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0.35rem;margin-bottom:0.65rem}
-.portion-btn{padding:0.55rem 0.2rem;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--mono);font-size:0.68rem;cursor:pointer;text-align:center}
+.portion-btn{padding:0.55rem 0.2rem;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--body);font-size:0.68rem;cursor:pointer;text-align:center}
 .portion-btn.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);font-weight:700}
 .score-breakdown{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.6rem 0.75rem;font-size:0.65rem;color:var(--muted2);line-height:1.7;margin-bottom:0.65rem}
 .score-breakdown .row{display:flex;justify-content:space-between;padding:0.15rem 0}
@@ -468,7 +479,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 .modal-actions button{flex:1}
 
 .teach-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.35rem;margin-bottom:0.6rem}
-.teach-btn{padding:0.5rem 0.3rem;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--mono);font-size:0.62rem;cursor:pointer;text-align:center;line-height:1.3}
+.teach-btn{padding:0.5rem 0.3rem;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--body);font-size:0.62rem;cursor:pointer;text-align:center;line-height:1.3}
 .teach-btn.active{border-width:2px}
 .teach-btn.anti.active{background:var(--green-dim);border-color:var(--green);color:var(--green)}
 .teach-btn.neu.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
@@ -480,7 +491,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
 <header class="app-header">
   <div>
-    <div class="logo">Quant<span>Health</span><sub>v2.9.3</sub></div>
+    <div class="logo">Quant<span>Health</span><sub>v2.10a</sub></div>
   </div>
   <div class="header-right">
     <div class="date-chip" id="headerDate"></div>
@@ -1131,14 +1142,24 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   </div>
 
   <div class="card" style="border-color:rgba(255,179,64,0.2);background:rgba(255,179,64,0.03)">
-    <div class="card-title" style="color:var(--amber)">Build Notes — v2.9.3</div>
+    <div class="card-title" style="color:var(--amber)">Build Notes — v2.10a</div>
     <div style="font-size:0.72rem;color:var(--muted2);line-height:1.7">
-      <strong style="color:var(--text)">v2.9.3 — Bilateral pain + medications:</strong>
+      <strong style="color:var(--text)">v2.10a — Palette B refresh (visual only):</strong>
       <br><br>
-      <strong style="color:var(--text)">1. Bilateral joint pain.</strong> Elbow, shoulder, and knee now track left and right independently. Existing single-value pain entries migrated to BOTH sides as a starting point — refine going forward as needed. The Today screen shows a 4-row layout (Elbow / Shoulder / Knee with L/R cells, plus Back as full-width).<br><br>
-      <strong style="color:var(--text)">2. Lower-back tracking.</strong> New single field for back pain (1–5 scale). Joins the bilateral grid as the bottom row.<br><br>
-      <strong style="color:var(--text)">3. Medication tracking.</strong> Predefined list configured in Settings → Medications. Each med becomes a tappable chip in Check-In to log compliance daily. Will feed correlation analysis with pain, sleep, HR over time.<br><br>
-      <strong style="color:var(--text)">4. Food score clarity.</strong> Inflammation pill on Food Log now reads "infl −2" instead of just "−2" so the meaning is obvious on mobile. Same for organ-load pill.<br><br>
+      This is Ship 1 of 2 in the v2.10 redesign. Pure visual change — no functional restructure. All features work identically to v2.9.3.
+      <br><br>
+      <strong style="color:var(--text)">Color palette.</strong> Mineral teal accent (#5ec8d8) replaces the previous electric cyan (#33d6ff). Calmer green for "good" states (#5dd39e), warmer amber for caution (#f5b54a), slightly desaturated red for alerts (#e8645e), muted purple for sleep/recovery (#9d7ddb). Background shifted to #0a0d12 (slight blue undertone vs the previous near-black).
+      <br><br>
+      <strong style="color:var(--text)">Typography.</strong> Three-font system replacing all-mono:
+      <br>• <strong>Schibsted Grotesk</strong> for display headers
+      <br>• <strong>Inter</strong> for body text, labels, buttons
+      <br>• <strong>Geist Mono</strong> for numeric data only (HR, weight, scores, set-input fields)
+      <br><br>
+      <strong style="color:var(--text)">Why.</strong> The previous all-mono "Bloomberg terminal" aesthetic was distinctive but fatiguing for daily use. The new system reads as professional and trustworthy without being clinical. WCAG-AA contrast throughout.
+      <br><br>
+      <strong style="color:var(--text)">Next:</strong> v2.10b ships the structural changes — Today screen redesign with hero narrative + 3 dials, inline joint pain, 6-tab nav (Today · Log · Program · Insights · History · Settings).
+      <br><br>
+      <strong style="color:var(--text)">v2.9.3:</strong> Bilateral pain (L/R for elbow/shoulder/knee), back pain, medication tracking, food score clarity.<br><br>
       <strong style="color:var(--text)">v2.9.2:</strong> Timezone bug fixed. IndexedDB durable storage. Skip indicator. Empty chart placeholder. Test harness adopted.<br><br>
       <strong style="color:var(--text)">v2.9.1:</strong> Cross-week logging. Compliance strip cells jump to that week.<br><br>
       <strong style="color:var(--text)">v2.9:</strong> Program tab is the workout logger. Per-exercise state, per-set logging, compliance strip.<br><br>
