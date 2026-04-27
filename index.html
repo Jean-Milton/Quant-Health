@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="QuantHealth">
 <meta name="theme-color" content="#06080b">
-<title>QuantHealth v2.10b2</title>
+<title>QuantHealth v2.10b3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -591,7 +591,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
 <header class="app-header">
   <div>
-    <div class="logo">Quant<span>Health</span><sub>v2.10b2</sub></div>
+    <div class="logo">Quant<span>Health</span><sub>v2.10b3</sub></div>
   </div>
   <div class="header-right">
     <div class="date-chip" id="headerDate"></div>
@@ -1324,8 +1324,12 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   </div>
 
   <div class="card" style="border-color:rgba(255,179,64,0.2);background:rgba(255,179,64,0.03)">
-    <div class="card-title" style="color:var(--amber)">Build Notes — v2.10b1</div>
+    <div class="card-title" style="color:var(--amber)">Build Notes — v2.10b3</div>
     <div style="font-size:0.72rem;color:var(--muted2);line-height:1.7">
+      <strong style="color:var(--text)">v2.10b3 — Program start date fix:</strong> Program start corrected from Apr 21 (Tue) → Apr 20 (Mon). Existing week-1 completion records auto-shifted +1 day-slot via one-shot migration. Mon Apr 27 now correctly appears as start of week 2.
+      <br><br>
+      <strong style="color:var(--text)">v2.10b2 — Today layout fix:</strong> Joint pain pills overflowed on phone width. Restructured into stacked L/R rows per joint — full screen width, larger tap targets.
+      <br><br>
       <strong style="color:var(--text)">v2.10b1 — Hotfix:</strong> Fixed crash when IndexedDB-cached data pre-dated the v2.9 schema (Cannot read properties of undefined). Hydration path now re-applies critical defaults after Object.assign. Added defensive guards across all D.workoutLogs and D.completedWorkouts read/write paths.
       <br><br>
       <strong style="color:var(--text)">v2.10b — Today screen redesign + 6-tab nav:</strong>
@@ -1659,7 +1663,7 @@ const LEX_INDEX = (() => {
 // CONSTANTS
 // ═══════════════════════════════
 const STORE = 'quanthealth_v29';
-const PROGRAM_START = new Date('2026-04-21');
+const PROGRAM_START = new Date('2026-04-20');  // v2.10b3 — corrected from Apr 21 (was wrong by 1 day)
 const VAC_START = new Date('2026-06-28');
 const VAC_END = new Date('2026-07-10');
 
@@ -1942,6 +1946,41 @@ let D = (() => {
     // Each med: {id, name, dose, schedule, active, addedAt}
     // The list itself is empty by default; user fills it in via Settings.
     if (!data.medsList) data.medsList = [];
+    // ─── v2.10b3 — Program-start date correction (Apr 21 → Apr 20) ───
+    // Before this fix, day-0-of-week-1 was a Tuesday (Apr 21). After the fix,
+    // day-0-of-week-1 is the actual Monday (Apr 20). Existing completion records
+    // need to shift by +1 day-slot, with overflow into week 2.
+    // We use a flag so this only runs once per data store.
+    if (!data._programStartFixed_v2_10b3) {
+      const shiftDay = (sourceMap, targetMap) => {
+        // Walk source week 1 in order, place each slot N → slot N+1,
+        // overflowing slot 6 → week 2 slot 0.
+        const wk1 = sourceMap['phase1-week1'];
+        if (!wk1) return;
+        const newWk1 = {};
+        const newWk2Overflow = {};
+        Object.keys(wk1).forEach(slotStr => {
+          const slot = parseInt(slotStr);
+          if (isNaN(slot)) return;
+          if (slot < 6) {
+            newWk1[slot + 1] = wk1[slot];
+          } else {
+            // slot 6 (was Mon under wrong math) becomes week 2 slot 0
+            newWk2Overflow[0] = wk1[slot];
+          }
+        });
+        targetMap['phase1-week1'] = newWk1;
+        if (Object.keys(newWk2Overflow).length) {
+          // Merge into existing week 2 if any
+          const existingWk2 = targetMap['phase1-week2'] || {};
+          targetMap['phase1-week2'] = { ...existingWk2, ...newWk2Overflow };
+        }
+      };
+      if (data.completedWorkouts) shiftDay(data.completedWorkouts, data.completedWorkouts);
+      if (data.workoutLogs)       shiftDay(data.workoutLogs, data.workoutLogs);
+      data._programStartFixed_v2_10b3 = true;
+      console.log('v2.10b3 migration: shifted week-1 program slots by +1 day');
+    }
     return data;
   };
 
