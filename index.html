@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="QuantHealth">
 <meta name="theme-color" content="#06080b">
-<title>QuantHealth v2.9.1</title>
+<title>QuantHealth v2.9.2</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
@@ -157,6 +157,11 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .insight-chip.bad{border-color:var(--red);background:var(--red-dim);color:var(--red)}
 
 .chart-wrap{position:relative;height:150px;margin-bottom:0.4rem}
+/* v2.9.2 — empty-state overlay for charts with no data */
+.chart-empty-state{display:none;flex-direction:column;align-items:center;justify-content:center;height:150px;gap:0.3rem;padding:1rem;text-align:center}
+.chart-empty-icon{font-size:1.5rem;opacity:0.5}
+.chart-empty-text{font-family:var(--display);font-size:0.78rem;font-weight:700;color:var(--muted2)}
+.chart-empty-sub{font-size:0.6rem;color:var(--muted);letter-spacing:0.05em}
 .yearly-wrap{position:relative;height:60px;margin-bottom:0.5rem;padding-bottom:0.3rem;border-bottom:1px solid var(--border)}
 .yearly-label{font-size:0.55rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.15rem}
 .recent-label{font-size:0.55rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top:0.5rem;margin-bottom:0.15rem}
@@ -183,10 +188,13 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 
 .day-nav{display:flex;gap:0.3rem;overflow-x:auto;margin-bottom:0.65rem;padding-bottom:0.25rem}
 .day-nav::-webkit-scrollbar{display:none}
-.day-btn{flex-shrink:0;padding:0.55rem 0.7rem;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted2);font-family:var(--mono);font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;text-align:center;min-width:50px}
+.day-btn{flex-shrink:0;padding:0.55rem 0.7rem;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted2);font-family:var(--mono);font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;text-align:center;min-width:50px;transition:all 0.15s}
 .day-btn.active{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
+.day-btn.done{border-color:rgba(0,232,122,0.35);background:rgba(0,232,122,0.06)}
+.day-btn.done .day-num{color:var(--green)}
+.day-btn.skipped{border-color:rgba(255,179,64,0.35);background:rgba(255,179,64,0.06)}
+.day-btn.skipped .day-num{color:var(--amber)}
 .day-btn .day-num{font-family:var(--display);font-size:0.95rem;font-weight:800;display:block}
-.day-btn.done .day-num::after{content:'✓';color:var(--green);font-size:0.6rem;margin-left:0.15rem}
 
 .workout-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem;margin-bottom:0.65rem}
 .workout-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem}
@@ -439,7 +447,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
 <header class="app-header">
   <div>
-    <div class="logo">Quant<span>Health</span><sub>v2.9.1</sub></div>
+    <div class="logo">Quant<span>Health</span><sub>v2.9.2</sub></div>
   </div>
   <div class="header-right">
     <div class="date-chip" id="headerDate"></div>
@@ -992,11 +1000,17 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   </div>
 
   <div class="card" style="border-color:rgba(255,179,64,0.2);background:rgba(255,179,64,0.03)">
-    <div class="card-title" style="color:var(--amber)">Build Notes — v2.9.1</div>
+    <div class="card-title" style="color:var(--amber)">Build Notes — v2.9.2</div>
     <div style="font-size:0.72rem;color:var(--muted2);line-height:1.7">
-      <strong style="color:var(--text)">Hotfix v2.9.1:</strong> Cross-week logging now works. Previously, "Mark Done" always wrote to the current week's key, so logging past workouts silently failed. Now you can tap any cell in the compliance strip to switch the viewing week, and all log/done actions write to that week. A purple banner appears at the top of the workout view when you're not on the current week. "← Current week" button jumps you back.<br><br>
-      <strong style="color:var(--text)">v2.9:</strong> Program tab is the workout logger. Per-exercise state (😊 easy / ✓ as prescribed / ⚠ failed / 🩹 pain) with optional notes. Tap "▸ sets" for per-set logging with reps + weight inputs. Cardio days get a simpler form (duration + avg HR + felt 1–5).<br><br>
-      <strong style="color:var(--text)">Compliance strip:</strong> 12-week overview at top of Program tab. Each cell tap-to-jump.<br><br>
+      <strong style="color:var(--text)">v2.9.2 — Critical fixes:</strong>
+      <br><br>
+      <strong style="color:var(--text)">1. Timezone bug fixed.</strong> Previously the app used UTC dates internally, causing entries logged after 8pm Eastern to be saved under tomorrow's date. Now uses local timezone consistently. ~30 call sites updated.<br><br>
+      <strong style="color:var(--text)">2. IndexedDB durable storage.</strong> Storage migrated from localStorage to IndexedDB. localStorage is treated as "cache" by browsers and gets evicted under storage pressure (especially iOS Safari). IndexedDB is treated as durable app storage. We write to both for now; on next load if IndexedDB has more data than localStorage, it auto-restores. This protects against the data loss seen earlier in development.<br><br>
+      <strong style="color:var(--text)">3. Skip indicator on day buttons.</strong> Previously, marking a day as Skip showed no visual change on the day-of-week buttons (only Done showed ✓). Now Skip displays an amber × so the data state is unambiguous.<br><br>
+      <strong style="color:var(--text)">4. Empty chart placeholder.</strong> Previously, charts with no data rendered as a blank graph with 0–1.0 axis (looked broken). Now they show "No data yet · Log entries or import data to populate."<br><br>
+      <strong style="color:var(--text)">Plus:</strong> Test harness adopted (validate.sh + GitHub Action). All builds now auto-validated for JS syntax, handler coverage, fetch count, structural integrity, migration cleanliness.<br><br>
+      <strong style="color:var(--text)">v2.9.1:</strong> Cross-week logging. Compliance strip cells now jump to that week.<br><br>
+      <strong style="color:var(--text)">v2.9:</strong> Program tab is the workout logger. Per-exercise state, per-set logging, compliance strip.<br><br>
       <strong style="color:var(--text)">v2.8c:</strong> Yearly-average bars above Trends charts.<br><br>
       <strong style="color:var(--text)">v2.8b:</strong> Schema aligned with actual Vivoactive 3 export.<br><br>
       <strong style="color:var(--text)">v2.7:</strong> Program tab mirrors Trail & Iron Google Calendar exactly.<br><br>
@@ -1634,7 +1648,85 @@ let D = (() => {
   return { entries:[], trail:'unknown', trailDate:null, completedWorkouts:{}, profile:null };
 })();
 
-function save() { localStorage.setItem(STORE, JSON.stringify(D)); }
+function save() {
+  // v2.9.2 — Write to IndexedDB (durable) AND localStorage (backup/legacy).
+  // IndexedDB is treated by browsers as real app storage, less likely to be evicted.
+  // localStorage write is kept as a belt-and-suspenders fallback during the transition.
+  try { localStorage.setItem(STORE, JSON.stringify(D)); } catch (e) { console.warn('localStorage save failed', e); }
+  idbSave().catch(e => console.warn('IndexedDB save failed', e));
+}
+
+// ═══════════════════════════════
+// v2.9.2 — IndexedDB durable storage
+// Schema: single store 'kv' with key='data' holding the entire D object.
+// We don't shard across multiple keys because D is small (<1MB typical, <5MB worst case).
+// ═══════════════════════════════
+const IDB_NAME = 'quanthealth';
+const IDB_STORE = 'kv';
+const IDB_KEY = 'data';
+let _idbCache = null; // cached open db
+
+function idbOpen() {
+  if (_idbCache) return Promise.resolve(_idbCache);
+  return new Promise((resolve, reject) => {
+    if (typeof indexedDB === 'undefined') { reject(new Error('IndexedDB not available')); return; }
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onerror = () => reject(req.error);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+    };
+    req.onsuccess = () => { _idbCache = req.result; resolve(_idbCache); };
+  });
+}
+
+async function idbLoad() {
+  try {
+    const db = await idbOpen();
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readonly');
+      const req = tx.objectStore(IDB_STORE).get(IDB_KEY);
+      req.onerror = () => reject(req.error);
+      req.onsuccess = () => resolve(req.result || null);
+    });
+  } catch (e) { return null; }
+}
+
+async function idbSave() {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).put(D, IDB_KEY);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// Hydrate from IndexedDB on startup. If IDB has newer/identical data, use it.
+// This runs after the synchronous localStorage-based init so D is never undefined.
+async function hydrateFromIDB() {
+  const idbData = await idbLoad();
+  if (!idbData) {
+    // First run after v2.9.2 deploy — push current localStorage-derived D into IDB
+    try { await idbSave(); } catch (e) {}
+    return;
+  }
+  // If IDB has more entries than current D (e.g. localStorage was evicted), prefer IDB
+  const idbEntries = (idbData.entries || []).length;
+  const memEntries = (D.entries || []).length;
+  if (idbEntries > memEntries) {
+    console.log(`Hydrating from IndexedDB: ${idbEntries} entries (vs ${memEntries} in localStorage)`);
+    Object.assign(D, idbData);
+    // Re-render the current page so the hydrated data shows immediately
+    const activePage = document.querySelector('.page.active');
+    const pageId = activePage?.id?.replace('page-', '');
+    const renderers = { today:'renderToday', checkin:'renderCheckin', program:'renderProgram',
+                        trends:'renderTrends', history:'renderHistory', sync:'renderSync' };
+    if (pageId && renderers[pageId] && typeof window[renderers[pageId]] === 'function') {
+      window[renderers[pageId]]();
+    }
+  }
+}
 
 let S = { sleep:null, flex:null, programDay:null, entryDate:null, historyView:'cards',
   viewWeek:null, viewPhase:null,
@@ -1690,7 +1782,7 @@ function showPage(name, btn) {
 // ═══════════════════════════════
 function setTrail(status) {
   D.trail = status;
-  D.trailDate = new Date().toISOString().split('T')[0];
+  D.trailDate = todayISO();
   save();
   updateTrailUI();
   updateRec();
@@ -1698,7 +1790,7 @@ function setTrail(status) {
 }
 
 function updateTrailUI() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = todayISO();
   const status = D.trailDate === today ? D.trail : 'unknown';
   const dot = document.getElementById('trailDot');
   const lbl = document.getElementById('trailLabel');
@@ -1715,7 +1807,7 @@ function updateTrailUI() {
 // ═══════════════════════════════
 function updateRec() {
   const prog = getProgramInfo();
-  const trail = D.trailDate===new Date().toISOString().split('T')[0] ? D.trail : 'unknown';
+  const trail = D.trailDate===todayISO() ? D.trail : 'unknown';
   const last = D.entries[D.entries.length-1];
   const stravaOK = !last?.strava || last.strava > -20;
   const painOK = !last || (Math.max(last.elbowPain||1, last.shoulderPain||1, last.kneePain||1) <= 2);
@@ -2286,7 +2378,15 @@ function clearCheckin() {
 // ═══════════════════════════════
 // CHECK-IN DATE PICKER + PRE-FILL
 // ═══════════════════════════════
-function todayISO() { return new Date().toISOString().split('T')[0]; }
+// v2.9.2 — local-date helper. The previous toISOString approach used UTC,
+// which caused entries logged after 8pm Eastern to be saved under tomorrow's date.
+function dateToLocalISO(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+function todayISO() { return dateToLocalISO(new Date()); }
 
 function renderCheckin() {
   // Init date if not set
@@ -2523,7 +2623,7 @@ function renderOptimize() {
 
   const last = entries[entries.length-1];
   const avgPain = avg([last?.elbowPain, last?.shoulderPain, last?.kneePain]);
-  const trail = D.trailDate===new Date().toISOString().split('T')[0]?D.trail:'unknown';
+  const trail = D.trailDate===todayISO()?D.trail:'unknown';
 
   const options = [
     {name:'MTB Trail Ride',score:trail==='green'?90:20,duration:'60–120 min',note:'Hydrocut '+(trail==='green'?'is open ✓':'status unknown')},
@@ -2700,10 +2800,15 @@ function renderProgram() {
   }
 
   const navEl = document.getElementById('dayNav');
-  navEl.innerHTML = days.map((d,i)=>`
-    <button class="day-btn ${i===S.programDay?'active':''} ${completed[i]==='done'?'done':''}" onclick="selectProgramDay(${i})">
-      ${d.day}<span class="day-num">${i+1}</span>
-    </button>`).join('');
+  navEl.innerHTML = days.map((d,i)=>{
+    const st = completed[i];  // 'done' | 'skip' | undefined
+    const stCls = st === 'done' ? 'done' : (st === 'skip' ? 'skipped' : '');
+    const stMark = st === 'done' ? '✓' : (st === 'skip' ? '×' : (i+1));
+    return `
+    <button class="day-btn ${i===S.programDay?'active':''} ${stCls}" onclick="selectProgramDay(${i})">
+      ${d.day}<span class="day-num">${stMark}</span>
+    </button>`;
+  }).join('');
 
   renderProgramDay(S.viewPhase, S.programDay, completed);
 
@@ -3060,7 +3165,49 @@ function makeChart(id, datasets, opts={}) {
   const ctx = document.getElementById(id);
   if (!ctx) return;
   if (charts[id]) charts[id].destroy();
+
+  // v2.9.2 — detect all-null data and show a placeholder instead of an empty axis
+  const hasAnyData = datasets.some(ds =>
+    Array.isArray(ds.data) && ds.data.some(v => v != null && !isNaN(v))
+  );
+  if (!hasAnyData) {
+    showChartEmptyState(id, ctx);
+    return;
+  }
+  // Hide any prior empty-state overlay
+  hideChartEmptyState(id);
+
   charts[id] = new Chart(ctx,{type:'line',data:{labels:opts.labels||[],datasets},options:{...chartCfg,...opts.extra}});
+}
+
+// v2.9.2 — empty-state placeholder for chart canvases
+function showChartEmptyState(id, canvas) {
+  const parent = canvas.parentElement;
+  if (!parent) return;
+  let placeholder = parent.querySelector('.chart-empty-state');
+  if (!placeholder) {
+    placeholder = document.createElement('div');
+    placeholder.className = 'chart-empty-state';
+    placeholder.dataset.forCanvas = id;
+    placeholder.innerHTML = `
+      <div class="chart-empty-icon">📊</div>
+      <div class="chart-empty-text">No data yet</div>
+      <div class="chart-empty-sub">Log entries or import data to populate</div>
+    `;
+    parent.appendChild(placeholder);
+  }
+  placeholder.style.display = 'flex';
+  canvas.style.display = 'none';
+}
+
+function hideChartEmptyState(id) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const parent = canvas.parentElement;
+  if (!parent) return;
+  const placeholder = parent.querySelector('.chart-empty-state');
+  if (placeholder) placeholder.style.display = 'none';
+  canvas.style.display = '';
 }
 
 // v2.8c — make a bar chart for yearly averages. Same config shell as makeChart.
@@ -3264,7 +3411,7 @@ function setHistoryView(view) {
 function addPastEntry() {
   // Default to yesterday for "add past"
   const y = new Date(); y.setDate(y.getDate()-1);
-  S.entryDate = y.toISOString().split('T')[0];
+  S.entryDate = dateToLocalISO(y);
   // Switch to check-in tab
   const navBtns = document.querySelectorAll('.nav-item');
   showPage('checkin', navBtns[1]); // Check-In is 2nd nav item
@@ -3620,7 +3767,7 @@ function computeDayFoodScores(entry) {
 function getWeekPlantDiversity(date) {
   const target = new Date(date + 'T00:00:00');
   const cutoff = new Date(target.getTime() - 7*24*60*60*1000);
-  const cutoffISO = cutoff.toISOString().split('T')[0];
+  const cutoffISO = dateToLocalISO(cutoff);
   const plants = new Set();
   D.entries.forEach(e => {
     if (e.date > cutoffISO && e.date <= date) {
@@ -3742,7 +3889,7 @@ function renderLogTokens(log, date) {
 }
 
 function collectRecentFoods(days, limit) {
-  const cutoff = new Date(Date.now() - days*24*60*60*1000).toISOString().split('T')[0];
+  const cutoff = dateToLocalISO(new Date(Date.now() - days*24*60*60*1000));
   const counts = {};
   D.entries.forEach(e => {
     if (e.date < cutoff) return;
@@ -3993,7 +4140,7 @@ function exportCSV() {
   const b = new Blob([csv],{type:'text/csv'});
   const u = URL.createObjectURL(b);
   const a = document.createElement('a');
-  a.href = u; a.download = `quanthealth_${new Date().toISOString().split('T')[0]}.csv`; a.click();
+  a.href = u; a.download = `quanthealth_${todayISO()}.csv`; a.click();
   URL.revokeObjectURL(u);
   toast('✓ CSV exported');
 }
@@ -4089,7 +4236,7 @@ function exportJSON() {
   const blob = new Blob([json],{type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  const date = new Date().toISOString().split('T')[0];
+  const date = todayISO();
   const name = (D.profile?.name||'quanthealth').toLowerCase().replace(/\s+/g,'-');
   a.href = url; a.download = `${name}-backup-${date}.json`; a.click();
   URL.revokeObjectURL(url);
@@ -4273,7 +4420,10 @@ function makeEmptyEntry(date) {
 function confirmClear() {
   if (confirm('Delete ALL data? This cannot be undone.\n\nExport a backup first.')) {
     D = { entries:[], trail:'unknown', trailDate:null, completedWorkouts:{}, profile: D.profile };
-    save(); toast('✓ Data cleared'); renderToday(); renderSync();
+    save();
+    // v2.9.2 — explicitly clear IDB too (save() writes the new empty state, but be defensive)
+    idbSave().catch(()=>{});
+    toast('✓ Data cleared'); renderToday(); renderSync();
   }
 }
 
@@ -4299,11 +4449,15 @@ if ('serviceWorker' in navigator) {
 // ═══════════════════════════════
 // INIT
 // ═══════════════════════════════
-if (D.trailDate && D.trailDate !== new Date().toISOString().split('T')[0]) {
+if (D.trailDate && D.trailDate !== todayISO()) {
   D.trail = 'unknown'; save();
 }
 applyTextSize();
 renderToday();
+
+// v2.9.2 — async hydrate from IndexedDB. If IDB has more data than what
+// localStorage gave us (e.g. localStorage was evicted), repopulate D and re-render.
+hydrateFromIDB().catch(e => console.warn('IDB hydrate failed', e));
 </script>
 </body>
 </html>
