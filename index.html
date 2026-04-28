@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="QuantHealth">
 <meta name="theme-color" content="#06080b">
-<title>QuantHealth v2.10b4</title>
+<title>QuantHealth v2.10c</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -600,7 +600,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
 <header class="app-header">
   <div>
-    <div class="logo">Quant<span>Health</span><sub>v2.10b4</sub></div>
+    <div class="logo">Quant<span>Health</span><sub>v2.10c</sub></div>
   </div>
   <div class="header-right">
     <div class="date-chip" id="headerDate"></div>
@@ -910,7 +910,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
     <div class="card-title">Vitals</div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Resting HR (bpm)</label><input type="number" class="form-input" id="inHR" placeholder="58" min="35" max="120"></div>
-      <div class="form-group"><label class="form-label">Weight (lbs)</label><input type="number" class="form-input" id="inWeight" placeholder="190" step="0.1"></div>
+      <div class="form-group"><label class="form-label">Weight (lbs)</label><input type="number" class="form-input" id="inWeight" placeholder="190" step="0.1" oninput="renderComputedBodyComp()"></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">VO₂ Max</label><input type="number" class="form-input" id="inVO2" placeholder="42" step="0.1"></div>
@@ -1025,22 +1025,44 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
     </div>
 
     <hr class="div">
-    <div class="card-title">Weekly Benchmark <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(test once a week)</span></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Touch Toes (cm from floor)</label><input type="number" class="form-input" id="inTouchToes" placeholder="0 = reached"></div>
-      <div class="form-group"><label class="form-label">Shoulder Reach (cm gap)</label><input type="number" class="form-input" id="inShoulderReach" placeholder="0 = touched"></div>
+    <!-- v2.10c — benchmarks gated to Sunday by default; show link reveals on other days -->
+    <div id="benchmarkSection">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:baseline">
+        <span>Weekly Benchmark <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Sundays)</span></span>
+        <button type="button" id="benchmarkHideBtn" onclick="toggleBenchmark(false)" style="background:none;border:none;color:var(--muted);font-family:var(--body);font-size:0.6rem;cursor:pointer;letter-spacing:0.04em">hide</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Touch Toes (cm from floor)</label><input type="number" class="form-input" id="inTouchToes" placeholder="0 = reached"></div>
+        <div class="form-group"><label class="form-label">Shoulder Reach (cm gap)</label><input type="number" class="form-input" id="inShoulderReach" placeholder="0 = touched"></div>
+      </div>
     </div>
+    <button type="button" id="benchmarkShowBtn" onclick="toggleBenchmark(true)" style="display:none;width:100%;background:transparent;border:1px dashed var(--border2);color:var(--muted);font-family:var(--body);font-size:0.65rem;letter-spacing:0.06em;text-transform:uppercase;padding:0.55rem;border-radius:8px;cursor:pointer;margin-top:0.4rem">+ Show benchmark inputs</button>
 
     <div style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin:0.65rem 0 0.4rem">Body Composition (cm)</div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Body Fat %</label><input type="number" class="form-input" id="inBodyFat" placeholder="18.5" step="0.1" min="3" max="50"></div>
-      <div class="form-group"><label class="form-label">Waist (cm)</label><input type="number" class="form-input" id="inWaist" placeholder="86" step="0.5"></div>
+      <div class="form-group"><label class="form-label">Waist (cm)</label><input type="number" class="form-input" id="inWaist" placeholder="86" step="0.5" oninput="renderComputedBodyComp()"></div>
+      <div class="form-group"><label class="form-label">Neck (cm) <span style="font-size:0.5rem;color:var(--muted)">v2.10c</span></label><input type="number" class="form-input" id="inNeck" placeholder="38" step="0.5" oninput="renderComputedBodyComp()"></div>
     </div>
     <div class="body-grid">
-      <div class="form-group body-cell"><label class="form-label">Hips</label><input type="number" class="form-input" id="inHips" placeholder="98" step="0.5"></div>
+      <div class="form-group body-cell"><label class="form-label">Hips</label><input type="number" class="form-input" id="inHips" placeholder="98" step="0.5" oninput="renderComputedBodyComp()"></div>
       <div class="form-group body-cell"><label class="form-label">Chest</label><input type="number" class="form-input" id="inChest" placeholder="104" step="0.5"></div>
       <div class="form-group body-cell"><label class="form-label">Thigh</label><input type="number" class="form-input" id="inThigh" placeholder="58" step="0.5"></div>
       <div class="form-group body-cell" style="grid-column:span 3"><label class="form-label">Bicep</label><input type="number" class="form-input" id="inBicep" placeholder="36" step="0.5"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="grid-column:span 2"><label class="form-label">Body Fat % <span style="font-size:0.5rem;color:var(--muted)">(manual override — leave blank to auto-compute)</span></label><input type="number" class="form-input" id="inBodyFat" placeholder="18.5" step="0.1" min="3" max="50"></div>
+    </div>
+    <!-- v2.10c — computed body comp readout (Navy method + FFMI) -->
+    <div id="computedBodyComp" style="display:none;margin-top:0.55rem;padding:0.7rem 0.85rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px">
+      <div style="font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:0.45rem;display:flex;justify-content:space-between;align-items:center">
+        <span>Computed</span>
+        <span style="font-size:0.5rem;color:var(--muted);text-transform:none;letter-spacing:0">Navy method</span>
+      </div>
+      <div id="computedBodyCompBody"></div>
+    </div>
+    <!-- Profile-not-set prompt -->
+    <div id="bodyCompProfilePrompt" style="display:none;margin-top:0.55rem;padding:0.7rem 0.85rem;background:rgba(255,179,64,0.06);border:1px solid rgba(255,179,64,0.2);border-radius:8px;font-size:0.7rem;color:var(--amber);line-height:1.5">
+      💡 Add your <strong>height</strong> and <strong>sex</strong> in <a href="#" onclick="showPage('settings',document.querySelector('.nav-item:last-child'));return false;" style="color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent)">Settings → Profile</a> to auto-compute body fat from waist + neck.
     </div>
 
     <button class="btn-primary" onclick="saveCheckin()">Save Entry</button>
@@ -1121,13 +1143,13 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   <div class="card">
     <div class="card-title">Resting Heart Rate</div>
     <div class="yearly-wrap" id="cHR-yearly-card"><div class="yearly-label">Yearly Average · bpm</div><canvas id="cHR-yearly"></canvas></div>
-    <div class="recent-label">Recent · 21 days</div>
+    <div class="recent-label">Recent · 30 days</div>
     <div class="chart-wrap"><canvas id="cHR"></canvas></div>
   </div>
   <div class="card">
     <div class="card-title">Weight (lbs)</div>
     <div class="yearly-wrap" id="cWeight-yearly-card"><div class="yearly-label">Yearly Average · lbs</div><canvas id="cWeight-yearly"></canvas></div>
-    <div class="recent-label">Recent · 21 days</div>
+    <div class="recent-label">Recent · 30 days</div>
     <div class="chart-wrap"><canvas id="cWeight"></canvas></div>
   </div>
   <div class="sl">Joint Pain Trends</div>
@@ -1143,7 +1165,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   <div class="card">
     <div class="card-title">Calorie Balance</div>
     <div class="yearly-wrap" id="cCal-yearly-card"><div class="yearly-label">Yearly Average · kcal</div><canvas id="cCal-yearly"></canvas></div>
-    <div class="recent-label">Recent · 21 days</div>
+    <div class="recent-label">Recent · 30 days</div>
     <div class="chart-wrap"><canvas id="cCal"></canvas></div>
   </div>
 
@@ -1151,52 +1173,63 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   <div class="card">
     <div class="card-title">Water Intake (L)</div>
     <div class="yearly-wrap" id="cWater-yearly-card"><div class="yearly-label">Yearly Average · L</div><canvas id="cWater-yearly"></canvas></div>
-    <div class="recent-label">Recent · 21 days</div>
+    <div class="recent-label">Recent · 30 days</div>
     <div class="chart-wrap"><canvas id="cWater"></canvas></div>
   </div>
   <div class="card">
     <div class="card-title">Alcohol (drinks/day)</div>
     <div class="yearly-wrap" id="cDrinks-yearly-card"><div class="yearly-label">Yearly Average · drinks/day</div><canvas id="cDrinks-yearly"></canvas></div>
-    <div class="recent-label">Recent · 21 days</div>
+    <div class="recent-label">Recent · 30 days</div>
     <div class="chart-wrap"><canvas id="cDrinks"></canvas></div>
   </div>
 
   <div class="sl">Body Composition</div>
   <div class="card">
-    <div class="card-title">Body Fat % <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(weekly)</span></div>
+    <div class="card-title">Body Fat % <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(weekly · computed + manual · 7-day smoothed)</span></div>
     <div class="yearly-wrap" id="cBodyFat-yearly-card"><div class="yearly-label">Yearly Average · %</div><canvas id="cBodyFat-yearly"></canvas></div>
-    <div class="recent-label">Recent</div>
+    <div class="recent-label">Recent · 30 days</div>
     <div class="chart-wrap"><canvas id="cBodyFat"></canvas></div>
+  </div>
+  <!-- v2.10c — lean mass + FFMI -->
+  <div class="card">
+    <div class="card-title">Lean Mass &amp; FFMI <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(computed · 7-day smoothed)</span></div>
+    <div class="recent-label">Recent · 30 days · Lean left axis · FFMI right axis</div>
+    <div class="chart-wrap"><canvas id="cLeanFFMI"></canvas></div>
   </div>
   <div class="card">
     <div class="card-title">Measurements (cm) <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(weekly)</span></div>
+    <div class="recent-label">Recent · 30 days</div>
     <div class="chart-wrap"><canvas id="cMeasure"></canvas></div>
   </div>
   <div class="card">
     <div class="card-title">Sleep Hours <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin)</span></div>
     <div class="yearly-wrap" id="cSleepHours-yearly-card"><div class="yearly-label">Yearly Average · hrs</div><canvas id="cSleepHours-yearly"></canvas></div>
-    <div class="recent-label">Recent · 21 days</div>
+    <div class="recent-label">Recent · 30 days</div>
     <div class="chart-wrap"><canvas id="cSleepHours"></canvas></div>
   </div>
   <div class="card">
     <div class="card-title">Daily Steps <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin)</span></div>
     <div class="yearly-wrap" id="cSteps-yearly-card"><div class="yearly-label">Yearly Average · steps/day</div><canvas id="cSteps-yearly"></canvas></div>
-    <div class="recent-label">Recent · 21 days</div>
+    <div class="recent-label">Recent · 30 days</div>
     <div class="chart-wrap"><canvas id="cSteps"></canvas></div>
   </div>
   <div class="card">
     <div class="card-title">Stress (avg) <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin)</span></div>
     <div class="yearly-wrap" id="cStress-yearly-card"><div class="yearly-label">Yearly Average · /100</div><canvas id="cStress-yearly"></canvas></div>
-    <div class="recent-label">Recent · 21 days</div>
+    <div class="recent-label">Recent · 30 days</div>
     <div class="chart-wrap"><canvas id="cStress"></canvas></div>
   </div>
   <div class="card">
     <div class="card-title">VO2 Max <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(Garmin)</span></div>
     <div class="yearly-wrap" id="cVO2-yearly-card"><div class="yearly-label">Yearly Average · ml/kg/min</div><canvas id="cVO2-yearly"></canvas></div>
-    <div class="recent-label">Recent measurements</div>
+    <div class="recent-label">Recent · 30 days</div>
     <div class="chart-wrap"><canvas id="cVO2"></canvas></div>
   </div>
-  <div class="card"><div class="card-title">Strava Fitness · Fatigue · Form <span style="font-size:0.55rem;color:var(--muted);font-weight:400">(30 days)</span></div><div class="chart-wrap"><canvas id="cStrava"></canvas></div></div>
+  <div class="card">
+    <div class="card-title">Strava Fitness · Fatigue · Form</div>
+    <div class="recent-label">Recent · 30 days</div>
+    <div class="chart-wrap"><canvas id="cStrava"></canvas></div>
+  </div>
 </div>
 
 <!-- ════════════════ v2.10b — INSIGHTS (Optimize + Trends merged) ════════════════ -->
@@ -1290,6 +1323,29 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
       <label class="form-label">Your Name</label>
       <input type="text" class="form-input" id="inputProfileName" placeholder="e.g. JT" oninput="updateProfileName(this.value)">
     </div>
+    <!-- v2.10c — height + sex for body-fat auto-compute (Navy method) -->
+    <div class="form-row" style="margin-top:0.4rem">
+      <div class="form-group">
+        <label class="form-label" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Height</span>
+          <span style="display:inline-flex;gap:0.15rem;font-size:0.5rem">
+            <button type="button" class="height-unit-btn" data-unit="cm" onclick="setHeightUnit('cm')" style="padding:0.15rem 0.45rem;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-family:var(--mono);cursor:pointer;text-transform:uppercase;letter-spacing:0.06em">cm</button>
+            <button type="button" class="height-unit-btn" data-unit="in" onclick="setHeightUnit('in')" style="padding:0.15rem 0.45rem;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-family:var(--mono);cursor:pointer;text-transform:uppercase;letter-spacing:0.06em">in</button>
+          </span>
+        </label>
+        <input type="number" class="form-input" id="inputHeight" placeholder="178" step="0.1" oninput="updateHeight(this.value)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sex (for body-fat formula)</label>
+        <div style="display:flex;gap:0.4rem;margin-top:0.15rem">
+          <button type="button" class="sex-btn rbtn" data-sex="M" onclick="updateSex('M')" style="text-align:center">Male</button>
+          <button type="button" class="sex-btn rbtn" data-sex="F" onclick="updateSex('F')" style="text-align:center">Female</button>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:0.6rem;color:var(--muted);line-height:1.5;margin-top:0.4rem">
+      Used to auto-compute body fat from your weekly waist + neck measurements (US Navy method, ±3% vs DEXA — trend matters more than absolute).
+    </div>
   </div>
 
   <div class="card">
@@ -1336,8 +1392,9 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   </div>
 
   <div class="card" style="border-color:rgba(255,179,64,0.2);background:rgba(255,179,64,0.03)">
-    <div class="card-title" style="color:var(--amber)">Build Notes — v2.10b4</div>
+    <div class="card-title" style="color:var(--amber)">Build Notes — v2.10c</div>
     <div style="font-size:0.72rem;color:var(--muted2);line-height:1.7">
+      <strong style="color:var(--text)">v2.10c — Body composition + chart standardization:</strong> Set your height + sex in Settings → Profile, then add a weekly Neck measurement in Log alongside Waist. Body fat % is auto-computed via the US Navy method (±3% vs DEXA — trend matters more than absolute). Lean mass and adjusted FFMI computed alongside. Three new chart cards in Insights → Charts: Body Fat (computed + manual override, 7-day smoothed), Lean Mass &amp; FFMI (dual-axis, smoothed), and Measurements now includes Neck. <strong>All Insights → Charts now use a unified 30-day calendar window with date-aligned x-axes</strong> — fixes the Sleep Hours bug where sparse Garmin data stretched across years. Y-axis ranges fixed where physiologically sensible (HR 40-80, BF 10-30%, sleep 0-10h, stress 0-100, etc.) so charts are visually comparable. Bundled cleanups: tappable ⓘ legend on food-score pills, weekly benchmark inputs hidden Mon-Sat by default with manual show toggle.<br><br>
       <strong style="color:var(--text)">v2.10b4 — Nav cleanup:</strong><br>
       &bull; <strong>History moved into Settings</strong> as a tappable link card at the top — bottom nav drops from 6 to 5 tabs (Today · Log · Program · Insights · Settings). History page now has a "← Back to Settings" link at the top. Sub-text on the link card shows entry count for quick orientation.<br>
       &bull; <strong>Text Size feature removed</strong> — control did nothing visible in practice. CSS `--scale` variable, `body.size-X` classes, `setTextSize()` and `applyTextSize()` functions all stripped clean.
@@ -1949,6 +2006,15 @@ let D = (() => {
       if (e.backPain === undefined) e.backPain = null;
       // Medications taken today — array of med IDs (strings) from the user's predefined list
       if (!e.meds) e.meds = [];
+      // ─── v2.10c — Body composition auto-compute fields ───
+      // `neck` is a new manual input (weekly cadence, like waist/hips/etc.)
+      // The other three are computed by `computeBodyComp()` whenever the
+      // required inputs are all present. They stay null otherwise so charts
+      // don't show fake data points.
+      if (e.neck === undefined) e.neck = null;
+      if (e.bodyFatComputed === undefined) e.bodyFatComputed = null;
+      if (e.leanMassKg === undefined) e.leanMassKg = null;
+      if (e.ffmiAdjusted === undefined) e.ffmiAdjusted = null;
     });
     if (!data.completedWorkouts) data.completedWorkouts = {};
     if (!data.userFoods) data.userFoods = {};
@@ -1959,6 +2025,29 @@ let D = (() => {
     // Each med: {id, name, dose, schedule, active, addedAt}
     // The list itself is empty by default; user fills it in via Settings.
     if (!data.medsList) data.medsList = [];
+    // ─── v2.10c — Profile additions for body-fat auto-compute ───
+    // heightCm: one-time entry (set in Settings → Profile)
+    // sex: 'M' | 'F' | null — Navy formula differs by sex
+    // heightUnit: display preference 'cm' | 'in' (storage stays cm internally)
+    if (!data.profile) data.profile = {};
+    if (data.profile.heightCm === undefined) data.profile.heightCm = null;
+    if (data.profile.sex === undefined) data.profile.sex = null;
+    if (data.profile.heightUnit === undefined) data.profile.heightUnit = 'cm';
+    // One-shot: recompute body comp on all existing entries that have the inputs.
+    // Gated by version flag so it runs exactly once per data store.
+    if (!data._bodyComp_v2_10c) {
+      if (data.profile.heightCm && data.profile.sex && Array.isArray(data.entries)) {
+        data.entries.forEach(e => {
+          // Defer to computeBodyComp once it's defined. We can't call it here
+          // because this migrate runs before functions are wired. Instead we
+          // mark entries as needing recompute on first save() — handled in
+          // the bodyComp section below. For now, leave fields null; they'll
+          // populate as the user logs.
+        });
+      }
+      data._bodyComp_v2_10c = true;
+      console.log('v2.10c migration: body comp profile fields added');
+    }
     // ─── v2.10b3 — Program-start date correction (Apr 21 → Apr 20) ───
     // Before this fix, day-0-of-week-1 was a Tuesday (Apr 21). After the fix,
     // day-0-of-week-1 is the actual Monday (Apr 20). Existing completion records
@@ -3315,8 +3404,13 @@ function saveCheckin() {
     chest: get('inChest'),
     thigh: get('inThigh'),
     bicep: get('inBicep'),
+    neck: get('inNeck'),
     activities: existing?.activities || []
   });
+
+  // v2.10c — compute body fat / lean mass / FFMI if we have everything we need.
+  // Mutates entry in place; leaves fields null if inputs missing.
+  computeBodyComp(entry);
 
   if (!existing) D.entries.push(entry);
   D.entries.sort((a,b)=>a.date.localeCompare(b.date));
@@ -3329,7 +3423,7 @@ function saveCheckin() {
 }
 
 function clearCheckin() {
-  ['inHR','inWeight','inVO2','inStrava','inCalIn','inCalOut','inProtein','inCarbs','inWater','inTouchToes','inShoulderReach','inBodyFat','inWaist','inHips','inChest','inThigh','inBicep'].forEach(id=>{
+  ['inHR','inWeight','inVO2','inStrava','inCalIn','inCalOut','inProtein','inCarbs','inWater','inTouchToes','inShoulderReach','inBodyFat','inWaist','inHips','inChest','inThigh','inBicep','inNeck'].forEach(id=>{
     const el = document.getElementById(id); if (el) el.value = '';
   });
   ['sliderElbowL','sliderElbowR','sliderShoulderL','sliderShoulderR','sliderKneeL','sliderKneeR','sliderBack'].forEach(id=>{
@@ -3365,6 +3459,10 @@ function renderCheckin() {
   setWaterUnit(S.waterUnit || 'L');
   prefillFromExisting(S.entryDate);
   renderFoodLog('foodLogCheckin', S.entryDate);
+  // v2.10c — Sunday gate for benchmark inputs
+  applyBenchmarkGate();
+  // v2.10c — show computed body comp readout if applicable
+  renderComputedBodyComp();
 }
 
 function onEntryDateChange() {
@@ -3426,6 +3524,7 @@ function prefillFromExisting(date) {
     setVal('inChest', existing.chest);
     setVal('inThigh', existing.thigh);
     setVal('inBicep', existing.bicep);
+    setVal('inNeck', existing.neck);
     // v2.9.3 — bilateral pain hydration. Falls back to old singular field
     // if entry was created pre-v2.9.3 and never edited.
     [
@@ -3490,7 +3589,8 @@ const CARRY_FIELDS = {
   'inHips':          { field:'hips',          label:'Hips' },
   'inChest':         { field:'chest',         label:'Chest' },
   'inThigh':         { field:'thigh',         label:'Thigh' },
-  'inBicep':         { field:'bicep',         label:'Bicep' }
+  'inBicep':         { field:'bicep',         label:'Bicep' },
+  'inNeck':          { field:'neck',          label:'Neck' }
 };
 
 function findLastKnown(field, beforeDate) {
@@ -3584,6 +3684,275 @@ function pearson(xArr, yArr) {
   const num = pairs.reduce((s,p)=>s+(p[0]-mx)*(p[1]-my),0);
   const den = Math.sqrt(pairs.reduce((s,p)=>s+(p[0]-mx)**2,0)*pairs.reduce((s,p)=>s+(p[1]-my)**2,0));
   return den===0?0:num/den;
+}
+
+// ═══════════════════════════════
+// v2.10c — BODY COMPOSITION (Navy method + FFMI)
+// ═══════════════════════════════
+// US Navy method is one of the most-used no-equipment estimates. ±3-4% vs DEXA
+// for typical builds. For athletic builds with thicker necks it may slightly
+// overestimate body-fat — fine for tracking trends, not for absolute claims.
+//
+// All inputs in cm. Output as percentage (e.g. 18.4 = 18.4% body fat).
+function navyBodyFatMale(waistCm, neckCm, heightCm) {
+  if (!waistCm || !neckCm || !heightCm) return null;
+  if (waistCm <= neckCm) return null; // physiologically impossible — guard against bad input
+  const bf = 86.010 * Math.log10(waistCm - neckCm)
+           - 70.041 * Math.log10(heightCm)
+           + 36.76;
+  // Clamp to physiologically plausible range
+  return Math.max(2, Math.min(50, bf));
+}
+
+function navyBodyFatFemale(waistCm, neckCm, hipCm, heightCm) {
+  if (!waistCm || !neckCm || !hipCm || !heightCm) return null;
+  if ((waistCm + hipCm) <= neckCm) return null;
+  const bf = 163.205 * Math.log10(waistCm + hipCm - neckCm)
+           - 97.684 * Math.log10(heightCm)
+           - 78.387;
+  return Math.max(2, Math.min(50, bf));
+}
+
+// Lean mass from weight + body fat. Weight in lbs (matching the rest of the app).
+// FFMI normalizes to a 1.8m reference height (Kouri adjustment) so the value
+// is comparable across heights. Untrained ~18-20, trained ~22-25, exceptional 25+.
+function computeLeanAndFFMI(weightLbs, bodyFatPct, heightCm) {
+  if (!weightLbs || bodyFatPct == null || !heightCm) {
+    return { leanMassKg:null, ffmiAdjusted:null };
+  }
+  const weightKg = weightLbs * 0.453592;
+  const leanMassKg = weightKg * (1 - bodyFatPct / 100);
+  const heightM = heightCm / 100;
+  const ffmi = leanMassKg / (heightM * heightM);
+  const ffmiAdjusted = ffmi + 6.1 * (1.8 - heightM);
+  return {
+    leanMassKg: Math.round(leanMassKg * 10) / 10,
+    ffmiAdjusted: Math.round(ffmiAdjusted * 10) / 10
+  };
+}
+
+// Wrapper called from saveCheckin — populates the three computed fields on
+// the entry if all inputs are present. Otherwise leaves them null.
+function computeBodyComp(entry) {
+  const p = D.profile || {};
+  if (!p.heightCm || !p.sex) return; // can't compute without these
+
+  let bf = null;
+  if (p.sex === 'M') {
+    bf = navyBodyFatMale(entry.waist, entry.neck, p.heightCm);
+  } else if (p.sex === 'F') {
+    bf = navyBodyFatFemale(entry.waist, entry.neck, entry.hips, p.heightCm);
+  }
+  if (bf == null) {
+    entry.bodyFatComputed = null;
+    entry.leanMassKg = null;
+    entry.ffmiAdjusted = null;
+    return;
+  }
+  entry.bodyFatComputed = Math.round(bf * 10) / 10;
+  const lm = computeLeanAndFFMI(entry.weight, bf, p.heightCm);
+  entry.leanMassKg = lm.leanMassKg;
+  entry.ffmiAdjusted = lm.ffmiAdjusted;
+}
+
+// 7-day rolling average for a numeric series. Pass an array of {date, value}
+// or a parallel pair (entries, fieldName). Returns the smoothed series with
+// the same length, with nulls preserved where there isn't enough window.
+function rollingAvg(values, window = 7) {
+  const out = new Array(values.length).fill(null);
+  for (let i = 0; i < values.length; i++) {
+    const start = Math.max(0, i - window + 1);
+    const slice = values.slice(start, i + 1).filter(v => v != null && !isNaN(v));
+    if (slice.length >= 2) {
+      // Need at least 2 points for the average to be meaningful
+      out[i] = slice.reduce((a, b) => a + b, 0) / slice.length;
+    }
+  }
+  return out;
+}
+
+// v2.10c — calendar-aligned window for charting.
+// Returns N consecutive calendar days ending today, each slot aligned to a
+// real date. Days with no entry get a `null` slot so gaps stay visible — this
+// is the fix for the bug where filter().slice(-21) on sparse Garmin fields
+// stretched the x-axis across years instead of showing 21 days. Every chart
+// in renderTrends() now uses the same 30-day window so visually comparing
+// two charts is meaningful.
+//
+// Returns: { labels: string[], entries: (entry|null)[], dates: string[] }
+function getCalendarWindow(days = 30) {
+  const labels = [];
+  const dates = [];
+  const slots = [];
+  const today = new Date();
+  // Build N days ending today (most recent on the right)
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const iso = dateToLocalISO(d);
+    dates.push(iso);
+    labels.push(d.toLocaleDateString('en-CA', { month:'short', day:'numeric' }));
+    slots.push(D.entries.find(e => e.date === iso) || null);
+  }
+  return { labels, entries: slots, dates };
+}
+
+// Read a numeric field across the calendar window, returning a parallel
+// array of values or nulls. Used by every chart in renderTrends.
+function windowField(slots, fieldName) {
+  return slots.map(e => (e && e[fieldName] != null && !isNaN(e[fieldName])) ? e[fieldName] : null);
+}
+
+// Display helpers for the height unit toggle. Storage is always cm.
+function heightCmToDisplay(cm, unit) {
+  if (cm == null) return '';
+  if (unit === 'in') return Math.round((cm / 2.54) * 10) / 10;
+  return Math.round(cm * 10) / 10;
+}
+function heightDisplayToCm(val, unit) {
+  const n = parseFloat(val);
+  if (isNaN(n) || n <= 0) return null;
+  return unit === 'in' ? Math.round(n * 2.54 * 10) / 10 : Math.round(n * 10) / 10;
+}
+
+// Render the live computed body-comp readout in the Log form.
+// Called on input changes (waist / neck / hips) and on prefill.
+// Shows three lines: BF%, Lean Mass, FFMI — each with delta vs previous reading.
+function renderComputedBodyComp() {
+  const card = document.getElementById('computedBodyComp');
+  const bodyEl = document.getElementById('computedBodyCompBody');
+  const promptEl = document.getElementById('bodyCompProfilePrompt');
+  if (!card || !bodyEl) return;
+
+  const p = D.profile || {};
+  // Show prompt if profile incomplete
+  if (!p.heightCm || !p.sex) {
+    card.style.display = 'none';
+    if (promptEl) promptEl.style.display = 'block';
+    return;
+  }
+  if (promptEl) promptEl.style.display = 'none';
+
+  // Read current input values
+  const waist = parseFloat(document.getElementById('inWaist')?.value);
+  const neck = parseFloat(document.getElementById('inNeck')?.value);
+  const hips = parseFloat(document.getElementById('inHips')?.value);
+  const weight = parseFloat(document.getElementById('inWeight')?.value);
+
+  let bf = null;
+  if (p.sex === 'M') {
+    bf = navyBodyFatMale(waist, neck, p.heightCm);
+  } else if (p.sex === 'F') {
+    bf = navyBodyFatFemale(waist, neck, hips, p.heightCm);
+  }
+
+  if (bf == null) {
+    card.style.display = 'none';
+    return;
+  }
+
+  const lm = computeLeanAndFFMI(weight, bf, p.heightCm);
+  const bfRound = Math.round(bf * 10) / 10;
+
+  // Find previous reading (most recent entry with computed values, not today)
+  const today = S.entryDate || todayISO();
+  let prev = null;
+  for (let i = D.entries.length - 1; i >= 0; i--) {
+    const e = D.entries[i];
+    if (e.date >= today) continue;
+    if (e.bodyFatComputed != null) { prev = e; break; }
+  }
+
+  const bfDelta = prev ? bfRound - prev.bodyFatComputed : null;
+  const lmDelta = (prev && lm.leanMassKg != null && prev.leanMassKg != null)
+    ? Math.round((lm.leanMassKg - prev.leanMassKg) * 10) / 10 : null;
+  const ffmiDelta = (prev && lm.ffmiAdjusted != null && prev.ffmiAdjusted != null)
+    ? Math.round((lm.ffmiAdjusted - prev.ffmiAdjusted) * 10) / 10 : null;
+
+  const deltaSpan = (d, lowerBetter, unit) => {
+    if (d == null || d === 0) return '';
+    const arrow = d > 0 ? '↑' : '↓';
+    const good = lowerBetter ? d < 0 : d > 0;
+    const color = good ? 'var(--green)' : 'var(--red)';
+    const s = (d > 0 ? '+' : '') + d + (unit || '');
+    return `<span style="color:${color};font-size:0.62rem;margin-left:0.5rem;font-family:var(--mono)">${arrow} ${s}</span>`;
+  };
+
+  // FFMI category label (Kouri-adjusted reference points for males)
+  let ffmiLabel = '';
+  if (lm.ffmiAdjusted != null) {
+    const f = lm.ffmiAdjusted;
+    if (f < 18) ffmiLabel = 'untrained';
+    else if (f < 20) ffmiLabel = 'novice';
+    else if (f < 22) ffmiLabel = 'intermediate';
+    else if (f < 25) ffmiLabel = 'trained';
+    else ffmiLabel = 'exceptional';
+  }
+
+  const leanLbs = lm.leanMassKg != null ? Math.round(lm.leanMassKg * 2.20462 * 10) / 10 : null;
+
+  let html = `
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.4rem">
+      <span style="font-size:0.65rem;color:var(--muted2)">Body Fat</span>
+      <span><span style="font-family:var(--mono);font-size:0.95rem;font-weight:600;color:var(--text)">${bfRound}%</span>${deltaSpan(bfDelta, true, '%')}</span>
+    </div>`;
+  if (leanLbs != null) {
+    html += `
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.4rem">
+      <span style="font-size:0.65rem;color:var(--muted2)">Lean Mass</span>
+      <span><span style="font-family:var(--mono);font-size:0.95rem;font-weight:600;color:var(--text)">${leanLbs} lb</span>${deltaSpan(lmDelta != null ? Math.round(lmDelta * 2.20462 * 10) / 10 : null, false, ' lb')}</span>
+    </div>`;
+  }
+  if (lm.ffmiAdjusted != null) {
+    html += `
+    <div style="display:flex;justify-content:space-between;align-items:baseline">
+      <span style="font-size:0.65rem;color:var(--muted2)">FFMI <span style="font-size:0.55rem;color:var(--muted)">adj</span></span>
+      <span><span style="font-family:var(--mono);font-size:0.95rem;font-weight:600;color:var(--text)">${lm.ffmiAdjusted}</span>${ffmiLabel ? ` <span style="font-size:0.58rem;color:var(--muted)">${ffmiLabel}</span>` : ''}${deltaSpan(ffmiDelta, false, '')}</span>
+    </div>`;
+  }
+  bodyEl.innerHTML = html;
+  card.style.display = 'block';
+}
+
+// v2.10c — Sunday-only benchmark gate.
+// Applied automatically on Sundays; on Mon-Sat the section is hidden behind
+// a "+ Show benchmark inputs" button so the user can still log mid-week if
+// they happened to do the test (e.g., after a Saturday stretch session).
+function applyBenchmarkGate() {
+  const section = document.getElementById('benchmarkSection');
+  const showBtn = document.getElementById('benchmarkShowBtn');
+  if (!section || !showBtn) return;
+  // If user manually toggled this session, respect it
+  if (S.benchmarkOverride === 'show') {
+    section.style.display = 'block';
+    showBtn.style.display = 'none';
+    return;
+  }
+  if (S.benchmarkOverride === 'hide') {
+    section.style.display = 'none';
+    showBtn.style.display = 'block';
+    return;
+  }
+  // Otherwise, default to Sunday-on / weekday-off based on the entry date,
+  // not just today (so editing past Sundays still surfaces the inputs).
+  const date = S.entryDate || todayISO();
+  const dayIdx = new Date(date + 'T12:00:00').getDay(); // 0=Sun
+  const isSunday = dayIdx === 0;
+  // Also force-show if the entry already has benchmark values (don't hide data)
+  const existing = D.entries.find(e => e.date === date);
+  const hasValues = existing && (existing.touchToes != null || existing.shoulderReach != null);
+  if (isSunday || hasValues) {
+    section.style.display = 'block';
+    showBtn.style.display = 'none';
+  } else {
+    section.style.display = 'none';
+    showBtn.style.display = 'block';
+  }
+}
+
+function toggleBenchmark(show) {
+  S.benchmarkOverride = show ? 'show' : 'hide';
+  applyBenchmarkGate();
 }
 
 // ═══════════════════════════════
@@ -4277,112 +4646,236 @@ function renderYearlyBars(canvasId, fieldName, color, unit) {
 }
 
 function renderTrends() {
-  const entries = D.entries.slice(-21);
-  if (!entries.length) return;
-  const labels = entries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
+  // v2.10c — single 30-day calendar window for ALL "recent" charts.
+  // Date-aligned slots, gaps preserved as nulls, every chart shares the same
+  // x-axis labels so visually comparing across charts is meaningful.
+  // Y-axis ranges are fixed where physiologically sensible — see Y_RANGES.
+  const W = getCalendarWindow(30);
+  const { labels, entries: slots } = W;
+  const hasAnyData = D.entries.length > 0;
+  if (!hasAnyData) return;
 
-  // v2.8c — yearly average bars (rendered before each line chart)
+  // ── Fixed y-axis ranges (v2.10c standardization) ──
+  // Where set, charts always render this range so comparing two charts is
+  // visually meaningful. Where null, Chart.js auto-scales (used for personal
+  // absolutes — weight, lean mass, FFMI — where forcing a wide range would
+  // flatten meaningful movement.)
+  const Y_RANGES = {
+    hr:        { min: 40,    max: 80    },
+    weight:    null,                       // auto — personal absolute
+    bodyFat:   { min: 10,    max: 30    },
+    leanFFMI:  null,                       // auto — personal absolute
+    pain:      { min: 1,     max: 5     },
+    recovery:  { min: 0,     max: 6     }, // sleep + flex 1-5 with headroom
+    cal:       { min: -1500, max: 1500  }, // symmetric around zero
+    water:     { min: 0,     max: 5     },
+    drinks:    { min: 0,     max: 8     },
+    measure:   null,                       // auto — multiple metrics
+    sleepHrs:  { min: 0,     max: 10    },
+    steps:     { min: 0,     max: 20000 },
+    stress:    { min: 0,     max: 100   },
+    vo2:       { min: 35,    max: 55    },
+    strava:    null                        // auto — wide negative-positive range
+  };
+
+  // Helper: produce scales config with optional y-range override
+  const yScale = (range) => {
+    if (!range) return chartCfg.scales.y;
+    return { ...chartCfg.scales.y, min: range.min, max: range.max };
+  };
+
+  // ── Yearly average bars (unchanged — historical context, separate axis) ──
   renderYearlyBars('cHR-yearly', 'hr', 'rgba(0,232,122,0.55)', ' bpm');
   renderYearlyBars('cWeight-yearly', 'weight', 'rgba(0,200,255,0.55)', ' lbs');
   renderYearlyBars('cCal-yearly', 'calBal', 'rgba(255,179,64,0.55)', ' kcal');
   renderYearlyBars('cWater-yearly', 'water', 'rgba(0,200,255,0.55)', ' L');
   renderYearlyBars('cDrinks-yearly', 'drinks', 'rgba(255,69,96,0.55)', ' drinks');
-  renderYearlyBars('cBodyFat-yearly', 'bodyFat', 'rgba(255,69,96,0.55)', '%');
+  renderYearlyBars('cBodyFat-yearly', 'bodyFatComputed', 'rgba(255,69,96,0.55)', '%');
   renderYearlyBars('cSleepHours-yearly', 'sleepHours', 'rgba(180,79,255,0.55)', ' hrs');
   renderYearlyBars('cSteps-yearly', 'steps', 'rgba(0,232,122,0.55)', '');
   renderYearlyBars('cStress-yearly', 'stressAvg', 'rgba(255,179,64,0.55)', '/100');
   renderYearlyBars('cVO2-yearly', 'vo2Max', 'rgba(0,200,255,0.55)', '');
 
-  makeChart('cHR',[{data:entries.map(e=>e.hr),borderColor:'#00e87a',backgroundColor:'rgba(0,232,122,0.05)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#00e87a',tension:0.3,fill:true,spanGaps:true}],{labels});
-  makeChart('cWeight',[{data:entries.map(e=>e.weight),borderColor:'#00c8ff',backgroundColor:'rgba(0,200,255,0.05)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#00c8ff',tension:0.3,fill:true,spanGaps:true}],{labels});
-  makeChart('cPain',[
-    {label:'Elbow',data:entries.map(e=>e.elbowPain),borderColor:'#ff4560',borderWidth:2,pointRadius:2,tension:0.3,spanGaps:true},
-    {label:'Shoulder',data:entries.map(e=>e.shoulderPain),borderColor:'#ffb340',borderWidth:2,pointRadius:2,tension:0.3,spanGaps:true},
-    {label:'Knee',data:entries.map(e=>e.kneePain),borderColor:'#b44fff',borderWidth:2,pointRadius:2,tension:0.3,spanGaps:true}
-  ],{labels,extra:{plugins:{legend:{display:true,labels:{color:'#7a8a9a',font:{family:'DM Mono',size:9},boxWidth:12}}}}});
-  makeChart('cRecovery',[
-    {label:'Sleep',data:entries.map(e=>e.sleep),borderColor:'#b44fff',backgroundColor:'rgba(180,79,255,0.05)',borderWidth:2,pointRadius:2,tension:0.3,fill:true,spanGaps:true},
-    {label:'Flexibility',data:entries.map(e=>e.flex),borderColor:'#00c8ff',borderWidth:2,pointRadius:2,tension:0.3,spanGaps:true}
-  ],{labels,extra:{plugins:{legend:{display:true,labels:{color:'#7a8a9a',font:{family:'DM Mono',size:9},boxWidth:12}}},scales:{...chartCfg.scales,y:{...chartCfg.scales.y,min:0,max:6}}}});
-  makeChart('cCal',[{data:entries.map(e=>e.calBal),borderColor:'#ffb340',backgroundColor:'rgba(255,179,64,0.05)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#ffb340',tension:0.3,fill:true,spanGaps:true}],{labels});
+  // ── 30-day recent charts ──
+  makeChart('cHR', [{
+    data: windowField(slots, 'hr'),
+    borderColor:'#00e87a', backgroundColor:'rgba(0,232,122,0.05)',
+    borderWidth:2, pointRadius:3, pointBackgroundColor:'#00e87a',
+    tension:0.3, fill:true, spanGaps:true
+  }], { labels, extra:{ scales:{ ...chartCfg.scales, y: yScale(Y_RANGES.hr) } } });
 
-  // Hydration — line chart in liters
-  makeChart('cWater',[{data:entries.map(e=>e.water),borderColor:'#00c8ff',backgroundColor:'rgba(0,200,255,0.06)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#00c8ff',tension:0.3,fill:true,spanGaps:true}],{labels});
+  makeChart('cWeight', [{
+    data: windowField(slots, 'weight'),
+    borderColor:'#00c8ff', backgroundColor:'rgba(0,200,255,0.05)',
+    borderWidth:2, pointRadius:3, pointBackgroundColor:'#00c8ff',
+    tension:0.3, fill:true, spanGaps:true
+  }], { labels });
 
-  // Alcohol — bar chart
-  const drinksData = entries.map(e=>e.drinks||0);
-  const drinksColors = drinksData.map(d=>d===0?'rgba(74,90,106,0.4)':d<=2?'rgba(0,232,122,0.6)':d<=4?'rgba(255,179,64,0.7)':'rgba(255,69,96,0.8)');
+  makeChart('cPain', [
+    {label:'Elbow', data:windowField(slots,'elbowPain'), borderColor:'#ff4560', borderWidth:2, pointRadius:2, tension:0.3, spanGaps:true},
+    {label:'Shoulder', data:windowField(slots,'shoulderPain'), borderColor:'#ffb340', borderWidth:2, pointRadius:2, tension:0.3, spanGaps:true},
+    {label:'Knee', data:windowField(slots,'kneePain'), borderColor:'#b44fff', borderWidth:2, pointRadius:2, tension:0.3, spanGaps:true}
+  ], { labels, extra:{
+    plugins:{ legend:{ display:true, labels:{ color:'#7a8a9a', font:{family:'DM Mono',size:9}, boxWidth:12 } } },
+    scales:{ ...chartCfg.scales, y: yScale(Y_RANGES.pain) }
+  } });
+
+  makeChart('cRecovery', [
+    {label:'Sleep', data:windowField(slots,'sleep'), borderColor:'#b44fff', backgroundColor:'rgba(180,79,255,0.05)', borderWidth:2, pointRadius:2, tension:0.3, fill:true, spanGaps:true},
+    {label:'Flexibility', data:windowField(slots,'flex'), borderColor:'#00c8ff', borderWidth:2, pointRadius:2, tension:0.3, spanGaps:true}
+  ], { labels, extra:{
+    plugins:{ legend:{ display:true, labels:{ color:'#7a8a9a', font:{family:'DM Mono',size:9}, boxWidth:12 } } },
+    scales:{ ...chartCfg.scales, y: yScale(Y_RANGES.recovery) }
+  } });
+
+  makeChart('cCal', [{
+    data: windowField(slots, 'calBal'),
+    borderColor:'#ffb340', backgroundColor:'rgba(255,179,64,0.05)',
+    borderWidth:2, pointRadius:3, pointBackgroundColor:'#ffb340',
+    tension:0.3, fill:true, spanGaps:true
+  }], { labels, extra:{ scales:{ ...chartCfg.scales, y: yScale(Y_RANGES.cal) } } });
+
+  makeChart('cWater', [{
+    data: windowField(slots, 'water'),
+    borderColor:'#00c8ff', backgroundColor:'rgba(0,200,255,0.06)',
+    borderWidth:2, pointRadius:3, pointBackgroundColor:'#00c8ff',
+    tension:0.3, fill:true, spanGaps:true
+  }], { labels, extra:{ scales:{ ...chartCfg.scales, y: yScale(Y_RANGES.water) } } });
+
+  // Alcohol — bar chart (still uses the same window)
+  const drinksData = windowField(slots, 'drinks').map(v => v == null ? 0 : v);
+  const drinksColors = drinksData.map(d => d===0 ? 'rgba(74,90,106,0.4)' : d<=2 ? 'rgba(0,232,122,0.6)' : d<=4 ? 'rgba(255,179,64,0.7)' : 'rgba(255,69,96,0.8)');
   if (charts['cDrinks']) charts['cDrinks'].destroy();
   const drinksCtx = document.getElementById('cDrinks');
   if (drinksCtx) {
     charts['cDrinks'] = new Chart(drinksCtx, {
       type:'bar',
-      data:{labels, datasets:[{data:drinksData, backgroundColor:drinksColors, borderColor:drinksColors, borderWidth:0, borderRadius:3}]},
-      options:{...chartCfg, scales:{...chartCfg.scales, y:{...chartCfg.scales.y, beginAtZero:true, ticks:{...chartCfg.scales.y.ticks, stepSize:1}}}}
+      data:{ labels, datasets:[{ data:drinksData, backgroundColor:drinksColors, borderColor:drinksColors, borderWidth:0, borderRadius:3 }] },
+      options:{ ...chartCfg, scales:{ ...chartCfg.scales, y: { ...yScale(Y_RANGES.drinks), beginAtZero:true, ticks:{ ...chartCfg.scales.y.ticks, stepSize:1 } } } }
     });
   }
 
-  // Body Fat — sparse, only entries with values, plotted over full history
-  const bfEntries = D.entries.filter(e=>e.bodyFat!=null);
-  const bfLabels = bfEntries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
-  if (bfEntries.length) {
-    makeChart('cBodyFat',[{data:bfEntries.map(e=>e.bodyFat),borderColor:'#ff4560',backgroundColor:'rgba(255,69,96,0.05)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#ff4560',tension:0.3,fill:true}],{labels:bfLabels});
+  // Body Fat — v2.10c: computed (raw + smoothed) + manual override.
+  // Now also calendar-aligned to the 30-day window.
+  const bfComputed = windowField(slots, 'bodyFatComputed');
+  const bfManual = windowField(slots, 'bodyFat');
+  const bfHasAny = bfComputed.some(v => v != null) || bfManual.some(v => v != null);
+  if (bfHasAny) {
+    const bfSmoothed = rollingAvg(bfComputed, 7);
+    makeChart('cBodyFat', [
+      {label:'Computed (Navy)', data:bfComputed, borderColor:'#ff4560', backgroundColor:'rgba(255,69,96,0.05)', borderWidth:1, pointRadius:2, pointBackgroundColor:'#ff4560', tension:0.3, spanGaps:true, borderDash:[3,3]},
+      {label:'Computed · 7d avg', data:bfSmoothed, borderColor:'#ff4560', backgroundColor:'rgba(255,69,96,0.08)', borderWidth:2.5, pointRadius:0, tension:0.4, fill:true, spanGaps:true},
+      {label:'Manual entry', data:bfManual, borderColor:'#ffb340', backgroundColor:'transparent', borderWidth:0, pointRadius:4, pointStyle:'rectRot', pointBackgroundColor:'#ffb340', spanGaps:false, showLine:false}
+    ], { labels, extra:{
+      plugins:{ legend:{ display:true, labels:{ color:'#7a8a9a', font:{family:'DM Mono',size:8}, boxWidth:10 } } },
+      scales:{ ...chartCfg.scales, y: yScale(Y_RANGES.bodyFat) }
+    } });
   } else {
     if (charts['cBodyFat']) charts['cBodyFat'].destroy();
   }
 
-  // Body measurements — multi-line
-  const measureEntries = D.entries.filter(e=>e.waist!=null||e.hips!=null||e.chest!=null||e.thigh!=null||e.bicep!=null);
-  const mLabels = measureEntries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
-  if (measureEntries.length) {
-    makeChart('cMeasure',[
-      {label:'Waist',data:measureEntries.map(e=>e.waist),borderColor:'#ffb340',borderWidth:2,pointRadius:3,tension:0.3,spanGaps:true},
-      {label:'Hips',data:measureEntries.map(e=>e.hips),borderColor:'#b44fff',borderWidth:2,pointRadius:3,tension:0.3,spanGaps:true},
-      {label:'Chest',data:measureEntries.map(e=>e.chest),borderColor:'#00c8ff',borderWidth:2,pointRadius:3,tension:0.3,spanGaps:true},
-      {label:'Thigh',data:measureEntries.map(e=>e.thigh),borderColor:'#00e87a',borderWidth:2,pointRadius:3,tension:0.3,spanGaps:true},
-      {label:'Bicep',data:measureEntries.map(e=>e.bicep),borderColor:'#ff4560',borderWidth:2,pointRadius:3,tension:0.3,spanGaps:true}
-    ],{labels:mLabels,extra:{plugins:{legend:{display:true,labels:{color:'#7a8a9a',font:{family:'DM Mono',size:8},boxWidth:10}}}}});
+  // Lean Mass + FFMI dual-axis. Calendar-aligned.
+  const leanLbsSeries = slots.map(e => (e && e.leanMassKg != null) ? Math.round(e.leanMassKg * 2.20462 * 10) / 10 : null);
+  const ffmiSeries = windowField(slots, 'ffmiAdjusted');
+  const lmHasAny = leanLbsSeries.some(v => v != null) || ffmiSeries.some(v => v != null);
+  if (lmHasAny) {
+    const leanSmoothed = rollingAvg(leanLbsSeries, 7);
+    const ffmiSmoothed = rollingAvg(ffmiSeries, 7);
+    if (charts['cLeanFFMI']) charts['cLeanFFMI'].destroy();
+    const lmCtx = document.getElementById('cLeanFFMI');
+    if (lmCtx) {
+      charts['cLeanFFMI'] = new Chart(lmCtx, {
+        type:'line',
+        data:{ labels, datasets:[
+          {label:'Lean (lbs)', data:leanSmoothed, borderColor:'#00e87a', backgroundColor:'rgba(0,232,122,0.06)', borderWidth:2, pointRadius:0, tension:0.4, fill:true, spanGaps:true, yAxisID:'y'},
+          {label:'FFMI', data:ffmiSmoothed, borderColor:'#00c8ff', backgroundColor:'transparent', borderWidth:2, pointRadius:0, tension:0.4, spanGaps:true, yAxisID:'y1'}
+        ]},
+        options:{
+          ...chartCfg,
+          plugins:{ ...chartCfg.plugins, legend:{ display:true, labels:{ color:'#7a8a9a', font:{family:'DM Mono',size:8}, boxWidth:10 } } },
+          scales:{
+            x: chartCfg.scales.x,
+            y: { ...chartCfg.scales.y, position:'left', ticks:{ ...chartCfg.scales.y.ticks, color:'#00e87a' } },
+            y1:{ ...chartCfg.scales.y, position:'right', grid:{ drawOnChartArea:false }, ticks:{ ...chartCfg.scales.y.ticks, color:'#00c8ff' } }
+          }
+        }
+      });
+    }
+  } else {
+    if (charts['cLeanFFMI']) charts['cLeanFFMI'].destroy();
+  }
+
+  // Body measurements — calendar-aligned multi-line (auto y-range)
+  const measureFields = ['waist','neck','hips','chest','thigh','bicep'];
+  const hasAnyMeasure = measureFields.some(f => windowField(slots, f).some(v => v != null));
+  if (hasAnyMeasure) {
+    makeChart('cMeasure', [
+      {label:'Waist', data:windowField(slots,'waist'), borderColor:'#ffb340', borderWidth:2, pointRadius:3, tension:0.3, spanGaps:true},
+      {label:'Neck',  data:windowField(slots,'neck'),  borderColor:'#5ec8d8', borderWidth:2, pointRadius:3, tension:0.3, spanGaps:true},
+      {label:'Hips',  data:windowField(slots,'hips'),  borderColor:'#b44fff', borderWidth:2, pointRadius:3, tension:0.3, spanGaps:true},
+      {label:'Chest', data:windowField(slots,'chest'), borderColor:'#00c8ff', borderWidth:2, pointRadius:3, tension:0.3, spanGaps:true},
+      {label:'Thigh', data:windowField(slots,'thigh'), borderColor:'#00e87a', borderWidth:2, pointRadius:3, tension:0.3, spanGaps:true},
+      {label:'Bicep', data:windowField(slots,'bicep'), borderColor:'#ff4560', borderWidth:2, pointRadius:3, tension:0.3, spanGaps:true}
+    ], { labels, extra:{ plugins:{ legend:{ display:true, labels:{ color:'#7a8a9a', font:{family:'DM Mono',size:8}, boxWidth:10 } } } } });
   } else {
     if (charts['cMeasure']) charts['cMeasure'].destroy();
   }
 
-  // v2.8b Garmin: Sleep Hours
-  const shEntries = D.entries.filter(e=>e.sleepHours!=null).slice(-21);
-  if (shEntries.length) {
-    const shLabels = shEntries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
-    makeChart('cSleepHours',[{data:shEntries.map(e=>e.sleepHours),borderColor:'#b44fff',backgroundColor:'rgba(180,79,255,0.06)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#b44fff',tension:0.3,fill:true,spanGaps:true}],{labels:shLabels,extra:{scales:{...chartCfg.scales,y:{...chartCfg.scales.y,min:0,max:12}}}});
+  // Garmin: Sleep Hours — calendar-aligned, fixed y 0-10
+  const sleepHoursData = windowField(slots, 'sleepHours');
+  if (sleepHoursData.some(v => v != null)) {
+    makeChart('cSleepHours', [{
+      data: sleepHoursData,
+      borderColor:'#b44fff', backgroundColor:'rgba(180,79,255,0.06)',
+      borderWidth:2, pointRadius:3, pointBackgroundColor:'#b44fff',
+      tension:0.3, fill:true, spanGaps:true
+    }], { labels, extra:{ scales:{ ...chartCfg.scales, y: yScale(Y_RANGES.sleepHrs) } } });
   } else if (charts['cSleepHours']) charts['cSleepHours'].destroy();
 
-  // v2.8b Garmin: Daily Steps
-  const stepsEntries = D.entries.filter(e=>e.steps!=null).slice(-21);
-  if (stepsEntries.length) {
-    const stepsLabels = stepsEntries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
-    makeChart('cSteps',[{data:stepsEntries.map(e=>e.steps),borderColor:'#00e87a',backgroundColor:'rgba(0,232,122,0.06)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#00e87a',tension:0.3,fill:true,spanGaps:true}],{labels:stepsLabels});
+  // Garmin: Daily Steps — calendar-aligned, fixed y 0-20000
+  const stepsData = windowField(slots, 'steps');
+  if (stepsData.some(v => v != null)) {
+    makeChart('cSteps', [{
+      data: stepsData,
+      borderColor:'#00e87a', backgroundColor:'rgba(0,232,122,0.06)',
+      borderWidth:2, pointRadius:3, pointBackgroundColor:'#00e87a',
+      tension:0.3, fill:true, spanGaps:true
+    }], { labels, extra:{ scales:{ ...chartCfg.scales, y: yScale(Y_RANGES.steps) } } });
   } else if (charts['cSteps']) charts['cSteps'].destroy();
 
-  // v2.8 Garmin: Stress (kept from earlier)
-  const stEntries = D.entries.filter(e=>e.stressAvg!=null).slice(-21);
-  if (stEntries.length) {
-    const stLabels = stEntries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
-    makeChart('cStress',[{data:stEntries.map(e=>e.stressAvg),borderColor:'#ffb340',backgroundColor:'rgba(255,179,64,0.06)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#ffb340',tension:0.3,fill:true,spanGaps:true}],{labels:stLabels,extra:{scales:{...chartCfg.scales,y:{...chartCfg.scales.y,min:0,max:100}}}});
+  // Garmin: Stress — calendar-aligned, fixed y 0-100
+  const stressData = windowField(slots, 'stressAvg');
+  if (stressData.some(v => v != null)) {
+    makeChart('cStress', [{
+      data: stressData,
+      borderColor:'#ffb340', backgroundColor:'rgba(255,179,64,0.06)',
+      borderWidth:2, pointRadius:3, pointBackgroundColor:'#ffb340',
+      tension:0.3, fill:true, spanGaps:true
+    }], { labels, extra:{ scales:{ ...chartCfg.scales, y: yScale(Y_RANGES.stress) } } });
   } else if (charts['cStress']) charts['cStress'].destroy();
 
-  // v2.8c VO2 Max — recent measurements (Garmin measures sporadically, not daily)
-  const vo2Entries = D.entries.filter(e=>e.vo2Max!=null).slice(-21);
-  if (vo2Entries.length) {
-    const vo2Labels = vo2Entries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
-    makeChart('cVO2',[{data:vo2Entries.map(e=>e.vo2Max),borderColor:'#00c8ff',backgroundColor:'rgba(0,200,255,0.06)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#00c8ff',tension:0.3,fill:true,spanGaps:true}],{labels:vo2Labels});
+  // Garmin: VO2 Max — calendar-aligned, fixed y 35-55
+  const vo2Data = windowField(slots, 'vo2Max');
+  if (vo2Data.some(v => v != null)) {
+    makeChart('cVO2', [{
+      data: vo2Data,
+      borderColor:'#00c8ff', backgroundColor:'rgba(0,200,255,0.06)',
+      borderWidth:2, pointRadius:3, pointBackgroundColor:'#00c8ff',
+      tension:0.3, fill:true, spanGaps:true
+    }], { labels, extra:{ scales:{ ...chartCfg.scales, y: yScale(Y_RANGES.vo2) } } });
   } else if (charts['cVO2']) charts['cVO2'].destroy();
 
-  // v2.8 Strava: Fitness/Fatigue/Form (unchanged)
-  const sfEntries = D.entries.filter(e=>e.stravaFitness!=null||e.stravaFatigue!=null||e.strava!=null).slice(-30);
-  if (sfEntries.length) {
-    const sfLabels = sfEntries.map(e=>{const d=new Date(e.date+'T12:00:00');return d.toLocaleDateString('en-CA',{month:'short',day:'numeric'});});
-    makeChart('cStrava',[
-      {label:'Fitness (CTL)',data:sfEntries.map(e=>e.stravaFitness),borderColor:'#00c8ff',borderWidth:2,pointRadius:2,tension:0.3,spanGaps:true},
-      {label:'Fatigue (ATL)',data:sfEntries.map(e=>e.stravaFatigue),borderColor:'#ff4560',borderWidth:2,pointRadius:2,tension:0.3,spanGaps:true},
-      {label:'Form (TSB)',data:sfEntries.map(e=>e.strava),borderColor:'#00e87a',borderWidth:2,pointRadius:2,tension:0.3,spanGaps:true}
-    ],{labels:sfLabels,extra:{plugins:{legend:{display:true,labels:{color:'#7a8a9a',font:{family:'DM Mono',size:8},boxWidth:10}}}}});
+  // Strava CTL/ATL/TSB — calendar-aligned to the same 30-day window
+  const ctl = windowField(slots, 'stravaFitness');
+  const atl = windowField(slots, 'stravaFatigue');
+  const tsb = windowField(slots, 'strava');
+  const stravaHasAny = ctl.some(v=>v!=null) || atl.some(v=>v!=null) || tsb.some(v=>v!=null);
+  if (stravaHasAny) {
+    makeChart('cStrava', [
+      {label:'Fitness (CTL)', data:ctl, borderColor:'#00c8ff', borderWidth:2, pointRadius:2, tension:0.3, spanGaps:true},
+      {label:'Fatigue (ATL)', data:atl, borderColor:'#ff4560', borderWidth:2, pointRadius:2, tension:0.3, spanGaps:true},
+      {label:'Form (TSB)',    data:tsb, borderColor:'#00e87a', borderWidth:2, pointRadius:2, tension:0.3, spanGaps:true}
+    ], { labels, extra:{ plugins:{ legend:{ display:true, labels:{ color:'#7a8a9a', font:{family:'DM Mono',size:8}, boxWidth:10 } } } } });
   } else if (charts['cStrava']) charts['cStrava'].destroy();
 }
 
@@ -4786,10 +5279,20 @@ function renderFoodLog(containerId, dateOverride) {
   let html = '<div class="food-card">';
   html += `<div class="food-header">
     <div class="food-title">${date===todayISO()?"Today":formatNiceDate(date)} (${logs.length} log${logs.length!==1?'s':''})</div>
-    <div class="food-day-score">
+    <div class="food-day-score" style="display:flex;align-items:center;gap:0.4rem">
       ${renderScorePill(scores)}
+      <button type="button" onclick="toggleFoodLegend('${containerId}')" aria-label="What do these mean?" style="background:transparent;border:1px solid var(--border2);color:var(--muted2);font-family:var(--mono);font-size:0.6rem;width:18px;height:18px;border-radius:50%;cursor:pointer;padding:0;line-height:1;display:flex;align-items:center;justify-content:center" title="What do these mean?">ⓘ</button>
     </div>
   </div>`;
+
+  // v2.10c — collapsible food-score legend (mobile-friendly tooltip alternative)
+  html += `<div id="${containerId}-legend" style="display:none;margin:0.5rem 0;padding:0.7rem 0.85rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:0.68rem;line-height:1.65">
+    <div style="font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:0.45rem">Score Legend</div>
+    <div style="margin-bottom:0.4rem"><strong style="color:var(--text)">infl</strong> &mdash; inflammation balance for the day. <span style="color:var(--green)">green</span> = anti-inflammatory (&minus;1 or lower); <span style="color:var(--red)">red</span> = pro-inflammatory (+1 or higher).</div>
+    <div style="margin-bottom:0.4rem"><strong style="color:var(--text)">🌱</strong> &mdash; unique plant species today. Target: 30+/week (ZOE / Spector research).</div>
+    <div><strong style="color:var(--text)">organ</strong> &mdash; cumulative load on liver / kidney / heart from taxing foods (red meat, processed meat). Amber = caution, not alarm.</div>
+  </div>`;
+
 
   html += `<div class="food-input-wrap">
     <input type="text" class="food-input" id="${containerId}-input" placeholder="What did you eat?" autocomplete="off" autocorrect="off" autocapitalize="off">
@@ -4854,6 +5357,13 @@ function renderFoodLog(containerId, dateOverride) {
 }
 
 function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// v2.10c — tap-to-toggle food-score legend (mobile alternative to title-attr tooltips)
+function toggleFoodLegend(containerId) {
+  const el = document.getElementById(containerId + '-legend');
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
 
 function renderScorePill(scores) {
   const i = scores.inflammation;
@@ -5118,7 +5628,7 @@ function closeModalOnBg(e) {
 
 function exportCSV() {
   if (!D.entries.length) { toast('No data to export'); return; }
-  const h = ['Date','HR','Weight','VO2','Strava','CalIn','CalOut','CalBal','Protein','Carbs','Water_L','Drinks','Sleep','Flex','ElbowPain','ShoulderPain','KneePain','Activities','TotalMin','Trail','TouchToes','ShoulderReach','BodyFat_pct','Waist_cm','Hips_cm','Chest_cm','Thigh_cm','Bicep_cm','Inflammation','PlantsToday','OrganLoad','ProcessedCount','FoodEntries'];
+  const h = ['Date','HR','Weight','VO2','Strava','CalIn','CalOut','CalBal','Protein','Carbs','Water_L','Drinks','Sleep','Flex','ElbowPain','ShoulderPain','KneePain','Activities','TotalMin','Trail','TouchToes','ShoulderReach','BodyFat_pct','BodyFat_computed_pct','LeanMass_kg','FFMI_adj','Waist_cm','Neck_cm','Hips_cm','Chest_cm','Thigh_cm','Bicep_cm','Inflammation','PlantsToday','OrganLoad','ProcessedCount','FoodEntries'];
   const rows = D.entries.map(e=>{
     const acts = e.activities || [];
     const actStr = acts.map(a=>{
@@ -5128,7 +5638,7 @@ function exportCSV() {
     const totalMin = acts.reduce((s,a)=>s+(a.duration||0),0);
     const fScores = computeDayFoodScores(e);
     const foodStr = (e.foodEntries||[]).map(l=>(l.raw||'').replace(/[",;]/g,' ')).join(';');
-    return [e.date,e.hr,e.weight,e.vo2,e.strava,e.calIn,e.calOut,e.calBal,e.protein,e.carbs,e.water,e.drinks,e.sleep,e.flex,e.elbowPain,e.shoulderPain,e.kneePain,`"${actStr}"`,totalMin,e.trail,e.touchToes,e.shoulderReach,e.bodyFat,e.waist,e.hips,e.chest,e.thigh,e.bicep,fScores.inflammation,fScores.plants,fScores.organ,fScores.processedCount,`"${foodStr}"`].map(v=>v??'');
+    return [e.date,e.hr,e.weight,e.vo2,e.strava,e.calIn,e.calOut,e.calBal,e.protein,e.carbs,e.water,e.drinks,e.sleep,e.flex,e.elbowPain,e.shoulderPain,e.kneePain,`"${actStr}"`,totalMin,e.trail,e.touchToes,e.shoulderReach,e.bodyFat,e.bodyFatComputed,e.leanMassKg,e.ffmiAdjusted,e.waist,e.neck,e.hips,e.chest,e.thigh,e.bicep,fScores.inflammation,fScores.plants,fScores.organ,fScores.processedCount,`"${foodStr}"`].map(v=>v??'');
   });
   const csv = [h,...rows].map(r=>r.join(',')).join('\n');
   const b = new Blob([csv],{type:'text/csv'});
@@ -5146,6 +5656,22 @@ function renderSync() {
   const name = D.profile?.name || '';
   document.getElementById('inputProfileName').value = name;
   document.getElementById('profileName').textContent = name || 'My Profile';
+  // v2.10c — height + sex + unit toggle hydration
+  const p = D.profile || {};
+  const unit = p.heightUnit || 'cm';
+  const heightInput = document.getElementById('inputHeight');
+  if (heightInput) heightInput.value = heightCmToDisplay(p.heightCm, unit);
+  // Activate the right unit toggle button
+  document.querySelectorAll('.height-unit-btn').forEach(b => {
+    const active = b.dataset.unit === unit;
+    b.style.background = active ? 'var(--accent-dim)' : 'transparent';
+    b.style.color = active ? 'var(--accent)' : 'var(--muted)';
+    b.style.borderColor = active ? 'var(--accent)' : 'var(--border2)';
+  });
+  // Activate the right sex button
+  document.querySelectorAll('.sex-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.sex === p.sex);
+  });
   document.getElementById('lastBackupDate').textContent = D.lastBackup
     ? new Date(D.lastBackup).toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'})
     : 'Never';
@@ -5280,6 +5806,49 @@ function updateProfileName(val) {
   D.profile.name = val;
   document.getElementById('profileName').textContent = val || 'My Profile';
   save();
+}
+
+// v2.10c — Profile: height, sex, height-unit handlers.
+// Changing height or sex triggers a recompute of body-comp on every entry
+// that has the inputs. This is the only "bulk recompute" path; otherwise
+// computeBodyComp runs per-entry on save.
+function updateHeight(rawVal) {
+  if (!D.profile) D.profile = {};
+  const unit = D.profile.heightUnit || 'cm';
+  const cm = heightDisplayToCm(rawVal, unit);
+  D.profile.heightCm = cm;
+  recomputeAllBodyComp();
+  save();
+}
+function updateSex(sex) {
+  if (!D.profile) D.profile = {};
+  D.profile.sex = sex;
+  document.querySelectorAll('.sex-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.sex === sex);
+  });
+  recomputeAllBodyComp();
+  save();
+}
+function setHeightUnit(unit) {
+  if (!D.profile) D.profile = {};
+  D.profile.heightUnit = unit;
+  // Update toggle visual state
+  document.querySelectorAll('.height-unit-btn').forEach(b => {
+    const active = b.dataset.unit === unit;
+    b.style.background = active ? 'var(--accent-dim)' : 'transparent';
+    b.style.color = active ? 'var(--accent)' : 'var(--muted)';
+    b.style.borderColor = active ? 'var(--accent)' : 'var(--border2)';
+  });
+  // Refresh the displayed input value in the new unit
+  const heightInput = document.getElementById('inputHeight');
+  if (heightInput) heightInput.value = heightCmToDisplay(D.profile.heightCm, unit);
+  save();
+}
+function recomputeAllBodyComp() {
+  // Triggered when profile height or sex changes — recomputes every entry.
+  // Cheap (O(n) over entries, no I/O until save).
+  if (!Array.isArray(D.entries)) return;
+  D.entries.forEach(e => computeBodyComp(e));
 }
 
 function exportJSON() {
