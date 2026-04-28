@@ -930,8 +930,31 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
 
     <hr class="div">
     <div class="card-title">Recovery</div>
+    <!-- v2.10c — Sleep is now hours (slider 0-12, step 0.5); Garmin overrides if present.
+         Quality 1-5 stays as an optional separate signal. -->
     <div class="form-group">
-      <label class="form-label">Sleep Quality</label>
+      <label class="form-label" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Hours Slept</span>
+        <span id="sleepHoursSource" style="font-size:0.5rem;color:var(--muted);text-transform:none;letter-spacing:0.02em"></span>
+      </label>
+      <div id="sleepHoursManualWrap">
+        <input type="range" class="pain-slider" id="sliderSleepHours" min="0" max="12" step="0.5" value="0" oninput="updateSleepHoursDisplay(this.value)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.2rem">
+          <span style="font-family:var(--mono);font-size:0.6rem;color:var(--muted)">0h</span>
+          <span id="sleepHoursDisplay" style="font-family:var(--display);font-size:1.05rem;font-weight:700;color:var(--text)">— h</span>
+          <span style="font-family:var(--mono);font-size:0.6rem;color:var(--muted)">12h</span>
+        </div>
+      </div>
+      <!-- Garmin lock state — shown when sleepHours came from Garmin -->
+      <div id="sleepHoursGarminWrap" style="display:none;padding:0.6rem 0.85rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-family:var(--display);font-size:1rem;font-weight:700;color:var(--text)" id="sleepHoursGarminVal">—</span>
+          <button type="button" onclick="overrideGarminSleep()" style="background:transparent;border:1px solid var(--border2);color:var(--accent);font-family:var(--mono);font-size:0.6rem;padding:0.3rem 0.6rem;border-radius:6px;cursor:pointer;letter-spacing:0.06em;text-transform:uppercase">Override</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Sleep Quality <span style="font-size:0.5rem;color:var(--muted);font-weight:400">(optional)</span></label>
       <div class="rating-btns">
         <button class="rbtn" data-sleep="1" onclick="setSleep(1)">1<br><span style="font-size:0.5rem">Poor</span></button>
         <button class="rbtn" data-sleep="2" onclick="setSleep(2)">2</button>
@@ -1394,7 +1417,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
   <div class="card" style="border-color:rgba(255,179,64,0.2);background:rgba(255,179,64,0.03)">
     <div class="card-title" style="color:var(--amber)">Build Notes — v2.10c</div>
     <div style="font-size:0.72rem;color:var(--muted2);line-height:1.7">
-      <strong style="color:var(--text)">v2.10c — Body composition + chart standardization:</strong> Set your height + sex in Settings → Profile, then add a weekly Neck measurement in Log alongside Waist. Body fat % is auto-computed via the US Navy method (±3% vs DEXA — trend matters more than absolute). Lean mass and adjusted FFMI computed alongside. Three new chart cards in Insights → Charts: Body Fat (computed + manual override, 7-day smoothed), Lean Mass &amp; FFMI (dual-axis, smoothed), and Measurements now includes Neck. <strong>All Insights → Charts now use a unified 30-day calendar window with date-aligned x-axes</strong> — fixes the Sleep Hours bug where sparse Garmin data stretched across years. Y-axis ranges fixed where physiologically sensible (HR 40-80, BF 10-30%, sleep 0-10h, stress 0-100, etc.) so charts are visually comparable. Bundled cleanups: tappable ⓘ legend on food-score pills, weekly benchmark inputs hidden Mon-Sat by default with manual show toggle.<br><br>
+      <strong style="color:var(--text)">v2.10c — Body composition + chart standardization + sleep hours:</strong> Set your height + sex in Settings → Profile, then add a weekly Neck measurement in Log alongside Waist. Body fat % is auto-computed via the US Navy method (±3% vs DEXA — trend matters more than absolute). Lean mass and adjusted FFMI computed alongside. Three new chart cards in Insights → Charts: Body Fat (computed + manual override, 7-day smoothed), Lean Mass &amp; FFMI (dual-axis, smoothed), and Measurements now includes Neck. <strong>All Insights → Charts now use a unified 30-day calendar window with date-aligned x-axes</strong> — fixes the Sleep Hours bug where sparse Garmin data stretched across years. Y-axis ranges fixed where physiologically sensible (HR 40-80, BF 10-30%, sleep 0-10h, stress 0-100, etc.) so charts are visually comparable. <strong>Sleep input is now an hours slider (0-12, 0.5 step)</strong> instead of a 1-5 quality rating heuristic. Quality 1-5 stays as an optional separate field. Garmin sleep data overrides manual entry with an Override link. Existing entries are migrated: rating-only entries get sleepHours backfilled from the heuristic so dial data isn't lost. Bundled cleanups: tappable ⓘ legend on food-score pills, weekly benchmark inputs hidden Mon-Sat by default with manual show toggle.<br><br>
       <strong style="color:var(--text)">v2.10b4 — Nav cleanup:</strong><br>
       &bull; <strong>History moved into Settings</strong> as a tappable link card at the top — bottom nav drops from 6 to 5 tabs (Today · Log · Program · Insights · Settings). History page now has a "← Back to Settings" link at the top. Sub-text on the link card shows entry count for quick orientation.<br>
       &bull; <strong>Text Size feature removed</strong> — control did nothing visible in practice. CSS `--scale` variable, `body.size-X` classes, `setTextSize()` and `applyTextSize()` functions all stripped clean.
@@ -2015,6 +2038,11 @@ let D = (() => {
       if (e.bodyFatComputed === undefined) e.bodyFatComputed = null;
       if (e.leanMassKg === undefined) e.leanMassKg = null;
       if (e.ffmiAdjusted === undefined) e.ffmiAdjusted = null;
+      // ─── v2.10c — Sleep hours unification ───
+      // sleepSource tracks where sleepHours came from: 'garmin' | 'manual'
+      // | 'rating-derived' | null. The one-shot backfill below populates
+      // sleepHours from the 1-5 sleep rating for old entries that never had it.
+      if (e.sleepSource === undefined) e.sleepSource = null;
     });
     if (!data.completedWorkouts) data.completedWorkouts = {};
     if (!data.userFoods) data.userFoods = {};
@@ -2047,6 +2075,35 @@ let D = (() => {
       }
       data._bodyComp_v2_10c = true;
       console.log('v2.10c migration: body comp profile fields added');
+    }
+    // ─── v2.10c — Sleep hours unification migration ───
+    // Backfill sleepHours from the 1-5 sleep rating for entries that never
+    // had a sleepHours value (i.e., entries from before Garmin import or
+    // before the new slider). Uses the same heuristic that the dial used:
+    // 1=4h, 2=5.5h, 3=7h, 4=8h, 5=8.5h. Flagged sleepSource:'rating-derived'
+    // so the UI can label it accurately.
+    if (!data._sleepHoursMigration_v2_10c) {
+      const RATING_TO_HOURS = { 1: 4, 2: 5.5, 3: 7, 4: 8, 5: 8.5 };
+      let backfilled = 0;
+      if (Array.isArray(data.entries)) {
+        data.entries.forEach(e => {
+          if ((e.sleepHours == null || isNaN(e.sleepHours)) && e.sleep != null) {
+            const hrs = RATING_TO_HOURS[e.sleep];
+            if (hrs != null) {
+              e.sleepHours = hrs;
+              e.sleepSource = 'rating-derived';
+              backfilled++;
+            }
+          } else if (e.sleepHours != null && e.sleepSource == null) {
+            // Entry has sleepHours but no source flag — assume Garmin if it's
+            // a non-rounded value (Garmin gives e.g. 7.83), else manual.
+            const isLikelyGarmin = (e.sleepHours % 0.5) !== 0;
+            e.sleepSource = isLikelyGarmin ? 'garmin' : 'manual';
+          }
+        });
+      }
+      data._sleepHoursMigration_v2_10c = true;
+      console.log(`v2.10c migration: backfilled sleepHours from rating on ${backfilled} entries`);
     }
     // ─── v2.10b3 — Program-start date correction (Apr 21 → Apr 20) ───
     // Before this fix, day-0-of-week-1 was a Tuesday (Apr 21). After the fix,
@@ -2243,7 +2300,7 @@ async function hydrateFromIDB() {
   }
 }
 
-let S = { sleep:null, flex:null, programDay:null, entryDate:null, historyView:'cards',
+let S = { sleep:null, sleepHours:null, sleepHoursSource:null, flex:null, programDay:null, entryDate:null, historyView:'cards',
   viewWeek:null, viewPhase:null,
           actType:null, actFelt:null, addActivityOpen:false, undoState:null,
           waterUnit:'L', drinks:0 };
@@ -2313,6 +2370,9 @@ function sleepRatingToHours(rating) {
 }
 
 // Compute Sleep dial — hours of sleep, percent against 8h target.
+// v2.10c — sleepHours is now the canonical field (manual slider OR Garmin OR
+// rating-derived during migration). Quality rating fallback only triggers for
+// entries somehow missing both, which shouldn't happen post-migration.
 function computeSleepDial() {
   const fresh = findFreshEntry(['sleepHours', 'sleep']);
   if (!fresh) return { state: 'empty' };
@@ -2323,10 +2383,10 @@ function computeSleepDial() {
 
   if (e.sleepHours != null && !isNaN(e.sleepHours)) {
     hours = parseFloat(e.sleepHours);
-    source = 'garmin';
+    source = e.sleepSource || 'unknown';
   } else if (e.sleep != null) {
     hours = sleepRatingToHours(e.sleep);
-    source = 'rating';
+    source = 'rating-derived';
   }
   if (hours == null) return { state: 'empty' };
 
@@ -3055,6 +3115,73 @@ function setFlex(v) {
   document.querySelectorAll('[data-flex]').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.flex)===v));
 }
 
+// v2.10c — Sleep hours slider handlers.
+// Manual slider value is held on S.sleepHours; source flagged 'manual'.
+// Garmin sourced hours show a locked card with an "Override" link that
+// switches the UI back into manual editing for that entry only.
+function updateSleepHoursDisplay(val) {
+  const v = parseFloat(val);
+  if (isNaN(v) || v <= 0) {
+    document.getElementById('sleepHoursDisplay').textContent = '— h';
+    S.sleepHours = null;
+    S.sleepHoursSource = null;
+    return;
+  }
+  document.getElementById('sleepHoursDisplay').textContent = v.toFixed(1) + ' h';
+  S.sleepHours = v;
+  S.sleepHoursSource = 'manual';
+  const srcEl = document.getElementById('sleepHoursSource');
+  if (srcEl) srcEl.textContent = 'manual';
+}
+
+// Show the Garmin lock state — called from prefillFromExisting when the entry
+// has Garmin sleep data. User can hit Override to swap into manual editing.
+function showGarminSleepLock(hours) {
+  const manual = document.getElementById('sleepHoursManualWrap');
+  const garmin = document.getElementById('sleepHoursGarminWrap');
+  const garminVal = document.getElementById('sleepHoursGarminVal');
+  const srcEl = document.getElementById('sleepHoursSource');
+  if (!manual || !garmin) return;
+  manual.style.display = 'none';
+  garmin.style.display = 'block';
+  if (garminVal) garminVal.textContent = hours.toFixed(1) + ' h (from Garmin)';
+  if (srcEl) srcEl.textContent = 'garmin';
+  S.sleepHours = hours;
+  S.sleepHoursSource = 'garmin';
+}
+
+// Hide the lock and switch to manual entry. Pre-loads slider with the Garmin
+// value so the user can nudge it rather than re-enter from zero.
+function overrideGarminSleep() {
+  const manual = document.getElementById('sleepHoursManualWrap');
+  const garmin = document.getElementById('sleepHoursGarminWrap');
+  const slider = document.getElementById('sliderSleepHours');
+  if (!manual || !garmin) return;
+  manual.style.display = 'block';
+  garmin.style.display = 'none';
+  if (slider && S.sleepHours != null) {
+    slider.value = S.sleepHours;
+    updateSleepHoursDisplay(S.sleepHours);
+  }
+  S.sleepHoursSource = 'manual';
+}
+
+// Reset the sleep UI to empty (called from clearCheckin and on new entry)
+function resetSleepHoursUI() {
+  const manual = document.getElementById('sleepHoursManualWrap');
+  const garmin = document.getElementById('sleepHoursGarminWrap');
+  const slider = document.getElementById('sliderSleepHours');
+  const display = document.getElementById('sleepHoursDisplay');
+  const srcEl = document.getElementById('sleepHoursSource');
+  if (manual) manual.style.display = 'block';
+  if (garmin) garmin.style.display = 'none';
+  if (slider) slider.value = 0;
+  if (display) display.textContent = '— h';
+  if (srcEl) srcEl.textContent = '';
+  S.sleepHours = null;
+  S.sleepHoursSource = null;
+}
+
 // ═══════════════════════════════
 // HYDRATION & ALCOHOL
 // ═══════════════════════════════
@@ -3365,7 +3492,7 @@ function saveCheckin() {
   const touchedAny = Object.keys(CARRY_FIELDS).some(id => {
     const el = document.getElementById(id);
     return el && el.value !== '' && !el.classList.contains('carried');
-  }) || S.sleep != null || S.flex != null || S.drinks > 0 || existing?.activities?.length;
+  }) || S.sleep != null || S.sleepHours != null || S.flex != null || S.drinks > 0 || existing?.activities?.length;
 
   if (!touchedAny) {
     toast('⚠ Enter at least one value or add an activity');
@@ -3376,6 +3503,20 @@ function saveCheckin() {
   const waterRaw = waterEl?.classList.contains('carried') ? '' : waterEl?.value;
   const waterL = waterToLiters(waterRaw, S.waterUnit);
 
+  // v2.10c — sleep hours write logic.
+  // If user kept the Garmin-sourced lock state, preserve existing sleepHours +
+  // sleepSource. If they overrode or entered manually, take S.sleepHours.
+  let entrySleepHours = existing?.sleepHours ?? null;
+  let entrySleepSource = existing?.sleepSource ?? null;
+  if (S.sleepHoursSource === 'manual' && S.sleepHours != null && S.sleepHours > 0) {
+    entrySleepHours = S.sleepHours;
+    entrySleepSource = 'manual';
+  } else if (S.sleepHoursSource === 'garmin' && S.sleepHours != null) {
+    // Garmin-sourced and user didn't override — keep as-is
+    entrySleepHours = S.sleepHours;
+    entrySleepSource = 'garmin';
+  }
+
   const entry = existing || {};
   Object.assign(entry, {
     date: entryDate, hr, weight,
@@ -3385,6 +3526,8 @@ function saveCheckin() {
     water: waterL,
     drinks: S.drinks || 0,
     sleep: S.sleep, flex: S.flex,
+    sleepHours: entrySleepHours,
+    sleepSource: entrySleepSource,
     // v2.9.3 — bilateral pain
     elbowPainL: geti('sliderElbowL'), elbowPainR: geti('sliderElbowR'),
     shoulderPainL: geti('sliderShoulderL'), shoulderPainR: geti('sliderShoulderR'),
@@ -3433,6 +3576,7 @@ function clearCheckin() {
   S.medsToday = [];
   S.drinks = 0;
   setDrinks(0);
+  resetSleepHoursUI(); // v2.10c
   document.querySelectorAll('.rbtn').forEach(b=>b.classList.remove('active'));
   // Note: we don't clear activities here — those are saved separately and persist
 }
@@ -3545,6 +3689,25 @@ function prefillFromExisting(date) {
     renderMedsCheckIn();
     if (existing.sleep) setSleep(existing.sleep);
     if (existing.flex) setFlex(existing.flex);
+    // v2.10c — sleep hours hydration
+    // Reset first, then apply based on what the entry has.
+    resetSleepHoursUI();
+    if (existing.sleepHours != null && !isNaN(existing.sleepHours)) {
+      const hrs = parseFloat(existing.sleepHours);
+      if (existing.sleepSource === 'garmin') {
+        showGarminSleepLock(hrs);
+      } else {
+        // manual or rating-derived — load into slider
+        const slider = document.getElementById('sliderSleepHours');
+        if (slider) {
+          slider.value = hrs;
+          updateSleepHoursDisplay(hrs);
+        }
+        // Show source on the label so old rating-derived entries are flagged
+        const srcEl = document.getElementById('sleepHoursSource');
+        if (srcEl) srcEl.textContent = existing.sleepSource === 'rating-derived' ? 'derived from rating' : 'manual';
+      }
+    }
     // For fields that exist for THIS entry but are empty, still try carry-over
     applyCarryOver(date, existing);
   } else {
@@ -5628,7 +5791,7 @@ function closeModalOnBg(e) {
 
 function exportCSV() {
   if (!D.entries.length) { toast('No data to export'); return; }
-  const h = ['Date','HR','Weight','VO2','Strava','CalIn','CalOut','CalBal','Protein','Carbs','Water_L','Drinks','Sleep','Flex','ElbowPain','ShoulderPain','KneePain','Activities','TotalMin','Trail','TouchToes','ShoulderReach','BodyFat_pct','BodyFat_computed_pct','LeanMass_kg','FFMI_adj','Waist_cm','Neck_cm','Hips_cm','Chest_cm','Thigh_cm','Bicep_cm','Inflammation','PlantsToday','OrganLoad','ProcessedCount','FoodEntries'];
+  const h = ['Date','HR','Weight','VO2','Strava','CalIn','CalOut','CalBal','Protein','Carbs','Water_L','Drinks','SleepRating','SleepHours','SleepSource','Flex','ElbowPain','ShoulderPain','KneePain','Activities','TotalMin','Trail','TouchToes','ShoulderReach','BodyFat_pct','BodyFat_computed_pct','LeanMass_kg','FFMI_adj','Waist_cm','Neck_cm','Hips_cm','Chest_cm','Thigh_cm','Bicep_cm','Inflammation','PlantsToday','OrganLoad','ProcessedCount','FoodEntries'];
   const rows = D.entries.map(e=>{
     const acts = e.activities || [];
     const actStr = acts.map(a=>{
@@ -5638,7 +5801,7 @@ function exportCSV() {
     const totalMin = acts.reduce((s,a)=>s+(a.duration||0),0);
     const fScores = computeDayFoodScores(e);
     const foodStr = (e.foodEntries||[]).map(l=>(l.raw||'').replace(/[",;]/g,' ')).join(';');
-    return [e.date,e.hr,e.weight,e.vo2,e.strava,e.calIn,e.calOut,e.calBal,e.protein,e.carbs,e.water,e.drinks,e.sleep,e.flex,e.elbowPain,e.shoulderPain,e.kneePain,`"${actStr}"`,totalMin,e.trail,e.touchToes,e.shoulderReach,e.bodyFat,e.bodyFatComputed,e.leanMassKg,e.ffmiAdjusted,e.waist,e.neck,e.hips,e.chest,e.thigh,e.bicep,fScores.inflammation,fScores.plants,fScores.organ,fScores.processedCount,`"${foodStr}"`].map(v=>v??'');
+    return [e.date,e.hr,e.weight,e.vo2,e.strava,e.calIn,e.calOut,e.calBal,e.protein,e.carbs,e.water,e.drinks,e.sleep,e.sleepHours,e.sleepSource||'',e.flex,e.elbowPain,e.shoulderPain,e.kneePain,`"${actStr}"`,totalMin,e.trail,e.touchToes,e.shoulderReach,e.bodyFat,e.bodyFatComputed,e.leanMassKg,e.ffmiAdjusted,e.waist,e.neck,e.hips,e.chest,e.thigh,e.bicep,fScores.inflammation,fScores.plants,fScores.organ,fScores.processedCount,`"${foodStr}"`].map(v=>v??'');
   });
   const csv = [h,...rows].map(r=>r.join(',')).join('\n');
   const b = new Blob([csv],{type:'text/csv'});
